@@ -1,2 +1,2 @@
 # ML-OPs
-ML-OPS repo.
+ML-OPS repository.
