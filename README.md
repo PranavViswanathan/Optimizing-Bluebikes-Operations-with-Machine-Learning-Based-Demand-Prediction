@@ -42,3 +42,16 @@ bluebikes-mlops/
 │── tests/ # Unit and integration tests
 │── docs/ # Diagrams, data cards, scoping document
 ```
+
+## Installation
+
+### 1. Install Requirements
+```bash
+pip install -r requirements.txt
+```
+
+
+## Status
+This repository is in the **scoping phase**.  
+Code, data pipelines, and models will be added in upcoming sprints.
+
