@@ -23,7 +23,7 @@ Develop predictive models using historical ridership patterns, weather data, sea
 
 ## Planned Folder Structure
 ```
-bluebikes-mlops/
+ML-OPS/
 │── README.md # Project description and setup
 │── requirements.txt # Python dependencies
 │── config/ # Config files for data sources, models, API
@@ -45,11 +45,44 @@ bluebikes-mlops/
 
 ## Installation
 
-### 1. Install Requirements
+### Clone the repository
+```bash
+git clone https://github.com/PranavViswanathan/ML-OPs.git
+cd ML-OPS
+```
+### Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
+## Usage (Possible Usages - May Change over time )
+```bash
+# run data ingestion
+python src/ingestion/fetch_bluebikes_data.py
+
+# preprocess and build features 
+python src/preprocessing/build_features.py
+
+# train the model 
+python src/training/train.py
+
+```
+
+
+### Preliminary Project Timeline
+```mermaid
+    gantt
+        title Project Timeline
+        dateFormat  YYYY-MM-DD
+        axisFormat  %b %d
+    
+        section Milestones
+        Project Scoping          :done,    ms1, 2025-09-30, 1d
+        Data Pipeline            :active,  ms2, 2025-10-01, 2025-10-28
+        Model Development        :         ms3, 2025-10-29, 2025-11-11
+        Model Deployment         :         ms4, 2025-11-12, 2025-12-09
+        MLOps Expo               :milestone, ms5, 2025-12-12, 1d
+```
 
 ## Status
 This repository is in the **scoping phase**.  
