@@ -1,4 +1,4 @@
-# Predictive Urban Mobility using Bluebikes & Boston GIS Data
+# Optimizing Bluebikes Operations with Machine Learning Based Demand Prediction
 
 ## About
 
