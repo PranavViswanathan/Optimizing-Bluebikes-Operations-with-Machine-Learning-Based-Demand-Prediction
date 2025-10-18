@@ -89,4 +89,4 @@ def load_data(pickle_path=None, data_paths=None, dataset_name="bluebikes"):
     return pickle_path
 
 if __name__=="__main__":
-    load_data(pickle_path="data/processed/bluebikes/raw_data.pkl", data_paths=["F:/MS in CS/MlOps/Project/Data gathering/Parquet/2025-bluebikes-9c68c69d33d74deda209e62bb6d65fc1.parquet"], dataset_name="bluebikes")
+    load_data(pickle_path="weather", data_paths=["D:\MLOps_Coursework\ML-OPs\data\\raw\\NOAA\\boston_daily_weather.csv"], dataset_name="weather")

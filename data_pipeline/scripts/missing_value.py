@@ -255,7 +255,7 @@ def _fill_column(df: pd.DataFrame, column: str, strategy: str) -> pd.DataFrame:
 
 if __name__=="__main__":
     print("*****************Before Filling Missing Values************************")
-    df = pd.read_pickle("./data/processed/bluebikes/raw_data.pkl")
+    df = pd.read_pickle("../data/processed/bluebikes/raw_data.pkl")
     print("Shape of data:", df.shape)       
     print("\nColumn names:\n", df.columns)
     print("\nMissing values per column:\n", df.isnull().sum())
@@ -266,13 +266,13 @@ if __name__=="__main__":
     print()
     print()
 
-    handle_missing(input_pickle_path="./data/processed/bluebikes/raw_data.pkl", output_pickle_path="./data/processed/bluebikes/raw_data.pkl", drop_columns=["end_station_latitude", "end_station_longitude"], fill_strategies={"start_station_name": "mode", "end_station_name": "mode"}, raise_on_remaining=False)
+    handle_missing(input_pickle_path="../data/processed/colleges/raw_data.pkl", output_pickle_path="../data/processed/colleges/raw_data.pkl", drop_columns=["end_station_latitude", "end_station_longitude"], fill_strategies={"start_station_name": "mode", "end_station_name": "mode"}, raise_on_remaining=False)
 
     print()
     print()
     print()
     print("*****************After Filling Missing Values************************")
-    df = pd.read_pickle("./data/processed/bluebikes/raw_data.pkl")
+    df = pd.read_pickle("./data/processed/colleges/raw_data.pkl")
     print("Shape of data:", df.shape)       
     print("\nColumn names:\n", df.columns)
     print("\nMissing values per column:\n", df.isnull().sum())

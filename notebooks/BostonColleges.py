@@ -80,3 +80,7 @@ class BostonCollegesAPI:
             pd.DataFrame: The data as a DataFrame.
         """
         return self.fetch_data()
+
+if __name__=="__main__":
+    api = BostonCollegesAPI()
+    api.save_to_csv()
