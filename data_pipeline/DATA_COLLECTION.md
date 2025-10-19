@@ -2,7 +2,7 @@
 
 This document explains the purpose and features of the `reading_data/` folder and how to run its scripts and helper functions.
 
-## What is in `reading_data/`
+##  Overview
 
 - `data_collection.py`
   - Orchestrates data collection and storing tasks. Use this to run end-to-end data acquisition.
