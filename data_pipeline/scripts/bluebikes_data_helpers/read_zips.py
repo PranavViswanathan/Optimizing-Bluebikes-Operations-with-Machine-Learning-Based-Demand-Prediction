@@ -1,0 +1,98 @@
+# read_zip_year_to_parquet.py
+
+import os
+from pathlib import Path
+from zipfile import ZipFile
+import pandas as pd
+from bluebikes_data_helpers.normalize import (
+    _rename_and_coalesce,
+    DEFAULT_MAPPING,
+    _normalized_mapping,
+    _coerce_for_parquet,
+)
+from bluebikes_data_helpers.record_file import log_file_status
+
+
+
+NORM_MAP = _normalized_mapping(DEFAULT_MAPPING)
+
+def read_one_zip_to_df(zip_path: str | Path) -> pd.DataFrame:
+    """
+    Read ALL CSV files inside a ZIP and return a single DataFrame.
+    - Tries utf-8 first, falls back to latin1.
+    - Applies rename+coalesce per CSV BEFORE concatenation (aligns columns).
+    """
+    zip_path = Path(zip_path)
+    frames: list[pd.DataFrame] = []
+
+    with ZipFile(zip_path) as zf:
+        csv_members = [m for m in zf.namelist() if m.lower().endswith(".csv")]
+        for name in csv_members:
+            try:
+                with zf.open(name) as f:
+                    df = pd.read_csv(f, low_memory=False)
+            except UnicodeDecodeError:
+                with zf.open(name) as f:
+                    df = pd.read_csv(f, low_memory=False, encoding="latin1")
+
+            df = df.loc[:, ~df.columns.str.contains(r"^Unnamed", na=False)]
+
+            df = _rename_and_coalesce(df, NORM_MAP)
+            frames.append(df)
+
+    if not frames:
+        return pd.DataFrame()
+    return pd.concat(frames, ignore_index=True, sort=False)
+
+
+def build_year_df_from_zips(zip_dir: str | Path, year: str, log_path: str | Path = "read_log.csv") -> pd.DataFrame:
+    """
+    Find all ZIPs in `zip_dir` whose filenames contain `year` (e.g., '2015'),
+    read & align their CSVs, and return a single combined DataFrame.
+    """
+    zip_dir = Path(zip_dir)
+    zip_paths = sorted(p for p in zip_dir.glob("*.zip") if year in p.name)
+
+    frames: list[pd.DataFrame] = []
+    for zp in zip_paths:
+        print(f"Reading: {zp.name}")
+        try:
+            df = read_one_zip_to_df(zp)
+            frames.append(df)
+            log_file_status(log_path, zp.name, True)
+        except Exception as e:
+            print(f"Failed to read {zp.name}: {e}")
+            log_file_status(log_path, zp.name, False)
+
+    if not frames:
+        print(f"No ZIP files found matching year '{year}' in {zip_dir}")
+        return pd.DataFrame()
+
+    combined = pd.concat(frames, ignore_index=True, sort=False)
+    print(f"Combined shape for {year}: {combined.shape}")
+    return combined
+
+
+def save_year_to_parquet(zip_dir: str | Path, year: str, out_dir: str | Path = "parquet", log_path: str | Path = "read_log.csv") -> str:
+    df = build_year_df_from_zips(zip_dir, year, log_path)
+    os.makedirs(out_dir := Path(out_dir), exist_ok=True)
+    out_path = out_dir / f"trips_{year}.parquet"
+    df = _coerce_for_parquet(df)
+    df.to_parquet(out_path, engine="pyarrow", index=False)
+    print(f"Saved: {out_path} ({len(df):,} rows)")
+
+    # --- delete zips now that save succeeded ---
+    deleted = 0
+    for zp in Path(zip_dir).glob(f"*{year}*.zip"):
+        try:
+            zp.unlink()                    # remove file
+            deleted += 1
+        except OSError as e:
+            print(f"Could not delete {zp.name}: {e}")
+    print(f"Deleted {deleted} zip(s) from {zip_dir}")
+
+    return str(out_path)
+
+if __name__ == "__main__":
+    # adjust paths/year as needed
+    save_year_to_parquet(zip_dir="bluebikes_zips", year="2023", out_dir="parquet", log_path="read_log.csv")
