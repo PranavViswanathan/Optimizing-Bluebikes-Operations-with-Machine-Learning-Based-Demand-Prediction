@@ -74,6 +74,10 @@ def build_year_df_from_zips(zip_dir: str | Path, year: str, log_path: str | Path
 
 
 def save_year_to_parquet(zip_dir: str | Path, year: str, out_dir: str | Path = "parquet", log_path: str | Path = "read_log.csv") -> str:
+    """ 
+    Read all ZIPs for the 'year' from 'zip_dir', and combine into a single Parquet file saved to an 'out_dir'.
+    And then delete the ZIPs after successful processing. 
+    """
     df = build_year_df_from_zips(zip_dir, year, log_path)
     os.makedirs(out_dir := Path(out_dir), exist_ok=True)
     out_path = out_dir / f"trips_{year}.parquet"
