@@ -1,92 +1,99 @@
-"""
-Module to handle the loading of dataset from multiple file formats.
-Supports pickle, CSV, Parquet, and Excel file formats.
-"""
-import pickle
 import os
+import pickle
 import pandas as pd
+from typing import List, Optional
 
-# Determine the absolute path of the project directory
+# Project paths
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-# Use the project directory to construct paths to other directories
-PROCESSED_FOLDER_PATH = os.path.join(PROJECT_DIR, 'data',
-                                   'processed')
-
-# !IMPORTANT: Need to fix data paths for all datasets while integrating the gathering code
+PROCESSED_FOLDER_PATH = os.path.join(PROJECT_DIR, 'data', 'processed')
 DEFAULT_DATA_PATHS = [
     os.path.join(PROJECT_DIR, 'data', 'raw', 'bluebikes'),
     os.path.join(PROJECT_DIR, 'data', 'raw', 'Boston_GIS'),
     os.path.join(PROJECT_DIR, 'data', 'raw', 'NOAA')
 ]
 
+SUPPORTED_EXTENSIONS = ['.csv', '.parquet', '.xlsx', '.xls']
 
-def load_data(pickle_path=None, data_paths=None, dataset_name="bluebikes"):
+def load_single_file(file_path: str) -> pd.DataFrame:
     """
-    Load the dataset.
+    Load a single data file based on its extension.
+    """
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext == '.csv':
+        return pd.read_csv(file_path)
+    elif ext == '.parquet':
+        return pd.read_parquet(file_path)
+    elif ext in ['.xlsx', '.xls']:
+        return pd.read_excel(file_path)
+    else:
+        raise ValueError(f"Unsupported file type: {ext}")
+
+def load_folder(folder_path: str) -> pd.DataFrame:
+    """
+    Load all files of the same type from a folder and concatenate into a single DataFrame.
+    Assumes all files have the same columns and extension.
+    """
+    if not os.path.isdir(folder_path):
+        raise FileNotFoundError(f"Folder not found: {folder_path}")
     
-    First, try to load from the pickle file. If it doesn't exist, load from the 
-    first available data file (CSV, Parquet, or Excel).
-    Regardless of the source, save the loaded data as a pickle for future use and
-    return the path to that pickle.
+    files = sorted([
+        os.path.join(folder_path, f) for f in os.listdir(folder_path)
+        if os.path.isfile(os.path.join(folder_path, f)) and os.path.splitext(f)[1].lower() in SUPPORTED_EXTENSIONS
+    ])
     
-    :param pickle_path: Path to the pickle file.
-    :param data_paths: List of paths to check for data files (CSV, Parquet, Excel).
-                       If None, uses DEFAULT_DATA_PATHS.
-    :return: Path to the saved pickle file.
+    if not files:
+        raise FileNotFoundError(f"No supported files found in folder: {folder_path}")
+
+    # Check that all files have the same extension
+    file_exts = {os.path.splitext(f)[1].lower() for f in files}
+    if len(file_exts) != 1:
+        raise ValueError(f"All files in the folder must have the same extension. Found: {file_exts}")
+
+    print(f"Loading {len(files)} files from folder {folder_path}")
+    df_list = [load_single_file(f) for f in files]
+    return pd.concat(df_list, ignore_index=True)
+
+def load_data(pickle_path: Optional[str] = None,
+              data_paths: Optional[List[str]] = None,
+              dataset_name: str = "bluebikes") -> str:
+    """
+    Load data from pickle if available, else from files/folders, and save as pickle.
+    Returns the pickle file path.
     """
     if pickle_path is None:
-        pickle_path=os.path.join(PROCESSED_FOLDER_PATH, "bluebikes", "raw_data.pkl")
+        pickle_path = os.path.join(PROCESSED_FOLDER_PATH, dataset_name, "raw_data.pkl")
     else:
-        pickle_path=os.path.join(PROCESSED_FOLDER_PATH, dataset_name, "raw_data.pkl")
+        pickle_path = os.path.join(PROCESSED_FOLDER_PATH, dataset_name, "raw_data.pkl")
 
-    if data_paths is None:
-        data_paths = DEFAULT_DATA_PATHS
-    
-    # Placeholder for the DataFrame
-    df = None
-    
-    # Check if pickle file exists
     if os.path.exists(pickle_path):
-        with open(pickle_path, "rb") as file:
-            df = pickle.load(file)
-        print(f"Data loaded successfully from {pickle_path}.")
+        print(f"Loading data from pickle: {pickle_path}")
+        with open(pickle_path, "rb") as f:
+            df = pickle.load(f)
     else:
-        # Try to load from available data files
-        for data_path in data_paths:
-            if os.path.exists(data_path):
-                file_ext = os.path.splitext(data_path)[1].lower()
-                
-                try:
-                    if file_ext == '.csv':
-                        df = pd.read_csv(data_path)
-                    elif file_ext == '.parquet':
-                        df = pd.read_parquet(data_path)
-                    elif file_ext in ['.xlsx', '.xls']:
-                        df = pd.read_excel(data_path)
-                    else:
-                        print(f"Unsupported file format: {file_ext}")
-                        continue
-                    
-                    print(f"Data loaded from {data_path}.")
-                    break
-                except Exception as e:
-                    print(f"Error loading {data_path}: {str(e)}")
-                    continue
-        
-        # If no data was loaded, raise an error
-        if df is None:
-            error_message = f"No data found in the specified paths: {pickle_path} or {data_paths}"
-            print(error_message)
-            raise FileNotFoundError(error_message)
-    
-    # Save the data to pickle for future use (or re-save it if loaded from existing pickle)
-    os.makedirs(os.path.dirname(pickle_path), exist_ok=True)
-    with open(pickle_path, "wb") as file:
-        pickle.dump(df, file)
-    print(f"Data saved to {pickle_path} for future use.")
-    
-    return pickle_path
+        if data_paths is None:
+            data_paths = DEFAULT_DATA_PATHS
 
-if __name__=="__main__":
-    load_data(pickle_path="weather", data_paths=["D:\MLOps_Coursework\ML-OPs\data\\raw\\NOAA\\boston_daily_weather.csv"], dataset_name="weather")
+        df_list = []
+        for path in data_paths:
+            if not os.path.exists(path):
+                print(f"Path does not exist: {path}")
+                continue
+            if os.path.isfile(path):
+                df_list.append(load_single_file(path))
+            elif os.path.isdir(path):
+                df_list.append(load_folder(path))
+            else:
+                print(f"Unsupported path type: {path}")
+
+        if not df_list:
+            raise FileNotFoundError(f"No data found in paths: {data_paths}")
+
+        df = pd.concat(df_list, ignore_index=True)
+
+        # Save to pickle
+        os.makedirs(os.path.dirname(pickle_path), exist_ok=True)
+        with open(pickle_path, "wb") as f:
+            pickle.dump(df, f)
+        print(f"Data saved to pickle: {pickle_path}")
+
+    return pickle_path

@@ -30,7 +30,7 @@ class NOAA:
         self.datatype_ids = ["TMAX", "TMIN", "PRCP"]
         self.start_year = 2015
         self.end_year = 2025
-        self.output_file = "data/raw/NOAA/boston_daily_weather_3.csv"
+        self.output_file = "./data_pipeline/data/raw/NOAA_weather/boston_daily_weather_3.csv"
 
         # Ensure directory exists
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
