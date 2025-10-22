@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 import os
-
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 class BostonCollegesAPI:
     """
     A class to interact with the Boston Colleges and Universities dataset from the Boston GIS portal.
@@ -18,7 +18,7 @@ class BostonCollegesAPI:
         """
         self.base_url = "https://gisportal.boston.gov/arcgis/rest/services/Education/OpenData/MapServer"
         self.layer_id = 2  # Colleges/Universities layer
-        self.output_file = "./data_pipeline/data/raw/boston_clg/boston_colleges.csv"
+        self.output_file = PROJECT_DIR+"/data_pipeline/data/raw/boston_clg/boston_colleges.csv"
 
     def fetch_data(self):
         """
