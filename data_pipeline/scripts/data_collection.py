@@ -9,7 +9,7 @@ from school_noaa_data_collectors.BostonColleges import BostonCollegesAPI
 from school_noaa_data_collectors.NOAA_DataAcq import NOAA
 
 
-def run(index_url: str, years: list[str], download_dir: str, parquet_dir: str, log_path: str):
+def collect_bluebikes_data(index_url: str, years: list[str], download_dir: str, parquet_dir: str, log_path: str):
     download_path = Path(download_dir)
     download_path.mkdir(parents=True, exist_ok=True)
 
@@ -41,8 +41,7 @@ def run(index_url: str, years: list[str], download_dir: str, parquet_dir: str, l
             print(f"[{year}] Failed to build/save parquet: {e}")
 
 
-
-def collect_additional_data():
+def collect_boston_college_data():
     """Mandatory: collect Boston Colleges and NOAA weather data."""
     print("\n=== Collecting Boston Colleges data ===")
     try:
@@ -51,6 +50,8 @@ def collect_additional_data():
     except Exception as e:
         print(f"Failed to fetch Boston Colleges data: {e}")
 
+        
+def collect_NOAA_Weather_data():
     print("\n=== Collecting NOAA Weather data ===")
     try:
         noaa = NOAA()
@@ -60,34 +61,35 @@ def collect_additional_data():
         print(f"Failed to fetch NOAA data: {e}")
 
 
-def parse_args():
-    p = argparse.ArgumentParser(description="Download BlueBikes/Hubway zips and save yearly Parquet.")
-    p.add_argument("--index-url",
-                   default="https://s3.amazonaws.com/hubway-data/index.html",
-                   help="Index page / bucket listing URL.")
-    p.add_argument("--years",
-                   default="2023,2024,2025",
-                   help="Comma-separated list of years to process (e.g. 2015,2016,2023).")
-    p.add_argument("--download-dir",
-                   default="bluebikes_zips",
-                   help="Folder to store ZIP files.")
-    p.add_argument("--parquet-dir",
-                   default="parquet",
-                   help="Folder to store Parquet outputs.")
-    p.add_argument("--log-path",
-                   default="read_log.csv",
-                   help="CSV log file for read statuses.")
-    return p.parse_args()
+# def parse_args():
+#     p = argparse.ArgumentParser(description="Download BlueBikes/Hubway zips and save yearly Parquet.")
+#     p.add_argument("--index-url",
+#                    default="https://s3.amazonaws.com/hubway-data/index.html",
+#                    help="Index page / bucket listing URL.")
+#     p.add_argument("--years",
+#                    default="2023,2024,2025",
+#                    help="Comma-separated list of years to process (e.g. 2015,2016,2023).")
+#     p.add_argument("--download-dir",
+#                    default="bluebikes_zips",
+#                    help="Folder to store ZIP files.")
+#     p.add_argument("--parquet-dir",
+#                    default="parquet",
+#                    help="Folder to store Parquet outputs.")
+#     p.add_argument("--log-path",
+#                    default="read_log.csv",
+#                    help="CSV log file for read statuses.")
+#     return p.parse_args()
 
 
-if __name__ == "__main__":
-    args = parse_args()
-    years = [y.strip() for y in args.years.split(",") if y.strip()]
-    run(
-        index_url=args.index_url,
-        years=years,
-        download_dir=args.download_dir,
-        parquet_dir=args.parquet_dir,
-        log_path=args.log_path,
-    )
-    collect_additional_data()
+# if __name__ == "__main__":
+#     args = parse_args()
+#     years = [y.strip() for y in args.years.split(",") if y.strip()]
+#     collect_bluebikes_data(
+#         index_url=args.index_url,
+#         years=years,
+#         download_dir=args.download_dir,
+#         parquet_dir=args.parquet_dir,
+#         log_path=args.log_path,
+#     )
+#     collect_boston_college_data()
+#     collect_NOAA_Weather_data()
