@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import os
 import time
 
-
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 class NOAA:
     """
     A class to fetch, update, and manage historical weather data from the NOAA
@@ -30,7 +30,7 @@ class NOAA:
         self.datatype_ids = ["TMAX", "TMIN", "PRCP"]
         self.start_year = 2015
         self.end_year = 2025
-        self.output_file = "./data_pipeline/data/raw/NOAA_weather/boston_daily_weather_3.csv"
+        self.output_file = PROJECT_DIR+"/data_pipeline/data/raw/NOAA_weather/boston_daily_weather_3.csv"
 
         # Ensure directory exists
         os.makedirs(os.path.dirname(self.output_file), exist_ok=True)
