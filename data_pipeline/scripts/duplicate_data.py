@@ -112,14 +112,9 @@ def handle_duplicates(
         _save_pickle(df, output_pickle_path)
         return output_pickle_path
     
-    # Handle duplicates based on strategy
-    if aggregation_rules:
-        df = _aggregate_duplicates(df, check_columns, aggregation_rules)
-        print(f"\nAggregated duplicates using rules: {aggregation_rules}")
-    else:
-        df = _drop_duplicates(df, check_columns, keep)
-        print(f"\nDropped duplicates with keep='{keep}'")
-    
+    df = _drop_duplicates(df, check_columns, keep)
+    print(f"\nDropped duplicates with keep='{keep}'")
+
     # Check for remaining duplicates
     remaining_duplicates = df.duplicated(subset=check_columns, keep=False).sum()
     

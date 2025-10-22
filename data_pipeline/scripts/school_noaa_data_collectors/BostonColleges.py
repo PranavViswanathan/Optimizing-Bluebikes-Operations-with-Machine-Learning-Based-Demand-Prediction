@@ -18,7 +18,7 @@ class BostonCollegesAPI:
         """
         self.base_url = "https://gisportal.boston.gov/arcgis/rest/services/Education/OpenData/MapServer"
         self.layer_id = 2  # Colleges/Universities layer
-        self.output_file = "./School_College_Data/boston_colleges.csv"
+        self.output_file = "./data_pipeline/data/raw/boston_clg/boston_colleges.csv"
 
     def fetch_data(self):
         """
