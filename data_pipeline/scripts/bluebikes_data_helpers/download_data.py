@@ -21,11 +21,11 @@ def _guess_s3_bucket(index_url: str) -> Optional[str]:
     host = u.netloc
     path = u.path.strip("/")
 
-    # host style: <bucket>.s3.amazonaws.com
+
     if host.endswith(".s3.amazonaws.com"):
         return host.split(".s3.amazonaws.com")[0] or None
 
-    # path style: s3.amazonaws.com/<bucket>/...
+
     if host == "s3.amazonaws.com" and path:
         return path.split("/", 1)[0]
 
@@ -47,7 +47,7 @@ def _list_s3_zip_urls(bucket: str) -> List[str]:
         resp = requests.get(base, params=params, timeout=30)
         resp.raise_for_status()
 
-        # Parse XML
+   
         root = ET.fromstring(resp.text)
         ns = {"s3": "http://s3.amazonaws.com/doc/2006-03-01/"}
 
@@ -69,7 +69,7 @@ def find_zip_links(index_url: str, names: List[str]) -> List[str]:
     Return .zip links that match any of the given names (partial match, case-insensitive).
     Tries HTML first; if none found, falls back to S3 XML listing.
     """
-    # 1) Try to scrape HTML <a href="...zip">
+    
     zip_urls: List[str] = []
     try:
         resp = requests.get(index_url, timeout=30)
@@ -91,7 +91,7 @@ def find_zip_links(index_url: str, names: List[str]) -> List[str]:
             except requests.RequestException:
                 pass
 
-    # 3) Filter by names (regex, case-insensitive)
+    
     if not names:
         return zip_urls
     matched: List[str] = []
@@ -130,9 +130,8 @@ def download_zips(urls: List[str], out_dir: str = "zips") -> List[str]:
 
 
 if __name__ == "__main__":
-    # Example usage: find and download only 2023-2025 zips from the Hubway (Bluebikes) S3 bucket
     index = "https://s3.amazonaws.com/hubway-data/index.html"
-    wanted_names = ["2023", "2024", "2025"]  # partial names or exact fragments
+    wanted_names = ["2023", "2024", "2025"]  
 
     zip_urls = find_zip_links(index, wanted_names)
     print("Found:", *zip_urls, sep="\n")

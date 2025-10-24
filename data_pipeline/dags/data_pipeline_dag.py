@@ -4,10 +4,10 @@ from datetime import datetime
 import sys
 import os
 
-# Ensure scripts directory is on Python path
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
-# ✅ Import actual functions that exist in datapipeline.py
+
 from datapipeline import (
     collect_bluebikes_data,
     collect_boston_college_data,
@@ -50,14 +50,14 @@ def load_and_process_dataset(dataset):
                 **preprocessing["duplicates"]
             )
 
-        print(f"✅ {dataset['name']} processed successfully.")
+        print(f"{dataset['name']} processed successfully.")
 
     except Exception as e:
-        print(f"❌ FAILED: {dataset['name']} - {e}")
+        print(f"FAILED: {dataset['name']} - {e}")
         raise e
 
 
-# --- DAG Definition ---
+
 with DAG(
     dag_id="data_pipeline_dag",
     start_date=datetime(2025, 1, 1),
@@ -65,7 +65,7 @@ with DAG(
     catchup=False,
 ) as dag:
 
-    # --- Collection Tasks ---
+
     t1 = PythonOperator(
         task_id="collect_bluebikes",
         python_callable=collect_bluebikes_data,
@@ -88,7 +88,6 @@ with DAG(
         python_callable=collect_NOAA_Weather_data,
     )
 
-    # --- Processing Tasks ---
     process_bluebikes = PythonOperator(
         task_id="process_bluebikes",
         python_callable=lambda: print("Processing BlueBikes data..."),
@@ -104,7 +103,7 @@ with DAG(
         python_callable=lambda: print("Processing NOAA weather data..."),
     )
 
-    # ✅ Set 1:1 dependencies
+
     t1 >> process_bluebikes
     t2 >> process_boston_colleges
     t3 >> process_NOAA_weather
