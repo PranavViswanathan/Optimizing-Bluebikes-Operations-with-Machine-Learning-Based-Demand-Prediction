@@ -3,7 +3,7 @@ set -e
 PROJECT_DIR="$(cd "$(dirname "$0")/data_pipeline" && pwd)"
 COMPOSE_FILE="$PROJECT_DIR/docker-compose.yaml"
 
-echo "Checking Docker and Airflow environment status..."
+echo "Checking Docker and Airflow environment status"
 echo "----------------------------------------------------------"
 
 if ! docker info >/dev/null 2>&1; then
@@ -38,7 +38,7 @@ echo ""
 docker compose -f "$COMPOSE_FILE" ps --format "{{.Names}} : {{.Status}}" || true
 
 echo ""
-echo "Waiting 10 seconds for Airflow Webserver to fully start..."
+echo "Waiting 10 seconds for Airflow Webserver to fully start"
 sleep 10
 echo ""
 
