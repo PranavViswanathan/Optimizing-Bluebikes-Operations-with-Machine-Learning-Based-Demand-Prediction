@@ -9,7 +9,7 @@ from bluebikes_data_helpers.read_zips import save_year_to_parquet
 from school_noaa_data_collectors.BostonColleges import BostonCollegesAPI
 from school_noaa_data_collectors.NOAA_DataAcq import NOAA
 
-from logger import get_logger
+from data_pipeline.scripts.logger import get_logger
 logger = get_logger("data_collection")
 
 def collect_bluebikes_data(index_url: str, years: list[str], download_dir: str, parquet_dir: str, log_path: str):
