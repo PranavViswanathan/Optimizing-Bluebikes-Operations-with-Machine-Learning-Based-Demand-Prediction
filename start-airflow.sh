@@ -1,4 +1,4 @@
-
+#!/bin/bash
 
 set -e  
 cd "$(dirname "$0")/data_pipeline" || exit 1
