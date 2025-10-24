@@ -94,11 +94,10 @@ def save_year_to_parquet(
     df.to_parquet(out_path, engine="pyarrow", index=False)
     print(f"Saved: {out_path} ({len(df):,} rows)")
 
-    # --- delete zips now that save succeeded ---
     deleted = 0
     for zp in Path(zip_dir).glob(f"*{year}*.zip"):
         try:
-            zp.unlink()  # remove file
+            zp.unlink()  
             deleted += 1
         except OSError as e:
             print(f"Could not delete {zp.name}: {e}")
@@ -108,5 +107,4 @@ def save_year_to_parquet(
 
 
 if __name__ == "__main__":
-    # adjust paths/year as needed
     save_year_to_parquet(zip_dir="bluebikes_zips", year="2023", out_dir="parquet", log_path="read_log.csv")
