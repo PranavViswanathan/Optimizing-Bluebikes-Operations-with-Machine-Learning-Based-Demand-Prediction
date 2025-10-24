@@ -17,6 +17,8 @@ data/raw/
 data/interim/
 DatasetGeneration/bluebikes/*.csv
 DatasetGeneration/*.csv
+data_pipeline/logs/
+*.log
 
 # Keep directory structure with .gitkeep
 !data/.gitkeep
