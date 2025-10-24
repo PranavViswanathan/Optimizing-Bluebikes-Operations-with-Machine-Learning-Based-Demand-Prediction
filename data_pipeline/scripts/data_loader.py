@@ -1,12 +1,12 @@
 # data_loader.py
-
 import os
 import pickle
 import pandas as pd
 from typing import List, Optional
-from logger import get_logger
+from data_pipeline.scripts.logger import get_logger
 
 logger = get_logger("data_loader")
+
 
 # Project paths
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
