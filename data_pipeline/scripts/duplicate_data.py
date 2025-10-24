@@ -11,7 +11,8 @@ from typing import Dict, List, Optional, Union
 import pandas as pd
 import numpy as np
 
-from logger import get_logger
+from data_pipeline.scripts.logger import get_logger
+
 logger = get_logger("duplicate_data")
 
 # !IMPORTANT: Determine the absolute path of the project directory
