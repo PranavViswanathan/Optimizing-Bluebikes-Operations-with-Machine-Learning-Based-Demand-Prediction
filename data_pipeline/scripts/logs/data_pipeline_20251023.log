@@ -28,3 +28,6 @@ Final shape: (3, 3)
 2025-10-23 22:22:21 - INFO - duplicate_data - Rows removed: 0
 2025-10-23 22:22:21 - INFO - duplicate_data - Final memory usage: 0.00 MB
 2025-10-23 22:22:21 - INFO - duplicate_data - Data saved to ../data/processed/test_duplicates/cleaned.pkl.
+2025-10-23 23:14:39 - INFO - data_loader - Loading 2 files from folder: /private/var/folders/pj/z9ycd8l90zxbm__60v5n24040000gn/T/pytest-of-gyuszix/pytest-0/test_load_folder0/folder
+2025-10-23 23:14:39 - INFO - data_loader - Loading 1 files from folder: /private/var/folders/pj/z9ycd8l90zxbm__60v5n24040000gn/T/pytest-of-gyuszix/pytest-0/test_load_data_creates_pickle0/raw
+2025-10-23 23:14:39 - INFO - data_loader - Data saved to pickle: /Users/gyuszix/GitRepos/IE7374Repo/MLProject/data_pipeline/data/processed/testset/raw_data.pkl
