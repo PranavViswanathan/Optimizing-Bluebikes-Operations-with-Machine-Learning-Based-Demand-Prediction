@@ -43,3 +43,8 @@ venv/
 
 # Testing
 test.py
+
+# Logs 
+logs/
+*.log
+!logs/.gitkeep
