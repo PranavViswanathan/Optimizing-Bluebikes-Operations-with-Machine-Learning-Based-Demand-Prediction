@@ -42,11 +42,20 @@ echo "Waiting 10 seconds for Airflow Webserver to fully start..."
 sleep 10
 echo ""
 
-WEB_PORT=8080  
-if curl -s -I "http://localhost:$WEB_PORT" | grep -q "200 OK"; then
-  echo "Airflow Web UI is reachable at http://localhost:$WEB_PORT"
+WEB_PORT=$(docker compose -f "$COMPOSE_FILE" port airflow-webserver 8080 | cut -d: -f2)
+
+if [ -z "$WEB_PORT" ]; then
+  echo "Could not detect host port for airflow-webserver. Using 8080 by default."
+  WEB_PORT=8080
+fi
+
+echo "Checking Airflow webserver HTTP response on port $WEB_PORT..."
+HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$WEB_PORT" || echo "000")
+
+if [ "$HTTP_RESPONSE" = "200" ] || [ "$HTTP_RESPONSE" = "302" ] || [ "$HTTP_RESPONSE" = "301" ]; then
+  echo "Airflow Web UI is reachable at http://localhost:$WEB_PORT (HTTP $HTTP_RESPONSE)"
 else
-  echo "Airflow Web UI not reachable on port $WEB_PORT."
+  echo "Airflow Web UI not reachable on port $WEB_PORT (HTTP $HTTP_RESPONSE)."
   echo "Try running: docker compose -f $COMPOSE_FILE logs airflow-webserver"
 fi
 
