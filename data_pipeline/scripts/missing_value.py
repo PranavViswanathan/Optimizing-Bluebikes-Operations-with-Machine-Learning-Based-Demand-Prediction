@@ -10,7 +10,7 @@ import pickle
 from typing import Dict, List, Optional
 import pandas as pd
 import numpy as np
-from logger import get_logger
+from data_pipeline.scripts.logger import get_logger
 
 
 logger = get_logger("missing_value")
