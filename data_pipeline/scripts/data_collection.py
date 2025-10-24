@@ -3,16 +3,12 @@ import argparse
 import sys
 import os
 from typing import List
-# -------------------------------------------------------------------
-# ✅ FIX 1: Ensure Python can find your project modules (works in Docker)
-# -------------------------------------------------------------------
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]  # Adjust to project root (1 level up)
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
-# -------------------------------------------------------------------
-# ✅ FIX 2: Import your helper modules safely
-# -------------------------------------------------------------------
+
 try:
     from bluebikes_data_helpers.download_data import find_zip_links, download_zips
     from bluebikes_data_helpers.read_zips import save_year_to_parquet
@@ -24,9 +20,7 @@ except ImportError as e:
     sys.exit(1)
 
 
-# -------------------------------------------------------------------
-# FUNCTIONS
-# -------------------------------------------------------------------
+
 def collect_bluebikes_data(index_url: str, years: List[str], download_dir: str, parquet_dir: str, log_path: str):
     download_path = Path(download_dir)
     download_path.mkdir(parents=True, exist_ok=True)
@@ -34,7 +28,7 @@ def collect_bluebikes_data(index_url: str, years: List[str], download_dir: str, 
     for year in years:
         print(f"\n=== Year {year} ===")
 
-        # 1) Find + download zips for this year
+   
         try:
             urls = find_zip_links(index_url, [year])
         except Exception as e:
@@ -83,10 +77,6 @@ def collect_NOAA_Weather_data():
     except Exception as e:
         print(f"Failed to fetch NOAA data: {e}")
 
-
-# -------------------------------------------------------------------
-# ✅ FIX 3: Argument parsing works both in Airflow or CLI
-# -------------------------------------------------------------------
 def parse_args():
     p = argparse.ArgumentParser(description="Download BlueBikes, Boston Colleges, and NOAA datasets.")
     p.add_argument(
@@ -116,10 +106,6 @@ def parse_args():
     )
     return p.parse_args()
 
-
-# -------------------------------------------------------------------
-# ✅ FIX 4: Safe main entrypoint
-# -------------------------------------------------------------------
 if __name__ == "__main__":
     args = parse_args()
     years = [y.strip() for y in args.years.split(",") if y.strip()]
