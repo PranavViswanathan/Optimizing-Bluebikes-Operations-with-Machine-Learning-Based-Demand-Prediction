@@ -26,6 +26,7 @@ DatasetGeneration/*.csv
 # Mac files
 __MACOSX/
 .DS_Store
+**/ .DS_Store
 
 # Python
 __pycache__/
@@ -45,6 +46,6 @@ venv/
 test.py
 
 # Logs 
-logs/
-*.log
+# logs/
+# *.log
 !logs/.gitkeep
