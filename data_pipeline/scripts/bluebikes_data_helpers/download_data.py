@@ -4,12 +4,13 @@ import os
 import re
 import xml.etree.ElementTree as ET
 from urllib.parse import urljoin, urlparse
+from typing import Optional, List
 
 import requests
 from bs4 import BeautifulSoup
 
 
-def _guess_s3_bucket(index_url: str) -> str | None:
+def _guess_s3_bucket(index_url: str) -> Optional[str]:
     """
     Best-effort bucket extractor for common S3 URLs.
     Supports:
@@ -31,13 +32,13 @@ def _guess_s3_bucket(index_url: str) -> str | None:
     return None
 
 
-def _list_s3_zip_urls(bucket: str) -> list[str]:
+def _list_s3_zip_urls(bucket: str) -> List[str]:
     """
     Use S3's ListObjectsV2 XML API to list all objects and return .zip URLs.
     """
     base = f"https://s3.amazonaws.com/{bucket}"
     params = {"list-type": "2", "max-keys": "1000"}
-    urls: list[str] = []
+    urls: List[str] = []
     token = None
 
     while True:
@@ -63,13 +64,13 @@ def _list_s3_zip_urls(bucket: str) -> list[str]:
     return urls
 
 
-def find_zip_links(index_url: str, names: list[str]) -> list[str]:
+def find_zip_links(index_url: str, names: List[str]) -> List[str]:
     """
     Return .zip links that match any of the given names (partial match, case-insensitive).
     Tries HTML first; if none found, falls back to S3 XML listing.
     """
     # 1) Try to scrape HTML <a href="...zip">
-    zip_urls: list[str] = []
+    zip_urls: List[str] = []
     try:
         resp = requests.get(index_url, timeout=30)
         resp.raise_for_status()
@@ -93,7 +94,7 @@ def find_zip_links(index_url: str, names: list[str]) -> list[str]:
     # 3) Filter by names (regex, case-insensitive)
     if not names:
         return zip_urls
-    matched: list[str] = []
+    matched: List[str] = []
     for link in zip_urls:
         for name in names:
             if re.search(name, link, re.IGNORECASE):
@@ -102,13 +103,13 @@ def find_zip_links(index_url: str, names: list[str]) -> list[str]:
     return matched
 
 
-def download_zips(urls: list[str], out_dir: str = "zips") -> list[str]:
+def download_zips(urls: List[str], out_dir: str = "zips") -> List[str]:
     """
     Download each URL in `urls` to `out_dir`. Skips files that already exist.
     Returns list of saved file paths.
     """
     os.makedirs(out_dir, exist_ok=True)
-    saved: list[str] = []
+    saved: List[str] = []
 
     for zurl in urls:
         fname = os.path.join(out_dir, zurl.rsplit("/", 1)[-1])
@@ -128,14 +129,10 @@ def download_zips(urls: list[str], out_dir: str = "zips") -> list[str]:
     return saved
 
 
-
-
-
-
 if __name__ == "__main__":
-    # Example: find and download only 2015 zips from the Hubway (Bluebikes) S3 bucket
+    # Example usage: find and download only 2023-2025 zips from the Hubway (Bluebikes) S3 bucket
     index = "https://s3.amazonaws.com/hubway-data/index.html"
-    wanted_names = ["2023","2024","2025"]  # partial names or exact fragments, e.g. "201501"
+    wanted_names = ["2023", "2024", "2025"]  # partial names or exact fragments
 
     zip_urls = find_zip_links(index, wanted_names)
     print("Found:", *zip_urls, sep="\n")

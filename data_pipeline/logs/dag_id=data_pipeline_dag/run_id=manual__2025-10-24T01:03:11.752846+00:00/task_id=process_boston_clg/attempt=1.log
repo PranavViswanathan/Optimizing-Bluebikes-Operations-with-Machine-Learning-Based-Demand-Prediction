@@ -1,0 +1,40 @@
+[2025-10-24T01:04:56.468+0000] {taskinstance.py:1083} INFO - Dependencies all met for <TaskInstance: data_pipeline_dag.process_boston_clg manual__2025-10-24T01:03:11.752846+00:00 [queued]>
+[2025-10-24T01:04:56.473+0000] {taskinstance.py:1083} INFO - Dependencies all met for <TaskInstance: data_pipeline_dag.process_boston_clg manual__2025-10-24T01:03:11.752846+00:00 [queued]>
+[2025-10-24T01:04:56.473+0000] {taskinstance.py:1279} INFO - 
+--------------------------------------------------------------------------------
+[2025-10-24T01:04:56.474+0000] {taskinstance.py:1280} INFO - Starting attempt 1 of 1
+[2025-10-24T01:04:56.474+0000] {taskinstance.py:1281} INFO - 
+--------------------------------------------------------------------------------
+[2025-10-24T01:04:56.481+0000] {taskinstance.py:1300} INFO - Executing <Task(PythonOperator): process_boston_clg> on 2025-10-24 01:03:11.752846+00:00
+[2025-10-24T01:04:56.485+0000] {standard_task_runner.py:55} INFO - Started process 337 to run task
+[2025-10-24T01:04:56.491+0000] {standard_task_runner.py:82} INFO - Running: ['***', 'tasks', 'run', 'data_pipeline_dag', 'process_boston_clg', 'manual__2025-10-24T01:03:11.752846+00:00', '--job-id', '19', '--raw', '--subdir', 'DAGS_FOLDER/data_pipeline_dag.py', '--cfg-path', '/tmp/tmphgokxjza']
+[2025-10-24T01:04:56.492+0000] {standard_task_runner.py:83} INFO - Job 19: Subtask process_boston_clg
+[2025-10-24T01:04:56.522+0000] {task_command.py:388} INFO - Running <TaskInstance: data_pipeline_dag.process_boston_clg manual__2025-10-24T01:03:11.752846+00:00 [running]> on host d471b7381392
+[2025-10-24T01:04:56.553+0000] {taskinstance.py:1509} INFO - Exporting the following env vars:
+AIRFLOW_CTX_DAG_OWNER=***
+AIRFLOW_CTX_DAG_ID=data_pipeline_dag
+AIRFLOW_CTX_TASK_ID=process_boston_clg
+AIRFLOW_CTX_EXECUTION_DATE=2025-10-24T01:03:11.752846+00:00
+AIRFLOW_CTX_TRY_NUMBER=1
+AIRFLOW_CTX_DAG_RUN_ID=manual__2025-10-24T01:03:11.752846+00:00
+[2025-10-24T01:04:56.554+0000] {logging_mixin.py:137} INFO - 
+Processing dataset: boston_clg
+[2025-10-24T01:04:56.554+0000] {logging_mixin.py:137} INFO - Path does not exist: /opt/data_pipeline/data/raw/boston_clg
+[2025-10-24T01:04:56.554+0000] {logging_mixin.py:137} INFO - ❌ FAILED: boston_clg - No data found in paths: ['/opt/data_pipeline/data/raw/boston_clg']
+[2025-10-24T01:04:56.554+0000] {taskinstance.py:1768} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.7/site-packages/airflow/operators/python.py", line 175, in execute
+    return_value = self.execute_callable()
+  File "/home/airflow/.local/lib/python3.7/site-packages/airflow/operators/python.py", line 192, in execute_callable
+    return self.python_callable(*self.op_args, **self.op_kwargs)
+  File "/opt/airflow/dags/data_pipeline_dag.py", line 59, in load_and_process_dataset
+    raise e
+  File "/opt/airflow/dags/data_pipeline_dag.py", line 34, in load_and_process_dataset
+    dataset_name=dataset["name"]
+  File "/opt/airflow/dags/../scripts/data_loader.py", line 89, in load_data
+    raise FileNotFoundError(f"No data found in paths: {data_paths}")
+FileNotFoundError: No data found in paths: ['/opt/data_pipeline/data/raw/boston_clg']
+[2025-10-24T01:04:56.559+0000] {taskinstance.py:1323} INFO - Marking task as FAILED. dag_id=data_pipeline_dag, task_id=process_boston_clg, execution_date=20251024T010311, start_date=20251024T010456, end_date=20251024T010456
+[2025-10-24T01:04:56.566+0000] {standard_task_runner.py:105} ERROR - Failed to execute job 19 for task process_boston_clg (No data found in paths: ['/opt/data_pipeline/data/raw/boston_clg']; 337)
+[2025-10-24T01:04:56.585+0000] {local_task_job.py:208} INFO - Task exited with return code 1
+[2025-10-24T01:04:56.595+0000] {taskinstance.py:2578} INFO - 0 downstream tasks scheduled from follow-on schedule check

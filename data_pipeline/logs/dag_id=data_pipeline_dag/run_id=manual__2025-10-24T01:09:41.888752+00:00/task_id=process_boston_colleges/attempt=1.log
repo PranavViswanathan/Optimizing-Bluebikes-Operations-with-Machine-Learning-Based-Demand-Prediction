@@ -1,0 +1,24 @@
+[2025-10-24T01:09:45.262+0000] {taskinstance.py:1083} INFO - Dependencies all met for <TaskInstance: data_pipeline_dag.process_boston_colleges manual__2025-10-24T01:09:41.888752+00:00 [queued]>
+[2025-10-24T01:09:45.266+0000] {taskinstance.py:1083} INFO - Dependencies all met for <TaskInstance: data_pipeline_dag.process_boston_colleges manual__2025-10-24T01:09:41.888752+00:00 [queued]>
+[2025-10-24T01:09:45.266+0000] {taskinstance.py:1279} INFO - 
+--------------------------------------------------------------------------------
+[2025-10-24T01:09:45.266+0000] {taskinstance.py:1280} INFO - Starting attempt 1 of 1
+[2025-10-24T01:09:45.266+0000] {taskinstance.py:1281} INFO - 
+--------------------------------------------------------------------------------
+[2025-10-24T01:09:45.272+0000] {taskinstance.py:1300} INFO - Executing <Task(PythonOperator): process_boston_colleges> on 2025-10-24 01:09:41.888752+00:00
+[2025-10-24T01:09:45.274+0000] {standard_task_runner.py:55} INFO - Started process 153 to run task
+[2025-10-24T01:09:45.276+0000] {standard_task_runner.py:82} INFO - Running: ['***', 'tasks', 'run', 'data_pipeline_dag', 'process_boston_colleges', 'manual__2025-10-24T01:09:41.888752+00:00', '--job-id', '28', '--raw', '--subdir', 'DAGS_FOLDER/data_pipeline_dag.py', '--cfg-path', '/tmp/tmpkhiy0lg4']
+[2025-10-24T01:09:45.277+0000] {standard_task_runner.py:83} INFO - Job 28: Subtask process_boston_colleges
+[2025-10-24T01:09:45.302+0000] {task_command.py:388} INFO - Running <TaskInstance: data_pipeline_dag.process_boston_colleges manual__2025-10-24T01:09:41.888752+00:00 [running]> on host 99e039d9b2d2
+[2025-10-24T01:09:45.329+0000] {taskinstance.py:1509} INFO - Exporting the following env vars:
+AIRFLOW_CTX_DAG_OWNER=***
+AIRFLOW_CTX_DAG_ID=data_pipeline_dag
+AIRFLOW_CTX_TASK_ID=process_boston_colleges
+AIRFLOW_CTX_EXECUTION_DATE=2025-10-24T01:09:41.888752+00:00
+AIRFLOW_CTX_TRY_NUMBER=1
+AIRFLOW_CTX_DAG_RUN_ID=manual__2025-10-24T01:09:41.888752+00:00
+[2025-10-24T01:09:45.330+0000] {logging_mixin.py:137} INFO - Processing Boston Colleges data...
+[2025-10-24T01:09:45.330+0000] {python.py:177} INFO - Done. Returned value was: None
+[2025-10-24T01:09:45.333+0000] {taskinstance.py:1323} INFO - Marking task as SUCCESS. dag_id=data_pipeline_dag, task_id=process_boston_colleges, execution_date=20251024T010941, start_date=20251024T010945, end_date=20251024T010945
+[2025-10-24T01:09:45.375+0000] {local_task_job.py:208} INFO - Task exited with return code 0
+[2025-10-24T01:09:45.383+0000] {taskinstance.py:2578} INFO - 0 downstream tasks scheduled from follow-on schedule check
