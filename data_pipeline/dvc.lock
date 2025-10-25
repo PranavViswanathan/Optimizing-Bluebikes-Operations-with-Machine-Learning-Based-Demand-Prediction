@@ -1,0 +1,51 @@
+schema: '2.0'
+stages:
+  data_pipeline:
+    cmd: python scripts/datapipeline.py
+    deps:
+    - path: scripts/bluebikes_data_helpers
+      hash: md5
+      md5: c60abf0199676bb2c4076052d75d293b.dir
+      size: 30512
+      nfiles: 10
+    - path: scripts/data_collection.py
+      hash: md5
+      md5: c6b4bd2861667eb52ce8486dbea899af
+      size: 4069
+    - path: scripts/data_loader.py
+      hash: md5
+      md5: 2358628a90c2cfd816864ab1dbfcb23c
+      size: 3695
+    - path: scripts/datapipeline.py
+      hash: md5
+      md5: bdc863d307f437561780e46c1af31203
+      size: 3904
+    - path: scripts/duplicate_data.py
+      hash: md5
+      md5: 716cf1943a14e39af82090e48399c9be
+      size: 11444
+    - path: scripts/missing_value.py
+      hash: md5
+      md5: b6620856b45b4d2dbc0799be27473eeb
+      size: 12066
+    - path: scripts/school_noaa_data_collectors
+      hash: md5
+      md5: 13b23bc0a17c58dc91b2d49241a94b69.dir
+      size: 22164
+      nfiles: 6
+    outs:
+    - path: ../data_pipeline/data/processed
+      hash: md5
+      md5: acdbeed8a6017d7ce6a055404a270e31.dir
+      size: 619685541
+      nfiles: 3
+    - path: ../data_pipeline/data/raw
+      hash: md5
+      md5: 296f5b2f62cd1a86975b76141fbf577a.dir
+      size: 158883856
+      nfiles: 3
+    - path: ../data_pipeline/data/temp
+      hash: md5
+      md5: d751713988987e9331980363e24189ce.dir
+      size: 0
+      nfiles: 0
