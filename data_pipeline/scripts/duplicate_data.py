@@ -6,25 +6,27 @@ identifying and removing duplicates based on various strategies.
 """
 
 import os
+import sys
+from pathlib import Path
 import pickle
 from typing import Dict, List, Optional, Union
 import pandas as pd
 import numpy as np
 
-from data_pipeline.scripts.logger import get_logger
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
+from logger import get_logger
 logger = get_logger("duplicate_data")
 
-# !IMPORTANT: Determine the absolute path of the project directory
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 INPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'data', 'processed', 'colleges', 'raw_data.pkl')
-OUTPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'data', 'processed', 'colleges' 'after_duplicates.pkl')
+OUTPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'data', 'processed', 'colleges', 'after_duplicates.pkl') 
 
-# Supported duplicate handling strategies
-SUPPORTED_KEEP_OPTIONS = ['first', 'last', False]  # False means drop all duplicates
+SUPPORTED_KEEP_OPTIONS = ['first', 'last', False] 
 SUPPORTED_AGGREGATION_STRATEGIES = ['mean', 'median', 'mode', 'min', 'max', 'sum', 'count']
-
 
 def handle_duplicates(
     input_pickle_path: str = INPUT_PICKLE_PATH,
@@ -41,7 +43,6 @@ def handle_duplicates(
     dropping rows or aggregating them based on specified strategies, then save to output pickle.
     """
     
-    # Load DataFrame from input pickle
     if not os.path.exists(input_pickle_path):
         raise FileNotFoundError(
             f"No data found at the specified path: {input_pickle_path}"
@@ -58,9 +59,8 @@ def handle_duplicates(
     logger.info(f"Initial shape: {df.shape}")
     logger.info(f"Initial memory usage: {df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
     
-    # Determine columns to check for duplicates
     if consider_all_columns:
-        check_columns = None  # Check all columns
+        check_columns = None  
         logger.info("Checking for duplicates across all columns")
     else:
         if subset is not None:
@@ -68,11 +68,9 @@ def handle_duplicates(
             check_columns = subset
             logger.info(f"Checking for duplicates based on columns: {check_columns}")
         else:
-            # Auto-detect potential key columns (non-numeric columns or ID columns)
             check_columns = _auto_detect_key_columns(df)
             logger.info(f"Auto-detected key columns for duplicate check: {check_columns}")
-    
-    # Identify duplicates
+
     duplicates_mask = df.duplicated(subset=check_columns, keep=False)
     num_duplicate_rows = duplicates_mask.sum()
     
@@ -80,8 +78,7 @@ def handle_duplicates(
         logger.info("No duplicate rows found!")
         _save_pickle(df, output_pickle_path)
         return output_pickle_path
-    
-    # Report duplicate statistics
+
     logger.info(f"\nDuplicate Statistics:")
     logger.info(f"Total duplicate rows: {num_duplicate_rows}")
     logger.info(f"Percentage of duplicates: {(num_duplicate_rows / len(df)) * 100:.2f}%")
@@ -99,8 +96,6 @@ def handle_duplicates(
     
     df = _drop_duplicates(df, check_columns, keep)
     logger.info(f"\nDropped duplicates with keep='{keep}'")
-
-    # Check for remaining duplicates
     remaining_duplicates = df.duplicated(subset=check_columns, keep=False).sum()
     
     if remaining_duplicates > 0:
@@ -115,8 +110,7 @@ def handle_duplicates(
     logger.info(f"\nFinal shape: {df.shape}")
     logger.info(f"Rows removed: {len(df) - df.shape[0] if not aggregation_rules else num_duplicate_rows}")
     logger.info(f"Final memory usage: {df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
-    
-    # Save the data to output pickle
+
     _save_pickle(df, output_pickle_path)
     return output_pickle_path
 

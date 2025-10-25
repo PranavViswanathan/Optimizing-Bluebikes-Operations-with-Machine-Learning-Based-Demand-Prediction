@@ -1,6 +1,18 @@
 # datapipeline.py
 
 import os
+import sys
+from pathlib import Path
+
+SCRIPTS_DIR = Path(__file__).resolve().parent  
+PROJECT_ROOT = Path(__file__).resolve().parents[1]  
+
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
 from data_collection import collect_bluebikes_data, collect_boston_college_data, collect_NOAA_Weather_data
 from data_loader import load_data
 from missing_value import handle_missing
@@ -8,7 +20,7 @@ from duplicate_data import handle_duplicates
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# --- Dataset configuration ---
+
 DATASETS = [
     {
         "name": "bluebikes",

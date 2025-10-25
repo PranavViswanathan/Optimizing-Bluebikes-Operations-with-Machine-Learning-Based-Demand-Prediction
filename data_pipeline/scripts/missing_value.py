@@ -6,27 +6,29 @@ dropping rows or filling missing values with statistical measures.
 """
 
 import os
+import sys
+from pathlib import Path
 import pickle
 from typing import Dict, List, Optional
 import pandas as pd
 import numpy as np
-from data_pipeline.scripts.logger import get_logger
 
+SCRIPTS_DIR = Path(__file__).resolve().parent
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
 
+from logger import get_logger
 logger = get_logger("missing_value")
 
-# Determine the absolute path of the project directory
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 INPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'data', 'processed', 'raw_data.pkl')
 OUTPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'data', 'processed', 'after_missing_values.pkl')
 
-# Supported fill strategies
 SUPPORTED_STRATEGIES = [
     'mean', 'median', 'mode', 'min', 'max', 'std', 'var', 'sum',
     'forward_fill', 'ffill', 'backward_fill', 'bfill', 'zero'
 ]
-
 
 def handle_missing(
     input_pickle_path: str = INPUT_PICKLE_PATH,

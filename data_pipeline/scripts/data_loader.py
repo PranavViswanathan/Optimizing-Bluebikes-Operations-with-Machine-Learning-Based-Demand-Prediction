@@ -1,12 +1,21 @@
 # data_loader.py
 import os
+import sys
+from pathlib import Path
 import pickle
 import pandas as pd
 from typing import List, Optional
-from data_pipeline.scripts.logger import get_logger
 
+SCRIPTS_DIR = Path(__file__).resolve().parent 
+PROJECT_ROOT = Path(__file__).resolve().parents[1] 
+
+if str(SCRIPTS_DIR) not in sys.path:
+    sys.path.insert(0, str(SCRIPTS_DIR))
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from logger import get_logger
 logger = get_logger("data_loader")
-
 
 # Project paths
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
