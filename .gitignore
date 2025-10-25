@@ -22,8 +22,8 @@ data_pipeline/logs/
 
 # Keep directory structure with .gitkeep
 !data/.gitkeep
-!data/processed/.gitkeep
-!data/raw/.gitkeep
+# !data/processed/.gitkeep
+# !data/raw/.gitkeep
 
 # Mac files
 __MACOSX/
