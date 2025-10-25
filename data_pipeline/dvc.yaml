@@ -1,9 +1,6 @@
 stages:
   data_pipeline:
-    cmd: python -c "import pathlib; [pathlib.Path(p).mkdir(parents=True, exist_ok=True) for p in [
-      'data/raw/bluebikes','data/raw/boston_clg','data/raw/NOAA_weather',
-      'data/processed/bluebikes','data/processed/boston_clg','data/processed/NOAA_weather'
-      ]]" && python scripts/datapipeline.py
+    cmd: python scripts/datapipeline.py
     deps:
       - scripts/datapipeline.py
       - scripts/data_collection.py
@@ -13,9 +10,6 @@ stages:
       - scripts/bluebikes_data_helpers
       - scripts/school_noaa_data_collectors
     outs:
-      - data/raw/bluebikes
-      - data/raw/boston_clg
-      - data/raw/NOAA_weather
-      - data/processed/bluebikes
-      - data/processed/boston_clg
-      - data/processed/NOAA_weather
+      - ../data_pipeline/data/raw
+      - ../data_pipeline/data/processed
+      - ../data_pipeline/data/temp
