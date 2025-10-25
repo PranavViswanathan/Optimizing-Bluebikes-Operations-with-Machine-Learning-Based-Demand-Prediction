@@ -28,6 +28,7 @@ data_pipeline/logs/
 # Mac files
 __MACOSX/
 .DS_Store
+**/ .DS_Store
 
 # Python
 __pycache__/
@@ -45,3 +46,8 @@ venv/
 
 # Testing
 test.py
+
+# Logs 
+logs/
+*.log
+!logs/.gitkeep
