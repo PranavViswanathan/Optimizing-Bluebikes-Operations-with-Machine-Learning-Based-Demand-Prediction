@@ -1,17 +1,16 @@
-#data_collection.py
+# data_collection.py
 from pathlib import Path
 import argparse
 import sys
 import os
 from typing import List
 
-from data_pipeline.scripts.logger import get_logger
-logger = get_logger("data_collection")
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]  # Adjust to project root (1 level up)
+PROJECT_ROOT = Path(__file__).resolve().parents[1]  
 if str(PROJECT_ROOT) not in sys.path:
-    sys.path.append(str(PROJECT_ROOT))
+    sys.path.insert(0, str(PROJECT_ROOT))  
 
+from logger import get_logger
+logger = get_logger("data_collection")
 
 try:
     from bluebikes_data_helpers.download_data import find_zip_links, download_zips
