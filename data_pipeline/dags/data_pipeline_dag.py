@@ -1,12 +1,11 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
-from datetime import datetime
+from datetime import datetime, timedelta
 import sys
 import os
 
-
+# Add scripts directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scripts"))
-
 
 from datapipeline import (
     collect_bluebikes_data,
@@ -14,6 +13,7 @@ from datapipeline import (
     collect_NOAA_Weather_data,
     DATASETS
 )
+from discord_notifier import send_discord_alert, send_dag_success_alert
 
 
 def load_and_process_dataset(dataset):
@@ -54,15 +54,27 @@ def load_and_process_dataset(dataset):
         print(f"FAILED: {dataset['name']} - {e}")
         raise e
 
-
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 2,
+    'retry_delay': timedelta(minutes=5),
+    'on_failure_callback': send_discord_alert,
+}
 
 with DAG(
     dag_id="data_pipeline_dag",
+    default_args=default_args,
     start_date=datetime(2025, 1, 1),
     schedule_interval="@daily",
     catchup=False,
+    description='Bluebikes data collection and processing pipeline with Discord notifications',
+    tags=['bluebikes', 'data-pipeline', 'production'],
+    on_success_callback=send_dag_success_alert,  
+    on_failure_callback=send_discord_alert,      
 ) as dag:
-
 
     t1 = PythonOperator(
         task_id="collect_bluebikes",
@@ -85,7 +97,6 @@ with DAG(
         task_id="collect_noaa_weather",
         python_callable=collect_NOAA_Weather_data,
     )
-
     process_bluebikes = PythonOperator(
         task_id="process_bluebikes",
         python_callable=lambda: print("Processing BlueBikes data..."),
@@ -100,8 +111,6 @@ with DAG(
         task_id="process_NOAA_weather",
         python_callable=lambda: print("Processing NOAA weather data..."),
     )
-
-
     t1 >> process_bluebikes
     t2 >> process_boston_colleges
     t3 >> process_NOAA_weather
