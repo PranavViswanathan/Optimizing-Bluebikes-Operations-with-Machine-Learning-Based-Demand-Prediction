@@ -166,3 +166,21 @@ They are listed below:
 
 
 ## Anomaly Detection and Alerts
+
+
+## Folder Structure
+
+```
+data_pipeline/
+│── README.md   # Data pipeline description, high-level overview, setup instructions, and execution details.
+│── .dvc/       # DVC's internal directory. Stores configuration, cache, and state information needed to track data and models.
+│── assets/     # Directory for non-code resources like images
+│── dags/       # Contains Directed Acyclic Graphs (DAGs), typically for Apache Airflow, defining the workflow and scheduling of the pipeline's tasks.
+│── data/       # Stores raw, intermediate, and final datasets. Often separated into subfolders like 'raw', 'processed', 'external', etc.
+├── logs/       # Stores execution logs from the pipeline runs, scripts, or Airflow. Essential for debugging and monitoring.
+│── scripts/    # Contains Python or shell scripts for specific pipeline steps (e.g., data ingestion, cleaning, transformation, model training).
+│── test/       # Contains unit tests and integration tests for the pipeline's scripts and code to ensure correctness.
+│── dvc.lock    # Automatically generated file that records the exact versions of data and models being used, ensuring reproducibility.
+│── dvc.yaml    # The main DVC configuration file. Defines the pipeline stages (steps) and their dependencies.
+
+```
