@@ -23,15 +23,12 @@ except ImportError as e:
     sys.exit(1)
 
 
-
-
 def collect_bluebikes_data(index_url: str, years: List[str], download_dir: str, parquet_dir: str, log_path: str):
     download_path = Path(download_dir)
     download_path.mkdir(parents=True, exist_ok=True)
 
     for year in years:
         logger.info(f"\n=== Year {year} ===")
-
    
         try:
             urls = find_zip_links(index_url, [year])
@@ -53,7 +50,7 @@ def collect_bluebikes_data(index_url: str, years: List[str], download_dir: str, 
             logger.error(f"[{year}] Failed to download ZIPs: {e}")
             continue
 
-        # 2) Build parquet
+        # Build parquet
         try:
             out_path = save_year_to_parquet(download_dir, year, parquet_dir, log_path)
             logger.info(f"[{year}] Parquet saved to: {out_path}")
@@ -61,26 +58,32 @@ def collect_bluebikes_data(index_url: str, years: List[str], download_dir: str, 
             logger.error(f"[{year}] Failed to build/save parquet: {e}")
 
 
-def collect_boston_college_data():
-    """Mandatory: collect Boston Colleges and NOAA weather data."""
+def collect_boston_college_data(output_path=None):
+    """Collect Boston Colleges data."""
     logger.info("\n=== Collecting Boston Colleges data ===")
     try:
-        colleges = BostonCollegesAPI()
+        # Pass output_path to the class constructor OR to save_to_csv
+        colleges = BostonCollegesAPI(output_path=output_path) if output_path else BostonCollegesAPI()
         colleges.save_to_csv()
         logger.info("Boston Colleges data saved successfully.")
     except Exception as e:
         logger.error(f"Failed to fetch Boston Colleges data: {e}")
+        raise   
 
 
-def collect_NOAA_Weather_data():
+def collect_NOAA_Weather_data(output_path=None):
+    """Collect NOAA Weather data."""
     logger.info("\n=== Collecting NOAA Weather data ===")
     try:
-        noaa = NOAA()
+        # Pass output_path to the class constructor
+        noaa = NOAA(output_path=output_path) if output_path else NOAA()
         noaa.fetch_training_data_from_api()
         noaa.get_weather_dataframe()
         logger.info("NOAA Weather data fetched and DataFrame created successfully.")
     except Exception as e:
         logger.error(f"Failed to fetch NOAA data: {e}")
+        raise
+
 
 def parse_args():
     p = argparse.ArgumentParser(description="Download BlueBikes, Boston Colleges, and NOAA datasets.")
@@ -109,7 +112,18 @@ def parse_args():
         default="read_log.csv",
         help="CSV log file for read statuses."
     )
+    p.add_argument(
+        "--boston-college-output",
+        default=None,
+        help="Output path for Boston College data."
+    )
+    p.add_argument(
+        "--noaa-output",
+        default=None,
+        help="Output path for NOAA weather data."
+    )
     return p.parse_args()
+
 
 if __name__ == "__main__":
     args = parse_args()
@@ -126,5 +140,5 @@ if __name__ == "__main__":
         log_path=args.log_path,
     )
 
-    collect_boston_college_data()
-    collect_NOAA_Weather_data()
+    collect_boston_college_data(output_path=args.boston_college_output)
+    collect_NOAA_Weather_data(output_path=args.noaa_output)
