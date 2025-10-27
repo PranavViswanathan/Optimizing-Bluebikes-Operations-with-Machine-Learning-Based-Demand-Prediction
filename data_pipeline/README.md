@@ -22,7 +22,549 @@ The Bluebikes data was pulled from the [Bluebikes System Data Website](https://s
 
 ## Airflow Setup
 
-To be Filled
+This project uses Apache Airflow for orchestrating the Bluebikes data pipeline. The setup runs in Docker containers with the following components:
+
+- **Airflow Webserver**: Web UI for monitoring and managing DAGs
+- **Airflow Scheduler**: Executes tasks and manages DAG runs
+- **Airflow Worker**: Executes tasks using CeleryExecutor
+- **Airflow Triggerer**: Handles deferred tasks
+- **PostgreSQL**: Metadata database for Airflow
+- **Redis**: Message broker for Celery
+
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Airflow Ecosystem                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
+│  │   Webserver  │    │   Scheduler  │    │    Worker    │ │
+│  │  (Port 8080) │    │  (DAG Exec)  │    │  (CeleryEx)  │ │
+│  └──────────────┘    └──────────────┘    └──────────────┘ │
+│         │                    │                    │         │
+│         └────────────────────┼────────────────────┘         │
+│                              │                              │
+│  ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ │
+│  │  PostgreSQL  │    │    Redis     │    │  Triggerer   │ │
+│  │  (Metadata)  │    │   (Broker)   │    │  (Deferred)  │ │
+│  └──────────────┘    └──────────────┘    └──────────────┘ │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+## Directory Structure
+
+```
+data_pipeline/
+├── docker-compose.yaml       # Container orchestration configuration
+├── Dockerfile               # Custom Airflow image definition
+├── .env                     # Environment variables (API keys, webhooks)
+├── .env.example            # Template for environment variables
+├── dags/                   # Airflow DAG definitions
+│   ├── data_pipeline_dag.py
+│   └── test_discord_dag.py
+├── scripts/                # Python modules and utilities
+│   ├── discord_notifier.py
+│   ├── datapipeline.py
+│   ├── data_collection.py
+│   ├── data_loader.py
+│   ├── missing_value.py
+│   ├── duplicate_data.py
+│   └── logger.py
+├── data/                   # Data storage (gitignored)
+│   ├── raw/
+│   └── processed/
+└── logs/                   # Airflow logs
+```
+
+## Prerequisites
+
+- Docker Desktop (or Docker Engine + Docker Compose)
+- At least 4GB RAM allocated to Docker
+- Python 3.10+ (for local development)
+
+## Initial Setup
+
+### 1. Environment Variables
+
+Create a `.env` file in the `data_pipeline/` directory:
+
+```bash
+cd data_pipeline
+cp .env.example .env
+```
+
+Edit `.env` with your credentials:
+
+```properties
+# .env
+NOAA_API_KEY=your_noaa_api_key_here
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/YOUR_WEBHOOK_ID/YOUR_TOKEN
+```
+
+**Getting Discord Webhook:**
+1. Open Discord → Server Settings → Integrations → Webhooks
+2. Click "Create Webhook"
+3. Name: `Airflow Alert Bot`
+4. Select notification channel
+5. Copy webhook URL
+
+**Important:** Never commit `.env` to Git. It's already in `.gitignore`.
+
+### 2. Docker Compose Configuration
+
+The `docker-compose.yaml` includes:
+
+```yaml
+x-airflow-common:
+  &airflow-common
+  image: custom-airflow:latest
+  environment:
+    &airflow-common-env
+    AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__CORE__FERNET_KEY: ''
+    AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+    AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+    DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+    NOAA_API_KEY: ${NOAA_API_KEY}
+```
+
+## Starting Airflow
+
+### Method 1: Using Docker Compose (Recommended)
+
+```bash
+# Navigate to data_pipeline directory
+cd data_pipeline
+
+# Start all services in detached mode
+docker compose up -d
+
+# Wait for services to be healthy (~30 seconds)
+sleep 30
+```
+
+### Method 2: First Time Initialization
+
+If this is your first time running Airflow:
+
+```bash
+cd data_pipeline
+
+# Initialize Airflow database
+docker compose up airflow-init
+
+# Start all services
+docker compose up -d
+```
+
+### Verify Services are Running
+
+```bash
+# Check container status
+docker compose ps
+
+# Expected output:
+# NAME                                STATUS              PORTS
+# data_pipeline-airflow-scheduler-1   Up (healthy)        8080/tcp
+# data_pipeline-airflow-webserver-1   Up (healthy)        0.0.0.0:8080->8080/tcp
+# data_pipeline-airflow-worker-1      Up (healthy)        8080/tcp
+# data_pipeline-postgres-1            Up (healthy)        5432/tcp
+# data_pipeline-redis-1               Up (healthy)        6379/tcp
+```
+
+### Access Airflow UI
+
+1. Open browser: `http://localhost:8080`
+2. Default credentials:
+   - **Username**: `airflow`
+   - **Password**: `airflow`
+
+## Stopping Airflow
+
+### Graceful Shutdown
+
+```bash
+cd data_pipeline
+
+# Stop all containers (preserves data)
+docker compose down
+```
+
+### Complete Cleanup
+
+```bash
+cd data_pipeline
+
+# Stop and remove all volumes (fresh start)
+docker compose down -v
+
+# Warning: This deletes all data including:
+# - DAG run history
+# - Task logs
+# - Connection configurations
+```
+
+### Stop Specific Service
+
+```bash
+cd data_pipeline
+
+# Stop only the scheduler
+docker compose stop airflow-scheduler
+
+# Restart it
+docker compose start airflow-scheduler
+```
+
+## Health Check Script
+
+### Location
+
+```
+Project/
+├── airflow-health-check.sh    # Health monitoring script
+└── data_pipeline/
+    └── docker-compose.yaml
+```
+
+### Script Features
+
+The `airflow-health-check.sh` script monitors:
+
+- Docker daemon status
+- Container health (all 6 services)
+- Airflow webserver accessibility
+- DAG parsing errors
+- Recent scheduler errors
+
+### Usage
+
+```bash
+# Run from project root
+./airflow-health-check.sh
+```
+
+### Sample Output
+
+```
+Checking Docker and Airflow environment status
+----------------------------------------------------------
+Docker daemon is running.
+
+Docker Compose Containers:
+NAME                                STATUS                   HEALTH
+data_pipeline-airflow-scheduler-1   Up 5 minutes (healthy)   healthy
+data_pipeline-airflow-webserver-1   Up 5 minutes (healthy)   healthy
+data_pipeline-postgres-1            Up 5 minutes (healthy)   healthy
+----------------------------------------------------------
+
+All 6 containers are healthy.
+
+Checking Airflow webserver HTTP response on port 8080...
+Airflow Web UI is reachable at http://localhost:8080 (HTTP 302)
+
+----------------------------------------------------------
+Checking DAG Health...
+----------------------------------------------------------
+Scanning for broken DAGs...
+No broken DAGs found
+
+Current DAGs:
+dag_id                          | filepath                              | paused
+================================|=======================================|========
+data_pipeline_dag               | dags/data_pipeline_dag.py            | False
+test_discord_notifications      | dags/test_discord_dag.py             | True
+
+Recent scheduler errors:
+No recent errors in scheduler logs
+
+Health check complete.
+```
+## Common Operations
+
+### Viewing Logs
+
+```bash
+cd data_pipeline
+
+# View all logs
+docker compose logs -f
+
+# View specific service logs
+docker compose logs -f airflow-scheduler
+docker compose logs -f airflow-webserver
+
+# View last 100 lines
+docker compose logs --tail=100 airflow-scheduler
+
+# Search for errors
+docker compose logs airflow-scheduler | grep -i error
+```
+
+### Triggering DAGs
+
+```bash
+cd data_pipeline
+
+# Trigger main pipeline DAG
+docker compose exec airflow-scheduler airflow dags trigger data_pipeline_dag
+
+# Trigger test DAG
+docker compose exec airflow-scheduler airflow dags trigger test_discord_notifications
+
+# List all DAGs
+docker compose exec airflow-scheduler airflow dags list
+
+# Check for DAG import errors
+docker compose exec airflow-scheduler airflow dags list-import-errors
+```
+
+### Managing DAGs
+
+```bash
+cd data_pipeline
+
+# Pause a DAG
+docker compose exec airflow-scheduler airflow dags pause data_pipeline_dag
+
+# Unpause a DAG
+docker compose exec airflow-scheduler airflow dags unpause data_pipeline_dag
+
+# Test a DAG (dry run)
+docker compose exec airflow-scheduler airflow dags test data_pipeline_dag 2025-10-26
+```
+
+### Debugging
+
+```bash
+cd data_pipeline
+
+# Enter scheduler container
+docker compose exec airflow-scheduler bash
+
+# Check Python imports
+docker compose exec airflow-scheduler python -c "from scripts.discord_notifier import send_discord_alert; print('✓ Import successful')"
+
+# Check environment variables
+docker compose exec airflow-scheduler env | grep DISCORD
+
+# Test DAG parsing
+docker compose exec airflow-scheduler python /opt/airflow/dags/data_pipeline_dag.py
+```
+
+### Restarting Services
+
+```bash
+cd data_pipeline
+
+# Restart specific service
+docker compose restart airflow-scheduler
+
+# Restart all services
+docker compose restart
+
+# Rebuild and restart (after code changes)
+docker compose down
+docker compose up -d --build
+```
+
+## Discord Notifications
+
+### Configuration
+
+Discord notifications are configured via:
+
+1. **Environment variable** in `.env`:
+   ```
+   DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/...
+   ```
+
+2. **DAG configuration** in `data_pipeline_dag.py`:
+   ```python
+   from discord_notifier import send_discord_alert, send_dag_success_alert
+   
+   default_args = {
+       'on_failure_callback': send_discord_alert,
+   }
+   
+   with DAG(
+       on_success_callback=send_dag_success_alert,
+       on_failure_callback=send_discord_alert,
+   ) as dag:
+   ```
+
+### Notification Types
+
+- **Task Failure**: Sent when any individual task fails
+- **DAG Success**: Sent when entire DAG run completes successfully
+- **DAG Failure**: Sent when DAG run fails
+
+### Notification Content
+
+Each failure notification includes:
+
+- DAG name
+- Failed task name
+- Retry attempt (e.g., 1/3)
+- Execution date
+- Task duration
+- Error message
+- Direct link to logs
+
+### Testing Notifications
+
+```bash
+cd data_pipeline
+
+# Trigger test DAG (includes intentional failure)
+docker compose exec airflow-scheduler airflow dags trigger test_discord_notifications
+
+# Check Discord channel for notifications
+```
+
+## Troubleshooting
+
+### Issue: Containers Not Starting
+
+**Solution:**
+```bash
+# Check logs for errors
+docker compose logs
+
+# Try clean restart
+docker compose down -v
+docker compose up -d
+```
+
+### Issue: "ModuleNotFoundError" in DAGs
+
+**Solution:**
+```bash
+# Check Python path setup in scripts
+# Each script should have at the top:
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+```
+
+### Issue: Discord Notifications Not Working
+
+**Solution:**
+```bash
+# Verify environment variable is set
+docker compose exec airflow-scheduler env | grep DISCORD_WEBHOOK_URL
+
+# Test webhook directly
+curl -X POST "$DISCORD_WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d '{"content": "Test message"}'
+```
+
+### Issue: DAG Not Appearing in UI
+
+**Solution:**
+```bash
+# Check for DAG import errors
+docker compose exec airflow-scheduler airflow dags list-import-errors
+
+# Check if DAG file is in correct location
+docker compose exec airflow-scheduler ls -la /opt/airflow/dags/
+
+# Wait for scheduler to detect (takes ~30 seconds)
+```
+
+### Issue: Web UI Not Accessible
+
+**Solution:**
+```bash
+# Check webserver logs
+docker compose logs airflow-webserver
+
+# Check port binding
+docker compose ps | grep webserver
+
+# Restart webserver
+docker compose restart airflow-webserver
+```
+
+## Performance Optimization
+
+### Resource Allocation
+
+Recommended Docker Desktop settings:
+- **CPUs**: 4+
+- **Memory**: 8GB+
+- **Swap**: 2GB+
+
+### Container Resources
+
+In `docker-compose.yaml`, you can limit resources:
+
+```yaml
+services:
+  airflow-worker:
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+        reservations:
+          cpus: '1'
+          memory: 2G
+```
+
+## Backup and Restore
+
+### Backup DAG Runs and Metadata
+
+```bash
+cd data_pipeline
+
+# Backup PostgreSQL database
+docker compose exec postgres pg_dump -U airflow airflow > airflow_backup.sql
+
+# Backup DAGs and scripts
+tar -czf airflow_code_backup.tar.gz dags/ scripts/
+```
+
+### Restore from Backup
+
+```bash
+cd data_pipeline
+
+# Restore database
+docker compose exec -T postgres psql -U airflow airflow < airflow_backup.sql
+
+# Restore code
+tar -xzf airflow_code_backup.tar.gz
+```
+## Quick Reference Commands
+
+```bash
+# Start Airflow
+cd data_pipeline && docker compose up -d
+
+# Stop Airflow
+cd data_pipeline && docker compose down
+
+# Health check
+./airflow-health-check.sh
+
+# View logs
+cd data_pipeline && docker compose logs -f
+
+# Trigger DAG
+cd data_pipeline && docker compose exec airflow-scheduler airflow dags trigger data_pipeline_dag
+
+# Access UI
+open http://localhost:8080
+```
 
 ## DVC Setup
 Data versioning via DVC with remote storage on GCS bucket `gs://bluebikes-dvc-storage`.
