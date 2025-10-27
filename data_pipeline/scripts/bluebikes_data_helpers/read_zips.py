@@ -53,10 +53,10 @@ def read_one_zip_to_df(zip_path: Union[str, Path]) -> pd.DataFrame:
 
             df.columns = _clean_cols(df.columns)
 
-            # drop empty/unnamed cols and any columns that are entirely NaN  ← ✳️ added all-null drop
+            
             keep = (df.columns != "") & (~df.columns.str.match(r"^Unnamed", na=False))
             df = df.loc[:, keep]
-            df = df.loc[:, df.notna().any(axis=0)]  # ✳️ NEW
+            df = df.loc[:, df.notna().any(axis=0)] 
 
             # map + coalesce to canonical schema
             df = _rename_and_coalesce(df, NORM_MAP)
@@ -66,7 +66,7 @@ def read_one_zip_to_df(zip_path: Union[str, Path]) -> pd.DataFrame:
         return pd.DataFrame()
 
     combined = pd.concat(frames, ignore_index=True, sort=False)
-    combined = combined.loc[:, combined.notna().any(axis=0)]  # ✳️ NEW: final sweep post-concat
+    combined = combined.loc[:, combined.notna().any(axis=0)] 
     return combined
 
 
