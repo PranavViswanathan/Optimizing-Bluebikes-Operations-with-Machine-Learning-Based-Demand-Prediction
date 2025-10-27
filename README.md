@@ -21,24 +21,16 @@ Bluebikes generates rich spatiotemporal datasets capturing cycling patterns, sta
 Develop predictive models using historical ridership patterns, weather data, seasonal variations, and event-driven demand spikes to forecast when and where bikes will be needed most.
 
 
-## Planned Folder Structure
+## Folder Structure
 ```
-ML-OPS/
+Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction/
 │── README.md # Project description and setup
 │── requirements.txt # Python dependencies
 │── config/ # Config files for data sources, models, API
-│── data/ # Raw and processed datasets (samples only, not full dumps)
-│ ├── raw/ # Direct API pulls (GBFS, GIS, Weather)
-│ └── processed/ # Cleaned and feature-engineered data
+│── data_pipeline/ 
 │── notebooks/ # Jupyter notebooks for EDA and prototyping
-│── src/ # Source code
-│ ├── ingestion/ # Scripts to fetch Bluebikes + GIS + weather data
-│ ├── preprocessing/ # Cleaning and merging datasets
-│ ├── features/ # Feature engineering
-│ ├── training/ # Model training scripts
-│ ├── evaluation/ # Model evaluation (RMSE, MAE, classification metrics)
-│ ├── deployment/ # FastAPI app, Dockerfile
-│ └── monitoring/ # Pipeline & model monitoring scripts
+│── Model/
+├── Deployment/
 │── tests/ # Unit and integration tests
 │── docs/ # Diagrams, data cards, scoping document
 ```
@@ -47,27 +39,13 @@ ML-OPS/
 
 ### Clone the repository
 ```bash
-git clone https://github.com/PranavViswanathan/ML-OPs.git
-cd ML-OPS
+git clone https://github.com/PranavViswanathan/Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction.git
+cd Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction
 ```
 ### Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
-
-## Usage (Possible Usages - May Change over time )
-```bash
-# run data ingestion
-python src/ingestion/fetch_bluebikes_data.py
-
-# preprocess and build features 
-python src/preprocessing/build_features.py
-
-# train the model 
-python src/training/train.py
-
-```
-
 
 ### Preliminary Project Timeline
 ```mermaid
@@ -85,6 +63,6 @@ python src/training/train.py
 ```
 
 ## Status
-This repository is in the **scoping phase**.  
+This repository is in the **data pipeline phase**.  
 Code, data pipelines, and models will be added in upcoming sprints.
 
