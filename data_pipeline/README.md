@@ -161,9 +161,23 @@ They are listed below:
     - To be Filled
 
 
-## Testing and Logging
-
-
+## Loggin and Testing 
+Logger.py is a linchpin of the process. It uses Python’s built-in logging module and sets up
+both console and file output with timestamps. Every module imports the same get logger() function so all
+logs go to one place — the logs/ folder — with daily rotating filenames like data pipeline 20251026.log.
+This makes debugging way easier since every INFO, WARNING, and ERROR is timestamped and searchable.
+Testing. All core scripts are covered by pytest tests under the tests/ directory. test data collection.py
+mocks the external APIs so tests run offline. test data loader.py checks that CSVs are loaded correctly and
+converted into pickles. test duplicate data.py validates deduplication behaviour under different modes,
+while test missing value.py verifies all filling strategies. test logger.py ensures log creation, formatting,
+and handler setup work as expected. All tests write to temporary directories so nothing in the actual data
+folders gets touched.
+Other setup files. The environment is containerised through a Dockerfile and docker-compose.yaml,
+while requirements.txt locks dependencies for reproducibility. dvc.yaml and dvc.lock handle version
+tracking for data, and small shell scripts (start-airflow.sh and stop-airflow.sh) spin Airflow up and
+down for orchestration tests.
+In short, the goal was to make the whole system clean, testable, and consistent — one logger, one test
+flow, and modular scripts that can run independently or as part of the bigger pipeline
 
 ## Anomaly Detection and Alerts
 
