@@ -4,7 +4,6 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-# Add scripts directory to path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
 from datapipeline import (
@@ -14,8 +13,7 @@ from datapipeline import (
     DATASETS
 )
 from discord_notifier import send_discord_alert, send_dag_success_alert
-from correlation_matrix import correlation_matrix
-from assign_station_ids import assign_station_ids  # ✅ Import for Bluebikes IDs
+
 
 def load_and_process_dataset(dataset):
     """Load + process a single dataset."""
@@ -56,6 +54,24 @@ def load_and_process_dataset(dataset):
         raise e
 
 
+def process_bluebikes_wrapper():
+    """Wrapper to process bluebikes dataset."""
+    dataset = next(d for d in DATASETS if d['name'] == 'bluebikes')
+    load_and_process_dataset(dataset)
+
+
+def process_boston_college_wrapper():
+    """Wrapper to process boston_clg dataset."""
+    dataset = next(d for d in DATASETS if d['name'] == 'boston_clg')
+    load_and_process_dataset(dataset)
+
+
+def process_noaa_weather_wrapper():
+    """Wrapper to process NOAA_weather dataset."""
+    dataset = next(d for d in DATASETS if d['name'] == 'NOAA_weather')
+    load_and_process_dataset(dataset)
+
+
 default_args = {
     'owner': 'airflow',
     'depends_on_past': False,
@@ -78,7 +94,6 @@ with DAG(
     on_failure_callback=send_discord_alert,      
 ) as dag:
 
-    # ------------------- Data Collection -------------------
     t1 = PythonOperator(
         task_id="collect_bluebikes",
         python_callable=collect_bluebikes_data,
@@ -100,61 +115,22 @@ with DAG(
         task_id="collect_noaa_weather",
         python_callable=collect_NOAA_Weather_data,
     )
-
-    # ------------------- Assign Station IDs for Bluebikes -------------------
-    assign_ids = PythonOperator(
-        task_id="assign_station_ids",
-        python_callable=lambda: assign_station_ids(
-            input_pickle_path=os.path.join(DATASETS[0]["processed_path"], "raw_data.pkl"),
-            output_pickle_path=os.path.join(DATASETS[0]["processed_path"], "raw_data.pkl")
-        ),
-    )
-
-    # ------------------- Data Processing -------------------
+    
     process_bluebikes = PythonOperator(
         task_id="process_bluebikes",
-        python_callable=lambda: load_and_process_dataset(DATASETS[0]),
+        python_callable=process_bluebikes_wrapper,
     )
 
     process_boston_colleges = PythonOperator(
         task_id="process_boston_colleges",
-        python_callable=lambda: load_and_process_dataset(DATASETS[1]),
+        python_callable=process_boston_college_wrapper,
     )
 
     process_NOAA_weather = PythonOperator(
         task_id="process_NOAA_weather",
-        python_callable=lambda: load_and_process_dataset(DATASETS[2]),
+        python_callable=process_noaa_weather_wrapper,
     )
-
-    # ------------------- Correlation Matrix -------------------
-    correlate_bluebikes = PythonOperator(
-        task_id="correlate_bluebikes",
-        python_callable=lambda: correlation_matrix(
-            pkl_path=os.path.join(DATASETS[0]["processed_path"], "raw_data.pkl"),
-            dataset_name="bluebikes",
-            method="pearson"
-        ),
-    )
-
-    correlate_boston_colleges = PythonOperator(
-        task_id="correlate_boston_colleges",
-        python_callable=lambda: correlation_matrix(
-            pkl_path=os.path.join(DATASETS[1]["processed_path"], "raw_data.pkl"),
-            dataset_name="boston_clg",
-            method="pearson"
-        ),
-    )
-
-    correlate_noaa_weather = PythonOperator(
-        task_id="correlate_noaa_weather",
-        python_callable=lambda: correlation_matrix(
-            pkl_path=os.path.join(DATASETS[2]["processed_path"], "raw_data.pkl"),
-            dataset_name="NOAA_weather",
-            method="pearson"
-        ),
-    )
-
-    # ------------------- DAG Dependencies -------------------
-    t1 >> assign_ids >> process_bluebikes >> correlate_bluebikes
-    t2 >> process_boston_colleges >> correlate_boston_colleges
-    t3 >> process_NOAA_weather >> correlate_noaa_weather
+    
+    t1 >> process_bluebikes
+    t2 >> process_boston_colleges
+    t3 >> process_NOAA_weather
