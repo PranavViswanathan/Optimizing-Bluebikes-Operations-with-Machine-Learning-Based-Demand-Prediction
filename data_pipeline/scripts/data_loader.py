@@ -19,7 +19,7 @@ logger = get_logger("data_loader")
 
 # Project paths
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROCESSED_FOLDER_PATH = os.path.join(PROJECT_DIR, 'data', 'processed')
+PROCESSED_FOLDER_PATH = os.path.join(PROJECT_DIR, 'working_data', 'processed')
 DEFAULT_DATA_PATHS = [
     os.path.join(PROJECT_DIR, 'data', 'raw', 'bluebikes'),
     os.path.join(PROJECT_DIR, 'data', 'raw', 'Boston_GIS'),
@@ -42,7 +42,7 @@ def load_single_file(file_path: str) -> pd.DataFrame:
         raise ValueError(f"Unsupported file type: {ext}")
 
 
-def load_folder(folder_path: str) -> pd.DataFrame:
+def load_folder(folder_path: str, chunksize: Optional[int] = None) -> pd.DataFrame:
     """Load all files of the same type from a folder and concatenate into a single DataFrame."""
     if not os.path.isdir(folder_path):
         raise FileNotFoundError(f"Folder not found: {folder_path}")
@@ -60,6 +60,11 @@ def load_folder(folder_path: str) -> pd.DataFrame:
         raise ValueError(f"All files in the folder must have the same extension. Found: {file_exts}")
 
     logger.info(f"Loading {len(files)} files from folder: {folder_path}")
+    
+    # For parquet files, use a more memory-efficient approach
+    if file_exts.pop() == '.parquet':
+        return pd.concat([pd.read_parquet(f) for f in files], ignore_index=True)
+    
     df_list = []
     for f in files:
         try:
