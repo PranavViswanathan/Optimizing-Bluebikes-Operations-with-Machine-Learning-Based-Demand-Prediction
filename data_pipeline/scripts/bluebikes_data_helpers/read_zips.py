@@ -1,6 +1,7 @@
 # read_zip_year_to_parquet.py
 
 import os
+import re
 from pathlib import Path
 from zipfile import ZipFile
 from typing import Union, List
@@ -19,8 +20,10 @@ NORM_MAP = _normalized_mapping(DEFAULT_MAPPING)
 def read_one_zip_to_df(zip_path: Union[str, Path]) -> pd.DataFrame:
     """
     Read ALL CSV files inside a ZIP and return a single DataFrame.
-    - Tries utf-8 first, falls back to latin1.
-    - Applies rename+coalesce per CSV BEFORE concatenation (aligns columns).
+    - Try UTF-8 with BOM first, then latin1
+    - Clean header junk (BOM/mojibake), drop Unnamed/empty
+    - Drop all-null junk columns
+    - Rename+coalesce BEFORE concatenation
     """
     zip_path = Path(zip_path)
     frames: List[pd.DataFrame] = []
@@ -30,18 +33,41 @@ def read_one_zip_to_df(zip_path: Union[str, Path]) -> pd.DataFrame:
         for name in csv_members:
             try:
                 with zf.open(name) as f:
-                    df = pd.read_csv(f, low_memory=False)
+                    df = pd.read_csv(f, encoding="utf-8-sig", low_memory=False)
             except UnicodeDecodeError:
                 with zf.open(name) as f:
-                    df = pd.read_csv(f, low_memory=False, encoding="latin1")
+                    df = pd.read_csv(f, encoding="latin1", low_memory=False)
 
-            df = df.loc[:, ~df.columns.str.contains(r"^Unnamed", na=False)]
+            # strong header cleanup (handles ëÀ¼ï, ï»¿, etc.)
+            import re, unicodedata
+            def _clean_cols(cols):
+                out = []
+                for c in cols:
+                    s = str(c)
+                    s = unicodedata.normalize("NFKD", s)        # decompose odd unicode
+                    s = s.replace("\ufeff", "")                 # strip BOM if present
+                    s = s.encode("ascii", "ignore").decode()    # drop non-ASCII junk
+                    s = re.sub(r"\s+", " ", s).strip()          # normalize spaces
+                    out.append(s)
+                return out
+
+            df.columns = _clean_cols(df.columns)
+
+            
+            keep = (df.columns != "") & (~df.columns.str.match(r"^Unnamed", na=False))
+            df = df.loc[:, keep]
+            df = df.loc[:, df.notna().any(axis=0)] 
+
+            # map + coalesce to canonical schema
             df = _rename_and_coalesce(df, NORM_MAP)
             frames.append(df)
 
     if not frames:
         return pd.DataFrame()
-    return pd.concat(frames, ignore_index=True, sort=False)
+
+    combined = pd.concat(frames, ignore_index=True, sort=False)
+    combined = combined.loc[:, combined.notna().any(axis=0)] 
+    return combined
 
 
 def build_year_df_from_zips(
