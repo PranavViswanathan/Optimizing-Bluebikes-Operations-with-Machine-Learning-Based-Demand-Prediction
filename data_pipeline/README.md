@@ -7,7 +7,6 @@
 
 - NOAA Weather Data: The script collects meteorological observations from the National Oceanic and Atmospheric Administration (NOAA) for the Boston area, providing critical environmental variables required to contextualize the collected mobility data. This typically includes time-series data covering weather elements such as temperature, precipitation, and general weather conditions on a daily basis. Merging this data with the Bluebikes trip history allows for a robust analysis of how real-world environmental factors, such as rain or cold temperatures, influence bicycle ridership volume and usage patterns across the city.
 
-
 ## Data Card
 
 Bluebikes Data Card
@@ -19,6 +18,12 @@ NOAA Data Card
 
 ## Data Sources
 The Bluebikes data was pulled from the [Bluebikes System Data Website](https://s3.amazonaws.com/hubway-data/index.html). The Boston School and Colleges data is being queried from [Boston GIS Portal](https://gisportal.boston.gov/arcgis/rest/services/Education/OpenData/MapServer). To pull the NOAA data, we have a NOAA API key that needs to be used to access [NOAA website](https://www.ncei.noaa.gov/cdo-web/api/v2/data).
+
+## Data Pre-processing 
+
+The initial preprocessing of the data focused on ensuring data quality and consistency for downstream demand prediction modeling. The raw data, obtained from multiple sources and file formats, was consolidated into a single structured DataFrame stored in pickle format for efficient handling.
+
+Missing values were addressed systematically: categorical columns were filled using the mode, while rows with missing values in critical numeric fields were removed. Additionally, duplicate records were identified and removed based on key identifiers to ensure uniqueness. These preprocessing steps provide a clean and reliable dataset, forming the foundation for further feature engineering and integration with auxiliary datasets to enable accurate demand prediction.
 
 ## Airflow Setup
 
@@ -696,14 +701,14 @@ They are listed below:
 
 ### Cleaning of Data
 - `scripts/data_loader.py`
-    - To be Filled
+    - This script is responsible for loading the raw data from various sources into a standardized format. It reads the input files, performs initial schema validation, converts data types where required, and saves the processed output as a pickle file for downstream tasks. Also includes logging to track file loading status and handle errors.
 - `scripts/duplicate_data.py`
-    - To be Filled
+    - This script identifies and handles duplicate records in the given dataset. It supports multiple duplicate-handling strategies including keeping the first/last occurrence and removing all duplicates. It can also auto-detect key columns for duplicate detection when not explicitly defined.
 - `scripts/missing_value.py`
-    - To be Filled
+    - This script detects and treats missing values across the dataset. It logs a summary of missing data per information and applies configurable strategies such as dropping missing records and filling values using statistical imputation.
 
 
-## Loggin and Testing 
+## Logging and Testing 
 Logger.py is a linchpin of the process. It uses Python’s built-in logging module and sets up
 both console and file output with timestamps. Every module imports the same get logger() function so all
 logs go to one place — the logs/ folder — with daily rotating filenames like data pipeline 20251026.log.
@@ -722,6 +727,63 @@ In short, the goal was to make the whole system clean, testable, and consistent 
 flow, and modular scripts that can run independently or as part of the bigger pipeline
 
 ## Anomaly Detection and Alerts
+
+
+
+
+## Dataset Bias Analysis: 
+
+### Why Observed Patterns Are Features, Not Biases
+**Key Finding: Natural Demand Patterns**
+
+Observed patterns in the dataset reflect real-world behavior and operational demand rather than problematic biases. Understanding these patterns is critical for accurate predictive modeling.
+
+**Exploratory Analysis and Data Slicing**
+
+Through extensive data slicing and exploratory data analysis (EDA), we investigated temporal, geographic, and user-specific trends to understand the true signals in the dataset. This process ensured that the patterns we observed were meaningful features rather than artifacts or biases.
+
+**Temporal Patterns Reflect Real Demand**
+
+Hourly, daily, and seasonal variations indicate actual user behavior. Peaks and troughs in usage are informative signals for forecasting, helping models learn when demand is high or low. Seasonal changes, such as reduced activity in colder months, are natural and should inform resource allocation rather than be corrected.
+
+**Geographic Concentration Highlights True Hotspots**
+
+Locations with higher activity represent real demand centers, such as transit hubs, workplaces, or educational institutions. These geographic patterns are essential features for predicting demand distribution across the service area.
+
+**User Segmentation Supports Granular Predictions**
+
+Differences in user types or categories reflect genuine behavior. For example, members may follow commute patterns, while casual users follow recreational patterns. Capturing these distinctions improves the model's ability to forecast different demand scenarios.
+
+**Identifying Bias Requiring Mitigation**
+
+While Bluebikes patterns are features, the college dataset exhibits severe geographic concentration and missing institutions, which could mislead demand predictions if used raw. 
+Exploratory analysis revealed:
+- 40% of colleges concentrated in Fenway/Kenmore, with major Cambridge institutions (MIT, Harvard) missing.
+- Student populations skewed, with few large institutions represented.
+
+***Impact on Modeling:***
+- Overrepresentation of one area could teach false correlations.
+- Underprediction at missing college locations.
+
+***Mitigation Strategy:***
+- Use generalized features like near_any_college instead of neighborhood-specific data.
+- Engineer robust features such as student density or distance to nearest college.
+
+**Why These Patterns Enhance Prediction**
+
+- Causally meaningful: Peaks, lows, and geographic clusters reflect real-world factors (e.g., work schedules, weather, locations).
+
+- Consistent over time: Repeated daily, weekly, and seasonal patterns indicate stable behavior rather than artifacts.
+
+- Support operational efficiency: Understanding true demand enables better allocation of resources, avoiding over- or under-provisioning.
+
+**Modeling Approach**
+
+- Temporal features for hourly, daily, and seasonal demand trends.
+
+- Location-specific features for geographic distribution.
+
+- External factors (e.g., weather) to modulate seasonal patterns.
 
 
 ## Folder Structure
