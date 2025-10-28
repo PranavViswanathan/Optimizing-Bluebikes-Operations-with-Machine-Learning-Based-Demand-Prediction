@@ -728,7 +728,77 @@ flow, and modular scripts that can run independently or as part of the bigger pi
 
 ## Anomaly Detection and Alerts
 
+### Alerts
 
+The data pipeline implements a comprehensive alerting system using Discord webhooks to provide real-time notifications about pipeline execution status. This ensures immediate visibility into pipeline health and enables rapid response to failures or successful completions.
+
+#### Alert Integration with Airflow
+
+The Discord notification system is integrated directly into the Airflow DAG through callback functions. Two primary alert types are implemented:
+
+- **Failure Alerts**: Triggered when any task or the entire DAG fails
+- **Success Alerts**: Triggered when the complete DAG execution finishes successfully
+
+#### Implementation
+
+Alerts are configured at two levels within the DAG:
+
+**Task-Level Alerts** - Individual task failures trigger immediate notifications:
+```python
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 2,
+    'retry_delay': timedelta(minutes=5),
+    'on_failure_callback': send_discord_alert,
+}
+```
+
+**DAG-Level Alerts** - Overall pipeline status notifications:
+```python
+with DAG(
+    dag_id="data_pipeline_dag",
+    default_args=default_args,
+    start_date=datetime(2025, 1, 1),
+    schedule_interval="@daily",
+    catchup=False,
+    on_success_callback=send_dag_success_alert,  
+    on_failure_callback=send_discord_alert,      
+) as dag:
+```
+
+#### Configuration
+
+The Discord webhook URL is managed through environment variables for security and portability:
+
+**Environment Variables (.env file)**:
+```bash
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your_webhook_url
+NOAA_API_KEY=your_api_key_here
+```
+
+**Docker Compose Configuration**:
+```yaml
+environment:
+  AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+  DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+  NOAA_API_KEY: ${NOAA_API_KEY}
+```
+
+#### Alert Functionality
+
+The `discord_notifier` module provides two callback functions:
+
+- `send_discord_alert(context)`: Sends detailed failure information including task ID, execution date, error messages, and logs
+- `send_dag_success_alert(context)`: Sends confirmation messages when the entire pipeline completes successfully
+
+This dual-level alerting approach allows for:
+- Granular monitoring of individual pipeline components (data collection, processing, transformation)
+- High-level overview of complete workflow execution status
+- Immediate notification of failures enabling rapid troubleshooting
+- Confirmation of successful daily pipeline runs
 
 
 ## Dataset Bias Analysis: 
