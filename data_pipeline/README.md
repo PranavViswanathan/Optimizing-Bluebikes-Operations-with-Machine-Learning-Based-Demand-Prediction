@@ -187,8 +187,8 @@ docker compose ps
 
 1. Open browser: `http://localhost:8080`
 2. Default credentials:
-   - **Username**: `airflow`
-   - **Password**: `airflow`
+   - **Username**: `airflow2`
+   - **Password**: `airflow2`
 
 ## Stopping Airflow
 
