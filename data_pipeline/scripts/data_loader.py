@@ -59,7 +59,7 @@ def load_folder(folder_path: str, chunksize: Optional[int] = None) -> pd.DataFra
     if len(file_exts) != 1:
         raise ValueError(f"All files in the folder must have the same extension. Found: {file_exts}")
 
-    logger.info(f"Loading {len(files)} files from folder: {folder_path}")
+    logger.info(f"Loading 33 {len(files)} files from folder: {folder_path}")
     
     # For parquet files, use a more memory-efficient approach
     if file_exts.pop() == '.parquet':

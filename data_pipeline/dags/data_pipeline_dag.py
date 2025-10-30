@@ -136,7 +136,7 @@ with DAG(
         python_callable=collect_bluebikes_data,
         op_kwargs={
             "index_url": "https://s3.amazonaws.com/hubway-data/index.html",
-            "years": ["2023", "2024", "2025"],
+            "years": ["2025"],
             "download_dir": "/opt/airflow/working_data/temp/bluebikes",
             "parquet_dir": "/opt/airflow/working_data/raw/bluebikes",
             "log_path": "/opt/airflow/working_data/read_log.csv",

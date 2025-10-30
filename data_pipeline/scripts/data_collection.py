@@ -94,7 +94,7 @@ def parse_args():
     )
     p.add_argument(
         "--years",
-        default="2023,2024,2025",
+        default="2025",
         help="Comma-separated list of years to process."
     )
     p.add_argument(
