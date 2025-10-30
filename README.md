@@ -33,7 +33,19 @@ Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction/
 │── docs/                     # Diagrams, data cards, scoping document
 ```
 
-## Installation
+## Installation/Replication 
+
+The following steps will ensure that anyone can set up and reproduce the Bluebikes pipeline - either locally or using the full Dockerized Airflow environment.
+
+### Prerequisites
+
+
+| Tool | Minimum Version | Purpose |
+|------|------------------|----------|
+| [Python](https://www.python.org/downloads/) | 3.11 | Local execution and development |
+| [Docker](https://docs.docker.com/get-docker/) | 24.0+ | Containerization |
+| [Docker Compose](https://docs.docker.com/compose/install/) | 2.20+ | Orchestration for Airflow stack |
+| [Git](https://git-scm.com/downloads) | any | Repository cloning |
 
 ### Clone the repository
 ```bash
@@ -41,10 +53,45 @@ git clone https://github.com/PranavViswanathan/Optimizing-Bluebikes-Operations-w
 cd Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction
 ```
 
-### Install Dependencies
-```bash
+### Local Setup (Without Docker)
+
+python -m venv venv
+source venv/bin/activate #macOS/Linux
+venv\Scripts\activate
+
+pip install --upgrade pip
 pip install -r requirements.txt
-```
+
+Run the pipeline:
+
+python data_pipeline/scripts/datapipeline.py
+
+Logs and data output are stored in: 
+data_pipeline/logs/
+data_pipeline/data/
+
+### To run orchestration stack (Airflow + Postgres + Redis)
+
+bash start-airflow.sh
+
+This will:
+ - Build the Airflow containers
+ - Initialize the Airflow database
+ - Create and admin user (airflow2/ airflow2)
+ - Launch the UI at http://localhost:8080
+
+ bash stop-airflow.sh
+
+ This will: 
+- Stop Airflow and cleanup
+
+### To run Standalone Pipeline Container
+
+To run only the data pipeline:
+
+docker build -f Dockerfile.pipeline -t ml-pipeline .
+docker run --rm -v $(pwd)/data_pipeline/data:/app/data ml-pipeline
+
 
 ## Data Pipeline
 

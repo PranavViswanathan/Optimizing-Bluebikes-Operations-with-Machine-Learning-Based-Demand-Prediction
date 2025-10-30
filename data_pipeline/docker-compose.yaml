@@ -87,6 +87,8 @@ services:
   airflow-worker:
     <<: *airflow-common
     command: celery worker
+    mem_limit: 9g
+    mem_reservation: 8g
     healthcheck:
       test: ["CMD-SHELL", 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"']
       interval: 10s
