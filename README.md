@@ -122,5 +122,5 @@ Key features:
 ```
 
 ## Status
-This repository is in the **data pipeline phase**.  
+This repository is in the **Model Development phase**.  
 Code, data pipelines, and models will be added in upcoming sprints.
