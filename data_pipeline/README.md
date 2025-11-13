@@ -9,11 +9,84 @@
 
 ## Data Card
 
-Bluebikes Data Card
+### 1. Bluebikes Trip Data
+*Source:* Bluebikes System Data (Boston’s public bike-share program)  
+*Description:* This dataset contains detailed trip-level information, including ride identifiers, timestamps, station details, coordinates, and user type.  
+*Total Columns:* 13  
 
-Zoning Data Card
+*Columns:*
+•⁠  ⁠ride_id: Unique identifier for each trip  
+•⁠  ⁠rideable_type: Type of bike used (classic/electric)  
+•⁠  ⁠start_time: Trip start timestamp (UTC)  
+•⁠  ⁠stop_time: Trip end timestamp (UTC)  
+•⁠  ⁠start_station_name: Name of the start station  
+•⁠  ⁠start_station_id: ID of the start station  
+•⁠  ⁠end_station_name: Name of the end station  
+•⁠  ⁠end_station_id: ID of the end station  
+•⁠  ⁠start_station_latitude: Latitude of start station  
+•⁠  ⁠start_station_longitude: Longitude of start station  
+•⁠  ⁠end_station_latitude: Latitude of end station  
+•⁠  ⁠end_station_longitude: Longitude of end station  
+•⁠  ⁠user_type: Type of user (e.g., member or casual)  
 
-NOAA Data Card
+*Use Case:*  
+Used to analyze ride patterns, durations, user behavior, and geographic distribution of trips across the Bluebikes network.
+
+---
+
+### 2. Boston Colleges Data
+*Source:* City of Boston Open Data Portal  
+*Description:* This dataset includes information about colleges and universities in Boston, covering their facilities, student numbers, building details, and geographic coordinates.  
+*Total Columns:* 28  
+
+*Columns:*
+•⁠  ⁠OBJECTID: Unique object identifier  
+•⁠  ⁠Match_type: Type of match used to identify the record  
+•⁠  ⁠Ref_ID: Reference ID  
+•⁠  ⁠ID1: Secondary ID (if available)  
+•⁠  ⁠Id: Main school ID  
+•⁠  ⁠SchoolId: Unique school identifier  
+•⁠  ⁠Name: Name of the college or university  
+•⁠  ⁠Address: Street address  
+•⁠  ⁠City: City name (typically Boston)  
+•⁠  ⁠Zipcode: ZIP code  
+•⁠  ⁠Contact: Contact person or department  
+•⁠  ⁠PhoneNumbe: Phone number  
+•⁠  ⁠YearBuilt: Year the building was constructed  
+•⁠  ⁠NumStories: Number of stories in the building  
+•⁠  ⁠Cost: Estimated building cost  
+•⁠  ⁠NumStudent: Total number of students  
+•⁠  ⁠BackupPowe: Indicator of backup power availability (1 = yes, 0 = no)  
+•⁠  ⁠ShelterCap: Shelter capacity information  
+•⁠  ⁠Latitude: Latitude of the institution  
+•⁠  ⁠Longitude: Longitude of the institution  
+•⁠  ⁠Comment: Additional comments or notes  
+•⁠  ⁠X: X coordinate (projection)  
+•⁠  ⁠Y: Y coordinate (projection)  
+•⁠  ⁠NumStudent12: Number of students in 2012  
+•⁠  ⁠CampusHous: Indicates presence of campus housing  
+•⁠  ⁠NumStudents13: Number of students in 2013  
+•⁠  ⁠URL: Website of the institution  
+•⁠  ⁠Address2013: Address update field (mostly null)  
+
+*Use Case:*  
+Used to explore spatial relationships between colleges and Bluebike stations, assess accessibility, and study potential demand from students.
+
+---
+
+### 3. NOAA Weather Data
+*Source:* National Oceanic and Atmospheric Administration (NOAA)  
+*Description:* Contains daily weather information for Boston, including precipitation and temperature data.  
+*Total Columns:* 4  
+
+*Columns:*
+•⁠  ⁠date: Observation date (YYYY-MM-DD)  
+•⁠  ⁠PRCP: Daily precipitation (inches)  
+•⁠  ⁠TMAX: Maximum daily temperature (°F)  
+•⁠  ⁠TMIN: Minimum daily temperature (°F)  
+
+*Use Case:*  
+Used to study the impact of weather conditions (such as rain or temperature) on Bluebike ride frequency and duration.
 
 
 ## Data Sources
