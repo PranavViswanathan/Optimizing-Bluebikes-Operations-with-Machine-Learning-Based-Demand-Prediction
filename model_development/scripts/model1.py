@@ -32,9 +32,9 @@ logger.info("="*60)
 
 # Data Loading
 logger.info("Loading data files...")
-bluebike_data = pd.read_pickle('/Users/pranavviswanathan/Northeastern/Education/Fall2025/ML-OPS/Project/data_pipeline/working_data/processed/bluebikes/after_duplicates.pkl')
-weather_data = pd.read_pickle('/Users/pranavviswanathan/Northeastern/Education/Fall2025/ML-OPS/Project/data_pipeline/working_data/processed/NOAA_weather/after_duplicates.pkl')
-college_data = pd.read_pickle('/Users/pranavviswanathan/Northeastern/Education/Fall2025/ML-OPS/Project/data_pipeline/working_data/processed/boston_clg/after_duplicates.pkl')
+bluebike_data = pd.read_pickle('../../data_pipeline/working_data/processed/bluebikes/after_duplicates.pkl')
+weather_data = pd.read_pickle('../../data_pipeline/working_data/processed/NOAA_weather/after_duplicates.pkl')
+college_data = pd.read_pickle('../../data_pipeline/working_data/processed/boston_clg/after_duplicates.pkl')
 
 logger.info(f"Data loaded: {len(bluebike_data):,} rides")
 
