@@ -22,7 +22,7 @@ logger = get_logger("missing_value")
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-INPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'data', 'processed', 'raw_data.pkl')
+INPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'data', 'raw', 'raw_data.pkl')
 OUTPUT_PICKLE_PATH = os.path.join(PROJECT_DIR, 'data', 'processed', 'after_missing_values.pkl')
 
 SUPPORTED_STRATEGIES = [

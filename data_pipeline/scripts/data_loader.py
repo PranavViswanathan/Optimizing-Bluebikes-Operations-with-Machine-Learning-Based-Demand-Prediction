@@ -19,7 +19,7 @@ logger = get_logger("data_loader")
 
 # Project paths
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROCESSED_FOLDER_PATH = os.path.join(PROJECT_DIR, 'working_data', 'processed')
+PROCESSED_FOLDER_PATH = os.path.join(PROJECT_DIR, 'working_data', 'processed') #changed path from working_data to data_pipeline/data
 DEFAULT_DATA_PATHS = [
     os.path.join(PROJECT_DIR, 'data', 'raw', 'bluebikes'),
     os.path.join(PROJECT_DIR, 'data', 'raw', 'Boston_GIS'),
