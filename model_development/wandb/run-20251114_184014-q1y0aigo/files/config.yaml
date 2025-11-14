@@ -1,0 +1,100 @@
+_wandb:
+    value:
+        cli_version: 0.22.2
+        e:
+            zriraeiyzlnhfhu41yiyo3fsiizr69ea:
+                apple:
+                    ecpuCores: 6
+                    gpuCores: 18
+                    memoryGb: 18
+                    name: Apple M3 Pro
+                    pcpuCores: 6
+                    ramTotalBytes: "19327352832"
+                    swapTotalBytes: "7516192768"
+                args:
+                    - --mode
+                    - train
+                codePath: model_development/model1.py
+                codePathLocal: model1.py
+                cpu_count: 12
+                cpu_count_logical: 12
+                disk:
+                    /:
+                        total: "494384795648"
+                        used: "435927277568"
+                email: viswanathan.pran@northeastern.edu
+                executable: /Users/pranavviswanathan/Northeastern/Education/Fall2025/ML-OPS/Project/env/bin/python
+                git:
+                    commit: c571716e536ec7b81f350b604b6bec5e30e3384f
+                    remote: https://github.com/PranavViswanathan/Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction.git
+                host: Pranavs-MacBook-Pro.local
+                memory:
+                    total: "19327352832"
+                os: macOS-15.6.1-arm64-arm-64bit-Mach-O
+                program: /Users/pranavviswanathan/Northeastern/Education/Fall2025/ML-OPS/Project/model_development/model1.py
+                python: CPython 3.13.0
+                root: /Users/pranavviswanathan/Northeastern/Education/Fall2025/ML-OPS/Project/model_development
+                startedAt: "2025-11-14T23:40:14.040624Z"
+                writerId: zriraeiyzlnhfhu41yiyo3fsiizr69ea
+        m: []
+        python_version: 3.13.0
+        t:
+            "1":
+                - 5
+                - 6
+                - 8
+                - 53
+            "2":
+                - 5
+                - 6
+                - 8
+                - 53
+            "3":
+                - 2
+                - 13
+                - 15
+                - 16
+                - 62
+            "4": 3.13.0
+            "5": 0.22.2
+            "12": 0.22.2
+            "13": darwin-arm64
+bagging_fraction:
+    value: 0.8
+bagging_freq:
+    value: 5
+feature_fraction:
+    value: 0.9
+learning_rate:
+    value: 0.05
+lgb_params:
+    value:
+        bagging_fraction: 0.8
+        bagging_freq: 5
+        boosting_type: gbdt
+        feature_fraction: 0.9
+        learning_rate: 0.05
+        max_depth: -1
+        metric: rmse
+        min_child_samples: 20
+        min_gain_to_split: 0
+        n_estimators: 1000
+        n_jobs: -1
+        num_leaves: 255
+        objective: regression
+        random_state: 42
+        reg_alpha: 0.1
+        reg_lambda: 0.1
+        verbosity: -1
+max_depth:
+    value: -1
+min_child_samples:
+    value: 20
+min_gain_to_split:
+    value: 0
+num_leaves:
+    value: 255
+reg_alpha:
+    value: 0.1
+reg_lambda:
+    value: 0.1
