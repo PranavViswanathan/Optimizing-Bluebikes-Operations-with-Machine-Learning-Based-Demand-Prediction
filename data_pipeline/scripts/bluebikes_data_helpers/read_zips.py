@@ -17,48 +17,48 @@ from bluebikes_data_helpers.record_file import log_file_status
 NORM_MAP = _normalized_mapping(DEFAULT_MAPPING)
 
 
-def read_one_zip_to_df(zip_path: Union[str, Path]) -> pd.DataFrame:
+def read_one_zip_to_df(zip_path: Union[str, Path], n_rows:int = 80000) -> pd.DataFrame:
     """
-    Read ALL CSV files inside a ZIP and return a single DataFrame.
-    - Try UTF-8 with BOM first, then latin1
-    - Clean header junk (BOM/mojibake), drop Unnamed/empty
-    - Drop all-null junk columns
-    - Rename+coalesce BEFORE concatenation
+    Read up to n_rows rows from ALL CSV files inside a ZIP and return a single DataFrame.
+    - Tries UTF-8 with BOM first, then latin1
+    - Cleans junk headers (BOM, mojibake)
+    - Drops empty/unnamed/all-null columns
+    - Renames and coalesces columns before concatenation
     """
     zip_path = Path(zip_path)
     frames: List[pd.DataFrame] = []
 
     with ZipFile(zip_path) as zf:
         csv_members = [m for m in zf.namelist() if m.lower().endswith(".csv")]
+
         for name in csv_members:
             try:
                 with zf.open(name) as f:
-                    df = pd.read_csv(f, encoding="utf-8-sig", low_memory=False)
+                    df = pd.read_csv(f, encoding="utf-8-sig", low_memory=False, nrows=n_rows)
             except UnicodeDecodeError:
                 with zf.open(name) as f:
-                    df = pd.read_csv(f, encoding="latin1", low_memory=False)
+                    df = pd.read_csv(f, encoding="latin1", low_memory=False, nrows=n_rows)
 
-            # strong header cleanup (handles ëÀ¼ï, ï»¿, etc.)
+            # --- header cleanup ---
             import re, unicodedata
             def _clean_cols(cols):
                 out = []
                 for c in cols:
                     s = str(c)
-                    s = unicodedata.normalize("NFKD", s)        # decompose odd unicode
-                    s = s.replace("\ufeff", "")                 # strip BOM if present
-                    s = s.encode("ascii", "ignore").decode()    # drop non-ASCII junk
-                    s = re.sub(r"\s+", " ", s).strip()          # normalize spaces
+                    s = unicodedata.normalize("NFKD", s)
+                    s = s.replace("\ufeff", "")
+                    s = s.encode("ascii", "ignore").decode()
+                    s = re.sub(r"\s+", " ", s).strip()
                     out.append(s)
                 return out
 
             df.columns = _clean_cols(df.columns)
 
-            
             keep = (df.columns != "") & (~df.columns.str.match(r"^Unnamed", na=False))
             df = df.loc[:, keep]
-            df = df.loc[:, df.notna().any(axis=0)] 
+            df = df.loc[:, df.notna().any(axis=0)]
 
-            # map + coalesce to canonical schema
+            # --- normalize schema ---
             df = _rename_and_coalesce(df, NORM_MAP)
             frames.append(df)
 
@@ -66,7 +66,7 @@ def read_one_zip_to_df(zip_path: Union[str, Path]) -> pd.DataFrame:
         return pd.DataFrame()
 
     combined = pd.concat(frames, ignore_index=True, sort=False)
-    combined = combined.loc[:, combined.notna().any(axis=0)] 
+    combined = combined.loc[:, combined.notna().any(axis=0)]
     return combined
 
 

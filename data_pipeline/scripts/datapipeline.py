@@ -29,11 +29,12 @@ logger = get_logger("datapipeline")
 # ---------- PROJECT PATHS ----------
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+#changed paths to be compatible with local {"/opt/airflow", "working_data"} to {PROJECT_DIR, "data_pipeline", "data"} 
 DATASETS = [
     {
         "name": "bluebikes",
         "raw_path": os.path.join("/opt/airflow", "working_data", "raw", "bluebikes"),
-        "processed_path": os.path.join("/opt/airflow", "working_data", "processed", "bluebikes"),
+        "processed_path": os.path.join( "/opt/airflow", "working_data", "processed", "bluebikes"),
         "preprocessing": {
             "assign_station_ids": True, 
             "missing_config": {
@@ -51,8 +52,8 @@ DATASETS = [
     },
     {
         "name": "boston_clg",
-        "raw_path": os.path.join("/opt/airflow", "working_data", "raw", "boston_clg"),
-        "processed_path": os.path.join("/opt/airflow", "working_data", "processed", "boston_clg"),
+        "raw_path": os.path.join("/opt/airflow", "working_data", "raw", "boston_clg"),   #changed paths from "/opt/airflow", "working_data"
+        "processed_path": os.path.join( "/opt/airflow", "working_data", "processed", "boston_clg"),   #changed paths from "/opt/airflow", "working_data"
         "preprocessing": {
             "missing_config": {
                 "fill_strategies": {
@@ -78,8 +79,8 @@ DATASETS = [
     },
     {
         "name": "NOAA_weather",
-        "raw_path": os.path.join("/opt/airflow", "working_data", "raw", "NOAA_weather"),
-        "processed_path": os.path.join("/opt/airflow", "working_data", "processed", "NOAA_weather"),
+        "raw_path": os.path.join("/opt/airflow", "working_data", "NOAA_weather"),        #changed paths from "/opt/airflow", "working_data"
+        "processed_path": os.path.join("/opt/airflow", "working_data", "processed", "NOAA_weather"),    #changed paths from "/opt/airflow", "working_data"
         "preprocessing": {
             "missing_config": {
                 "fill_strategies": {
@@ -141,8 +142,8 @@ if __name__ == "__main__":
         collect_bluebikes_data(
             index_url="https://s3.amazonaws.com/hubway-data/index.html",
             years=["2025"],
-            download_dir=os.path.join(PROJECT_DIR, "data_pipeline", "data", "temp", "bluebikes"),
-            parquet_dir=os.path.join(PROJECT_DIR, "data_pipeline", "data", "raw", "bluebikes"),
+            download_dir=os.path.join("/opt/airflow", "working_data", "temp", "bluebikes"),    #changed path to  to {PROJECT_DIR, "data_pipeline", "data"}
+            parquet_dir=os.path.join("/opt/airflow", "working_data", "raw", "bluebikes"),  #changed path to  to {PROJECT_DIR, "data_pipeline", "data"}
             log_path="read_log.csv"
         )
         collect_boston_college_data()
