@@ -444,17 +444,17 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     if args.mode == 'sweep':
-        logger.info("Starting hyperparameter sweep...")
+        logger.info("Starting hyperparameter sweep.")
         sweep_id = run_hyperparameter_sweep()
         logger.info(f"Sweep completed. Sweep ID: {sweep_id}")
         logger.info("Check W&B dashboard for best parameters")
         
     elif args.mode == 'train':
-        logger.info("Training final model with default/best parameters...")
+        logger.info("Training final model with default/best parameters.")
         model, metadata = train_final_model()
         
     elif args.mode == 'both':
-        logger.info("Running hyperparameter sweep followed by final training...")
+        logger.info("Running hyperparameter sweep followed by final training.")
         sweep_id = run_hyperparameter_sweep()
         logger.info(f"Sweep completed. Sweep ID: {sweep_id}")
         
@@ -464,7 +464,7 @@ if __name__ == "__main__":
         best_params = best_run.config
         
         logger.info(f"Best parameters found: {best_params}")
-        logger.info("Training final model with best parameters...")
+        logger.info("Training final model with best parameters.")
         model, metadata = train_final_model(best_params)
     
     logger.info("All operations completed successfully!")
