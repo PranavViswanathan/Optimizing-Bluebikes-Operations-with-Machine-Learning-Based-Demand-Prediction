@@ -1,6 +1,6 @@
 """
 Random Forest Training Module for BlueBikes Demand Prediction
-Adapted to work with MLflow tracking pipeline
+Adapted to work with MLflow tracking pipeline.
 """
 
 import pandas as pd
