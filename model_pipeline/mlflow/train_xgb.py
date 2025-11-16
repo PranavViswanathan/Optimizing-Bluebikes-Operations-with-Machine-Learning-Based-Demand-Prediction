@@ -2,7 +2,7 @@
 XGBoost Model Training Module for BlueBikes Demand Prediction
 This module contains the XGBoost training function with MLflow tracking
 """
-
+from __future__ import annotations
 import xgboost as xgb
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
