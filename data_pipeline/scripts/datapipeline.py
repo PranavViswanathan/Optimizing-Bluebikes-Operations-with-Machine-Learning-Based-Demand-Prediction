@@ -32,8 +32,8 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__
 DATASETS = [
     {
         "name": "bluebikes",
-        "raw_path": os.path.join(PROJECT_DIR, "data_pipeline", "data", "raw", "bluebikes"),
-        "processed_path": os.path.join(PROJECT_DIR, "data_pipeline", "data", "processed", "bluebikes"),
+        "raw_path": os.path.join("/opt/airflow", "working_data", "raw", "bluebikes"),
+        "processed_path": os.path.join("/opt/airflow", "working_data", "processed", "bluebikes"),
         "preprocessing": {
             "assign_station_ids": True, 
             "missing_config": {
@@ -51,8 +51,8 @@ DATASETS = [
     },
     {
         "name": "boston_clg",
-        "raw_path": os.path.join(PROJECT_DIR, "data_pipeline", "data", "raw", "boston_clg"),
-        "processed_path": os.path.join(PROJECT_DIR, "data_pipeline", "data", "processed", "boston_clg"),
+        "raw_path": os.path.join("/opt/airflow", "working_data", "raw", "boston_clg"),
+        "processed_path": os.path.join("/opt/airflow", "working_data", "processed", "boston_clg"),
         "preprocessing": {
             "missing_config": {
                 "fill_strategies": {
@@ -78,8 +78,8 @@ DATASETS = [
     },
     {
         "name": "NOAA_weather",
-        "raw_path": os.path.join(PROJECT_DIR, "data_pipeline", "data", "raw", "NOAA_weather"),
-        "processed_path": os.path.join(PROJECT_DIR, "data_pipeline", "data", "processed", "NOAA_weather"),
+        "raw_path": os.path.join("/opt/airflow", "working_data", "raw", "NOAA_weather"),
+        "processed_path": os.path.join("/opt/airflow", "working_data", "processed", "NOAA_weather"),
         "preprocessing": {
             "missing_config": {
                 "fill_strategies": {
@@ -88,13 +88,13 @@ DATASETS = [
                     "TMIN": "median"
                 },
                 "drop_columns": [],
-                "raise_on_remaining": False,
-                "duplicates": {
+                "raise_on_remaining": False
+            },
+            "duplicates": {
                 "subset": ["date", "PRCP", "TMAX", "TMIN"],
                 "keep": "first",
                 "consider_all_columns": False,
                 "raise_on_remaining": False
-            }
             }
         }
     }

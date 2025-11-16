@@ -7,18 +7,96 @@
 
 - NOAA Weather Data: The script collects meteorological observations from the National Oceanic and Atmospheric Administration (NOAA) for the Boston area, providing critical environmental variables required to contextualize the collected mobility data. This typically includes time-series data covering weather elements such as temperature, precipitation, and general weather conditions on a daily basis. Merging this data with the Bluebikes trip history allows for a robust analysis of how real-world environmental factors, such as rain or cold temperatures, influence bicycle ridership volume and usage patterns across the city.
 
-
 ## Data Card
 
-Bluebikes Data Card
+### 1. Bluebikes Trip Data
+*Source:* Bluebikes System Data (Boston’s public bike-share program)  
+*Description:* This dataset contains detailed trip-level information, including ride identifiers, timestamps, station details, coordinates, and user type.  
+*Total Columns:* 13  
 
-Zoning Data Card
+*Columns:*
+•⁠  ⁠ride_id: Unique identifier for each trip  
+•⁠  ⁠rideable_type: Type of bike used (classic/electric)  
+•⁠  ⁠start_time: Trip start timestamp (UTC)  
+•⁠  ⁠stop_time: Trip end timestamp (UTC)  
+•⁠  ⁠start_station_name: Name of the start station  
+•⁠  ⁠start_station_id: ID of the start station  
+•⁠  ⁠end_station_name: Name of the end station  
+•⁠  ⁠end_station_id: ID of the end station  
+•⁠  ⁠start_station_latitude: Latitude of start station  
+•⁠  ⁠start_station_longitude: Longitude of start station  
+•⁠  ⁠end_station_latitude: Latitude of end station  
+•⁠  ⁠end_station_longitude: Longitude of end station  
+•⁠  ⁠user_type: Type of user (e.g., member or casual)  
 
-NOAA Data Card
+*Use Case:*  
+Used to analyze ride patterns, durations, user behavior, and geographic distribution of trips across the Bluebikes network.
+
+---
+
+### 2. Boston Colleges Data
+*Source:* City of Boston Open Data Portal  
+*Description:* This dataset includes information about colleges and universities in Boston, covering their facilities, student numbers, building details, and geographic coordinates.  
+*Total Columns:* 28  
+
+*Columns:*
+•⁠  ⁠OBJECTID: Unique object identifier  
+•⁠  ⁠Match_type: Type of match used to identify the record  
+•⁠  ⁠Ref_ID: Reference ID  
+•⁠  ⁠ID1: Secondary ID (if available)  
+•⁠  ⁠Id: Main school ID  
+•⁠  ⁠SchoolId: Unique school identifier  
+•⁠  ⁠Name: Name of the college or university  
+•⁠  ⁠Address: Street address  
+•⁠  ⁠City: City name (typically Boston)  
+•⁠  ⁠Zipcode: ZIP code  
+•⁠  ⁠Contact: Contact person or department  
+•⁠  ⁠PhoneNumbe: Phone number  
+•⁠  ⁠YearBuilt: Year the building was constructed  
+•⁠  ⁠NumStories: Number of stories in the building  
+•⁠  ⁠Cost: Estimated building cost  
+•⁠  ⁠NumStudent: Total number of students  
+•⁠  ⁠BackupPowe: Indicator of backup power availability (1 = yes, 0 = no)  
+•⁠  ⁠ShelterCap: Shelter capacity information  
+•⁠  ⁠Latitude: Latitude of the institution  
+•⁠  ⁠Longitude: Longitude of the institution  
+•⁠  ⁠Comment: Additional comments or notes  
+•⁠  ⁠X: X coordinate (projection)  
+•⁠  ⁠Y: Y coordinate (projection)  
+•⁠  ⁠NumStudent12: Number of students in 2012  
+•⁠  ⁠CampusHous: Indicates presence of campus housing  
+•⁠  ⁠NumStudents13: Number of students in 2013  
+•⁠  ⁠URL: Website of the institution  
+•⁠  ⁠Address2013: Address update field (mostly null)  
+
+*Use Case:*  
+Used to explore spatial relationships between colleges and Bluebike stations, assess accessibility, and study potential demand from students.
+
+---
+
+### 3. NOAA Weather Data
+*Source:* National Oceanic and Atmospheric Administration (NOAA)  
+*Description:* Contains daily weather information for Boston, including precipitation and temperature data.  
+*Total Columns:* 4  
+
+*Columns:*
+•⁠  ⁠date: Observation date (YYYY-MM-DD)  
+•⁠  ⁠PRCP: Daily precipitation (inches)  
+•⁠  ⁠TMAX: Maximum daily temperature (°F)  
+•⁠  ⁠TMIN: Minimum daily temperature (°F)  
+
+*Use Case:*  
+Used to study the impact of weather conditions (such as rain or temperature) on Bluebike ride frequency and duration.
 
 
 ## Data Sources
 The Bluebikes data was pulled from the [Bluebikes System Data Website](https://s3.amazonaws.com/hubway-data/index.html). The Boston School and Colleges data is being queried from [Boston GIS Portal](https://gisportal.boston.gov/arcgis/rest/services/Education/OpenData/MapServer). To pull the NOAA data, we have a NOAA API key that needs to be used to access [NOAA website](https://www.ncei.noaa.gov/cdo-web/api/v2/data).
+
+## Data Pre-processing 
+
+The initial preprocessing of the data focused on ensuring data quality and consistency for downstream demand prediction modeling. The raw data, obtained from multiple sources and file formats, was consolidated into a single structured DataFrame stored in pickle format for efficient handling.
+
+Missing values were addressed systematically: categorical columns were filled using the mode, while rows with missing values in critical numeric fields were removed. Additionally, duplicate records were identified and removed based on key identifiers to ensure uniqueness. These preprocessing steps provide a clean and reliable dataset, forming the foundation for further feature engineering and integration with auxiliary datasets to enable accurate demand prediction.
 
 ## Airflow Setup
 
@@ -182,8 +260,8 @@ docker compose ps
 
 1. Open browser: `http://localhost:8080`
 2. Default credentials:
-   - **Username**: `airflow`
-   - **Password**: `airflow`
+   - **Username**: `airflow2`
+   - **Password**: `airflow2`
 
 ## Stopping Airflow
 
@@ -696,14 +774,14 @@ They are listed below:
 
 ### Cleaning of Data
 - `scripts/data_loader.py`
-    - To be Filled
+    - This script is responsible for loading the raw data from various sources into a standardized format. It reads the input files, performs initial schema validation, converts data types where required, and saves the processed output as a pickle file for downstream tasks. Also includes logging to track file loading status and handle errors.
 - `scripts/duplicate_data.py`
-    - To be Filled
+    - This script identifies and handles duplicate records in the given dataset. It supports multiple duplicate-handling strategies including keeping the first/last occurrence and removing all duplicates. It can also auto-detect key columns for duplicate detection when not explicitly defined.
 - `scripts/missing_value.py`
-    - To be Filled
+    - This script detects and treats missing values across the dataset. It logs a summary of missing data per information and applies configurable strategies such as dropping missing records and filling values using statistical imputation.
 
 
-## Loggin and Testing 
+## Logging and Testing 
 Logger.py is a linchpin of the process. It uses Python’s built-in logging module and sets up
 both console and file output with timestamps. Every module imports the same get logger() function so all
 logs go to one place — the logs/ folder — with daily rotating filenames like data pipeline 20251026.log.
@@ -722,6 +800,133 @@ In short, the goal was to make the whole system clean, testable, and consistent 
 flow, and modular scripts that can run independently or as part of the bigger pipeline
 
 ## Anomaly Detection and Alerts
+
+### Alerts
+
+The data pipeline implements a comprehensive alerting system using Discord webhooks to provide real-time notifications about pipeline execution status. This ensures immediate visibility into pipeline health and enables rapid response to failures or successful completions.
+
+#### Alert Integration with Airflow
+
+The Discord notification system is integrated directly into the Airflow DAG through callback functions. Two primary alert types are implemented:
+
+- **Failure Alerts**: Triggered when any task or the entire DAG fails
+- **Success Alerts**: Triggered when the complete DAG execution finishes successfully
+
+#### Implementation
+
+Alerts are configured at two levels within the DAG:
+
+**Task-Level Alerts** - Individual task failures trigger immediate notifications:
+```python
+default_args = {
+    'owner': 'airflow',
+    'depends_on_past': False,
+    'email_on_failure': False,
+    'email_on_retry': False,
+    'retries': 2,
+    'retry_delay': timedelta(minutes=5),
+    'on_failure_callback': send_discord_alert,
+}
+```
+
+**DAG-Level Alerts** - Overall pipeline status notifications:
+```python
+with DAG(
+    dag_id="data_pipeline_dag",
+    default_args=default_args,
+    start_date=datetime(2025, 1, 1),
+    schedule_interval="@daily",
+    catchup=False,
+    on_success_callback=send_dag_success_alert,  
+    on_failure_callback=send_discord_alert,      
+) as dag:
+```
+
+#### Configuration
+
+The Discord webhook URL is managed through environment variables for security and portability:
+
+**Environment Variables (.env file)**:
+```bash
+DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your_webhook_url
+NOAA_API_KEY=your_api_key_here
+```
+
+**Docker Compose Configuration**:
+```yaml
+environment:
+  AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+  DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+  NOAA_API_KEY: ${NOAA_API_KEY}
+```
+
+#### Alert Functionality
+
+The `discord_notifier` module provides two callback functions:
+
+- `send_discord_alert(context)`: Sends detailed failure information including task ID, execution date, error messages, and logs
+- `send_dag_success_alert(context)`: Sends confirmation messages when the entire pipeline completes successfully
+
+This dual-level alerting approach allows for:
+- Granular monitoring of individual pipeline components (data collection, processing, transformation)
+- High-level overview of complete workflow execution status
+- Immediate notification of failures enabling rapid troubleshooting
+- Confirmation of successful daily pipeline runs
+
+
+## Dataset Bias Analysis: 
+
+### Why Observed Patterns Are Features, Not Biases
+**Key Finding: Natural Demand Patterns**
+
+Observed patterns in the dataset reflect real-world behavior and operational demand rather than problematic biases. Understanding these patterns is critical for accurate predictive modeling.
+
+**Exploratory Analysis and Data Slicing**
+
+Through extensive data slicing and exploratory data analysis (EDA), we investigated temporal, geographic, and user-specific trends to understand the true signals in the dataset. This process ensured that the patterns we observed were meaningful features rather than artifacts or biases.
+
+**Temporal Patterns Reflect Real Demand**
+
+Hourly, daily, and seasonal variations indicate actual user behavior. Peaks and troughs in usage are informative signals for forecasting, helping models learn when demand is high or low. Seasonal changes, such as reduced activity in colder months, are natural and should inform resource allocation rather than be corrected.
+
+**Geographic Concentration Highlights True Hotspots**
+
+Locations with higher activity represent real demand centers, such as transit hubs, workplaces, or educational institutions. These geographic patterns are essential features for predicting demand distribution across the service area.
+
+**User Segmentation Supports Granular Predictions**
+
+Differences in user types or categories reflect genuine behavior. For example, members may follow commute patterns, while casual users follow recreational patterns. Capturing these distinctions improves the model's ability to forecast different demand scenarios.
+
+**Identifying Bias Requiring Mitigation**
+
+While Bluebikes patterns are features, the college dataset exhibits severe geographic concentration and missing institutions, which could mislead demand predictions if used raw. 
+Exploratory analysis revealed:
+- 40% of colleges concentrated in Fenway/Kenmore, with major Cambridge institutions (MIT, Harvard) missing.
+- Student populations skewed, with few large institutions represented.
+
+***Impact on Modeling:***
+- Overrepresentation of one area could teach false correlations.
+- Underprediction at missing college locations.
+
+***Mitigation Strategy:***
+- Use generalized features like near_any_college instead of neighborhood-specific data.
+- Engineer robust features such as student density or distance to nearest college.
+
+**Why These Patterns Enhance Prediction**
+
+- Causally meaningful: Peaks, lows, and geographic clusters reflect real-world factors (e.g., work schedules, weather, locations).
+
+- Consistent over time: Repeated daily, weekly, and seasonal patterns indicate stable behavior rather than artifacts.
+
+- Support operational efficiency: Understanding true demand enables better allocation of resources, avoiding over- or under-provisioning.
+
+**Modeling Approach**
+
+- Temporal features for hourly, daily, and seasonal demand trends.
+
+- Location-specific features for geographic distribution.
+
+- External factors (e.g., weather) to modulate seasonal patterns.
 
 
 ## Folder Structure
