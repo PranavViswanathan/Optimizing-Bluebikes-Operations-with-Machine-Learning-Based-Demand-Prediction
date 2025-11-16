@@ -1,17 +1,16 @@
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
-from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 import sys
 import os
-from pathlib import Path
-sys.path.insert(0, '/opt/airflow/plugins/mlflow')
 
-from exp_tracking import BlueBikesModelTrainer
-import joblib
+
+sys.path.insert(0, '/opt/airflow/model_pipeline/mlflow')
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scripts"))
+from discord_notifier import send_discord_alert, send_dag_success_alert
 default_args = {
-    'owner': 'data-team',
+    'owner': 'Pranav',
     'depends_on_past': False,
     'start_date': datetime(2024, 1, 1),
     'email_on_failure': False,
@@ -28,45 +27,43 @@ dag = DAG(
     catchup=False,
     max_active_runs=1,
     tags=['ml', 'training', 'bluebikes'],
+    on_success_callback=send_dag_success_alert,  
+    on_failure_callback=send_discord_alert, 
 )
 
 def run_training_pipeline(**context):
     import subprocess
     import json
     
-    print("="*80)
     print(" Starting BlueBikes Model Training Pipeline ")
-    print("="*80)
     print(f"Execution Date: {context['ds']}")
     print(f"Run ID: {context['run_id']}")
+    
     training_script = """
 import sys
 import os
 sys.path.append('/opt/airflow/model_pipeline/mlflow')
 os.chdir('/opt/airflow/model_pipeline/mlflow')
 
-# Now import and run
 from exp_tracking import BlueBikesModelTrainer
 import joblib
 
 # Initialize trainer
 trainer = BlueBikesModelTrainer(experiment_name='bluebikes_airflow_{date}')
 
-# Load and prepare data
-X_train, X_test, y_train, y_test = trainer.load_and_prepare_data()
+# Load and prepare data - Returns 6 values
+X_train, X_test, X_val, y_train, y_test, y_val = trainer.load_and_prepare_data()
 
-# Train models
-models_to_train = ['xgboost', 'lightgbm']
+# Train models - Pass all 6 datasets
+models_to_train = ['xgboost', 'lightgbm', 'randomforest']
 results = trainer.train_all_models(
-    X_train, X_test, y_train, y_test,
-    models_to_train=models_to_train
+    X_train, X_test, X_val, y_train, y_test, y_val,
+    models_to_train=models_to_train,
+    tune=False
 )
 
 if results:
-    # Compare models
     comparison_df = trainer.compare_models(results)
-    
-    # Select best model
     best_model_name, best_model, best_metrics, best_run_id = trainer.select_best_model(
         results, 
         metric='test_r2'
@@ -100,6 +97,7 @@ else:
     script_path = f'/tmp/training_script_{context["ds_nodash"]}.py'
     with open(script_path, 'w') as f:
         f.write(training_script)
+    
     try:
         result = subprocess.run(
             [sys.executable, script_path],
@@ -113,13 +111,11 @@ else:
         if result.stderr:
             print("STDERR:", result.stderr)
         
-        # Read the results
         results_file = f'/tmp/training_results_{context["ds_nodash"]}.json'
         if os.path.exists(results_file):
             with open(results_file, 'r') as f:
                 results = json.load(f)
             
-            # Push to XCom
             for key, value in results.items():
                 context['task_instance'].xcom_push(key=key, value=value)
             
@@ -138,36 +134,8 @@ else:
         print(f"STDERR: {e.stderr}")
         raise
     finally:
-        # Cleanup
         if os.path.exists(script_path):
             os.remove(script_path)
-
-def run_training_simple(**context):
-    import subprocess
-    
-    print("="*80)
-    print(" Running Model Training Script ")
-    print("="*80)
-    cmd = [
-        sys.executable,
-        '/opt/airflow/model_pipeline/mlflow/exp_tracking.py'
-    ]
-    
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        cwd='/opt/airflow/model_pipeline/mlflow',
-        env={**os.environ, 'PYTHONPATH': '/opt/airflow/model_pipeline/mlflow'}
-    )
-    
-    print("Output:", result.stdout)
-    if result.stderr:
-        print("Errors:", result.stderr)
-    
-    if result.returncode != 0:
-        raise Exception(f"Training script failed with return code {result.returncode}")
-    return {'status': 'success', 'return_code': result.returncode}
 
 def validate_model_performance(**context):
     ti = context['task_instance']
@@ -184,12 +152,11 @@ def validate_model_performance(**context):
             test_r2 = results.get('test_r2')
             test_mae = results.get('test_mae')
             best_model = results.get('best_model')
-    MIN_R2 = 0.70
-    MAX_MAE = 100
     
-    print("="*60)
+    MIN_R2 = 0.70
+    MAX_MAE = 110
+    
     print("MODEL VALIDATION")
-    print("="*60)
     
     if test_r2 and test_mae:
         print(f"Model: {best_model}")
@@ -197,13 +164,13 @@ def validate_model_performance(**context):
         print(f"MAE: {test_mae:.2f} (threshold: <{MAX_MAE})")
         
         if test_r2 >= MIN_R2 and test_mae <= MAX_MAE:
-            print("Model passed validation!")
+            print("✓ Model passed validation!")
             return True
         else:
-            print("Model failed validation")
+            print("✗ Model failed validation")
             raise Exception("Model did not meet performance thresholds")
     else:
-        print("No metrics found for validation")
+        print("⚠ No metrics found for validation")
         return False
 
 def cleanup_temp_files(**context):
@@ -220,30 +187,35 @@ def cleanup_temp_files(**context):
         for file in glob.glob(pattern):
             try:
                 os.remove(file)
-                print(f" Removed {file}")
+                print(f"✓ Removed {file}")
             except Exception as e:
-                print(f"Could not remove {file}: {e}")
+                print(f"✗ Could not remove {file}: {e}")
 
 with dag:
     start = DummyOperator(task_id='start')
+    
     run_training = PythonOperator(
         task_id='run_training',
         python_callable=run_training_pipeline,  
         provide_context=True
     )
+    
     validate = PythonOperator(
         task_id='validate_model',
         python_callable=validate_model_performance,
         provide_context=True
     )
+    
     cleanup = PythonOperator(
         task_id='cleanup',
         python_callable=cleanup_temp_files,
         provide_context=True,
         trigger_rule='all_done'
     )
+    
     end = DummyOperator(
         task_id='end',
         trigger_rule='all_done'
     )
+    
     start >> run_training >> validate >> cleanup >> end

@@ -109,10 +109,8 @@ def train_xgboost(X_train, y_train, X_val, y_val, X_test, y_test, mlflow, config
         
         # Log the model
         mlflow.xgboost.log_model(
-            model,
-            artifact_path="model",
-            input_example=X_train[:5] if hasattr(X_train, '__getitem__') else None,
-            model_format="json"
+            model, 
+            "model"
         )
         
         # Save model summary

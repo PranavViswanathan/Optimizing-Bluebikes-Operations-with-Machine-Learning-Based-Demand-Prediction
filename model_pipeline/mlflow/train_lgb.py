@@ -18,8 +18,8 @@ import mlflow
 import mlflow.lightgbm
 
 warnings.filterwarnings('ignore')
-plt.style.use('seaborn-v0_8-darkgrid')
-sns.set_palette("husl")
+# plt.style.use('seaborn-v0_8-darkgrid')
+# sns.set_palette("husl")
 
 logging.basicConfig(
     level=logging.INFO,
