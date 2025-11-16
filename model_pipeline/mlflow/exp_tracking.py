@@ -14,7 +14,7 @@ warnings.filterwarnings('ignore')
 
 from train_xgb import train_xgboost, tune_xgboost
 from train_lgb import train_lightgbm, tune_lightgbm
-from train_catbst import train_catboost, tune_catboost
+# from train_catbst import train_catboost, tune_catboost
 from feature_generation import load_and_prepare_data
 from train_random_forest import train_random_forest, tune_random_forest
 
@@ -47,7 +47,6 @@ class BlueBikesModelTrainer:
         test_start  = pd.Timestamp("2025-07-01")
         test_end = pd.Timestamp("2025-07-31")
 
-        # build masks WITHOUT .dt.date
         train_mask_full = (X["date"] >= train_start) & (X["date"] <= train_end)
         test_mask  = (X["date"] >= test_start) & (X["date"] <= test_end)
 
@@ -68,11 +67,6 @@ class BlueBikesModelTrainer:
         y_val   = y_train_full.loc[val_mask]
 
         X_test = X_test.drop(columns=["date"])
-        # # drop date from features after splitting
-        # X_train = X.loc[train_mask].drop(columns=["date"])
-        # X_test  = X.loc[test_mask].drop(columns=["date"])
-        # y_train = y.loc[train_mask]
-        # y_test  = y.loc[test_mask]
         
         print(f"Dataset shape: {X.shape}")
         print(f"Training samples: {len(X_train):,}")
@@ -86,11 +80,9 @@ class BlueBikesModelTrainer:
     def train_all_models(self, X_train, X_test, X_val, y_train, y_test, y_val, models_to_train=None, tune=False):
         
         if models_to_train is None:
-            models_to_train = ['xgboost', 'lightgbm','catboost', 'randomforest']
+            models_to_train = ['xgboost', 'lightgbm', 'randomforest']  
         
-        print("\n" + "="*60)
         print("TRAINING MODELS")
-        print("="*60)
         print(f"Models to train: {models_to_train}")
         
         results = {}       
@@ -115,7 +107,7 @@ class BlueBikesModelTrainer:
                             runs = self.client.search_runs(
                                 experiment_ids=[self.experiment.experiment_id],
                                 filter_string="tags.model_type = 'XGBoost'",
-                                order_by=["start_time DESC"],
+                                order_by=["attribute.start_time DESC"],
                                 max_results=1
                             )
                             run_id = runs[0].info.run_id if runs else None
@@ -126,7 +118,7 @@ class BlueBikesModelTrainer:
                             runs = self.client.search_runs(
                                 experiment_ids=[self.experiment.experiment_id],
                                 filter_string="tags.model_type = 'XGBoost'",
-                                order_by=["start_time DESC"],
+                                order_by=["attribute.start_time DESC"],
                                 max_results=1
                             )
                             run_id = runs[0].info.run_id if runs else None
@@ -140,7 +132,7 @@ class BlueBikesModelTrainer:
                             runs = self.client.search_runs(
                                 experiment_ids=[self.experiment.experiment_id],
                                 filter_string="tags.model_type = 'LightGBM'",
-                                order_by=["start_time DESC"],
+                                order_by=["attribute.start_time DESC"],
                                 max_results=1
                             )
                             run_id = runs[0].info.run_id if runs else None
@@ -151,35 +143,36 @@ class BlueBikesModelTrainer:
                             runs = self.client.search_runs(
                                 experiment_ids=[self.experiment.experiment_id],
                                 filter_string="tags.model_type = 'LightGBM'",
-                                order_by=["start_time DESC"],
+                                order_by=["attribute.start_time DESC"],
                                 max_results=1
                             )
                             run_id = runs[0].info.run_id if runs else None
 
-                    elif model_name == 'catboost':
-                        if tune:
-                            print("With Hyperparameter Tuning...")
-                            model, metrics = tune_catboost(
-                                X_train, y_train, X_val, y_val, X_test, y_test, mlflow
-                            )
-                            runs = self.client.search_runs(
-                                experiment_ids=[self.experiment.experiment_id],
-                                filter_string="tags.model_type = 'CatBoost'",
-                                order_by=["start_time DESC"],
-                                max_results=1
-                            )
-                            run_id = runs[0].info.run_id if runs else None
-                        else:
-                            model, metrics = train_catboost(
-                                X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client=mlflow
-                            )
-                            runs = self.client.search_runs(
-                                experiment_ids=[self.experiment.experiment_id],
-                                filter_string="tags.model_type = 'CatBoost'",
-                                order_by=["start_time DESC"],
-                                max_results=1
-                            )
-                            run_id = runs[0].info.run_id if runs else None
+                    # elif model_name == 'catboost':
+                    #     if tune:
+                    #         print("With Hyperparameter Tuning...")
+                    #         model, metrics = tune_catboost(
+                    #             X_train, y_train, X_val, y_val, X_test, y_test, mlflow
+                    #         )
+                    #         runs = self.client.search_runs(
+                    #             experiment_ids=[self.experiment.experiment_id],
+                    #             filter_string="tags.model_type = 'CatBoost'",
+                    #             order_by=["start_time DESC"],
+                    #             max_results=1
+                    #         )
+                    #         run_id = runs[0].info.run_id if runs else None
+                    #     else:
+                    #         model, metrics = train_catboost(
+                    #             X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client=mlflow
+                    #         )
+                    #         runs = self.client.search_runs(
+                    #             experiment_ids=[self.experiment.experiment_id],
+                    #             filter_string="tags.model_type = 'CatBoost'",
+                    #             order_by=["start_time DESC"],
+                    #             max_results=1
+                    #         )
+                    #         run_id = runs[0].info.run_id if runs else None
+                    
                     elif model_name == 'randomforest':
                         if tune:
                             print("With Hyperparameter Tuning...")
@@ -189,7 +182,7 @@ class BlueBikesModelTrainer:
                             runs = self.client.search_runs(
                                 experiment_ids=[self.experiment.experiment_id],
                                 filter_string="tags.model_type = 'RandomForest'",
-                                order_by=["start_time DESC"],
+                                order_by=["attribute.start_time DESC"],
                                 max_results=1
                             )
                             run_id = runs[0].info.run_id if runs else None
@@ -200,7 +193,7 @@ class BlueBikesModelTrainer:
                             runs = self.client.search_runs(
                                 experiment_ids=[self.experiment.experiment_id],
                                 filter_string="tags.model_type = 'RandomForest'",
-                                order_by=["start_time DESC"],
+                                order_by=["attribute.start_time DESC"],
                                 max_results=1
                             )
                             run_id = runs[0].info.run_id if runs else None
@@ -374,7 +367,7 @@ def main():
     )
     
     X_train, X_test, X_val, y_train, y_test, y_val = trainer.load_and_prepare_data()
-    models_to_train = ['xgboost', 'lightgbm', 'catboost', 'randomforest']  # Now includes both models!
+    models_to_train = ['xgboost', 'lightgbm', 'randomforest']  # removed 'catboost'
     results = trainer.train_all_models(
         X_train, X_test, X_val, y_train, y_test, y_val,
         models_to_train=models_to_train, tune=True
@@ -396,8 +389,7 @@ def main():
         print(f"Best model saved to: best_model_{best_model_name}.pkl")
         
         register = input("\nRegister the best model for deployment? (y/n): ").lower()
-        if register == 'y':
-            trainer.register_model(best_model_name, best_run_id, best_model_name)
+        trainer.register_model(best_model_name, best_run_id, best_model_name)
     
     print("PIPELINE COMPLETE")
     print("\nView detailed results in MLflow UI:")

@@ -18,8 +18,8 @@ import mlflow
 import mlflow.sklearn
 
 warnings.filterwarnings('ignore')
-plt.style.use('seaborn-v0_8-darkgrid')
-sns.set_palette("husl")
+# plt.style.use('seaborn-v0_8-darkgrid')
+# sns.set_palette("husl")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -218,7 +218,7 @@ def tune_random_forest(
     X_train, y_train,
     X_val,   y_val,
     X_test,  y_test,
-    mlflow_client=None,
+    mlflow=None,
     param_grid=None,
     max_combinations: int = 6,
 ):
@@ -266,7 +266,7 @@ def tune_random_forest(
             X_train, y_train,
             X_val,   y_val,
             X_test,  y_test,
-            mlflow_client=mlflow_client,
+            mlflow_client=mlflow,
             config=cfg,
         )
 
