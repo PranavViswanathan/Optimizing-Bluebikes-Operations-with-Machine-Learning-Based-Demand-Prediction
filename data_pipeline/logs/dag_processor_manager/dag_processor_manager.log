@@ -25960,3 +25960,35 @@ File Path                                  PID  Runtime      # DAGs    # Errors 
 /opt/airflow/dags/data_pipeline_dag.py     509  0.00s             1           0  0.33s           2025-11-16T22:35:18
 /opt/airflow/dags/test_discord_dag.py                             1           0  0.14s           2025-11-16T22:35:18
 ================================================================================
+[2025-11-16T22:36:19.076+0000] {manager.py:854} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                  PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run
+---------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/model_pipeline_dag.py    571  0.01s             1           0  0.10s           2025-11-16T22:35:48
+/opt/airflow/dags/data_pipeline_dag.py     572  0.01s             1           0  0.17s           2025-11-16T22:35:48
+/opt/airflow/dags/test_discord_dag.py                             1           0  0.08s           2025-11-16T22:35:48
+================================================================================
+[2025-11-16T22:36:45.416+0000] {manager.py:726} INFO - Searching for files in /opt/airflow/dags
+[2025-11-16T22:36:45.426+0000] {manager.py:729} INFO - There are 3 files in /opt/airflow/dags
+[2025-11-16T22:36:49.483+0000] {manager.py:854} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                  PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run
+---------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/model_pipeline_dag.py    614  0.02s             1           0  0.12s           2025-11-16T22:36:19
+/opt/airflow/dags/data_pipeline_dag.py     615  0.01s             1           0  0.17s           2025-11-16T22:36:19
+/opt/airflow/dags/test_discord_dag.py                             1           0  0.08s           2025-11-16T22:36:19
+================================================================================
+[2025-11-16T22:37:19.859+0000] {manager.py:854} INFO - 
+================================================================================
+DAG File Processing Stats
+
+File Path                                  PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run
+---------------------------------------  -----  ---------  --------  ----------  --------------  -------------------
+/opt/airflow/dags/model_pipeline_dag.py    677  0.02s             1           0  0.10s           2025-11-16T22:36:49
+/opt/airflow/dags/data_pipeline_dag.py     678  0.00s             1           0  0.15s           2025-11-16T22:36:49
+/opt/airflow/dags/test_discord_dag.py                             1           0  0.07s           2025-11-16T22:36:49
+================================================================================
