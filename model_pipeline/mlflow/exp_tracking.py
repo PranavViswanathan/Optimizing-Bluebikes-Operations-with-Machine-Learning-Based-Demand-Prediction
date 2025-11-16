@@ -105,7 +105,6 @@ class BlueBikesModelTrainer:
                 
                 try:
                     if model_name == 'xgboost':
-<<<<<<< Updated upstream
                         if tune:
                             print("With Hyperparameter Tuning...")
                             model, metrics = tune_xgboost(
@@ -179,59 +178,6 @@ class BlueBikesModelTrainer:
                                 max_results=1
                             )
                             run_id = runs[0].info.run_id if runs else None
-=======
-                        model, metrics = train_xgboost(
-                            X_train, y_train, X_test, y_test, mlflow
-                        )
-                        # FIX 1: Use proper order_by syntax or remove it
-                        try:
-                            runs = self.client.search_runs(
-                                experiment_ids=[self.experiment.experiment_id],
-                                filter_string="tags.model_type = 'XGBoost'",
-                                order_by=["attribute.start_time DESC"],  # Fixed syntax
-                                max_results=1
-                            )
-                        except Exception as e:
-                            # Fallback: search without order_by and sort manually
-                            print(f"Warning: order_by failed, using fallback: {e}")
-                            runs = self.client.search_runs(
-                                experiment_ids=[self.experiment.experiment_id],
-                                filter_string="tags.model_type = 'XGBoost'",
-                                max_results=10  # Get more runs
-                            )
-                            if len(runs) > 0:
-                                # Sort manually by start_time
-                                runs = sorted(runs, key=lambda x: x.info.start_time, reverse=True)
-                                runs = runs[:1]  # Take only the first
-                        
-                        run_id = runs[0].info.run_id if runs else None
-                    
-                    elif model_name == 'lightgbm':
-                        model, metrics = train_lightgbm(
-                            X_train, y_train, X_test, y_test, mlflow, use_cv=False
-                        )
-                        # FIX 2: Same fix for LightGBM
-                        try:
-                            runs = self.client.search_runs(
-                                experiment_ids=[self.experiment.experiment_id],
-                                filter_string="tags.model_type = 'LightGBM'",
-                                order_by=["attribute.start_time DESC"],  # Fixed syntax
-                                max_results=1
-                            )
-                        except Exception as e:
-                            # Fallback: search without order_by
-                            print(f"Warning: order_by failed, using fallback: {e}")
-                            runs = self.client.search_runs(
-                                experiment_ids=[self.experiment.experiment_id],
-                                filter_string="tags.model_type = 'LightGBM'",
-                                max_results=10
-                            )
-                            if len(runs) > 0:
-                                runs = sorted(runs, key=lambda x: x.info.start_time, reverse=True)
-                                runs = runs[:1]
-                        
-                        run_id = runs[0].info.run_id if runs else None
->>>>>>> Stashed changes
                     
                     else:
                         print(f"Warning: Model {model_name} not implemented yet")
