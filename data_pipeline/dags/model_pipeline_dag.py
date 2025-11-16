@@ -178,10 +178,7 @@ def promote_model_to_production(**context):
     import json
     import shutil
     from datetime import datetime
-    
-    print("="*60)
     print("MODEL PROMOTION DECISION (Custom Versioning)")
-    print("="*60)
     
     ti = context['task_instance']
     new_model_name = ti.xcom_pull(task_ids='run_training', key='best_model')
@@ -363,7 +360,7 @@ def deploy_model(**context):
     with open(metadata_path, 'w') as f:
         json.dump(metadata, f, indent=2)
     
-    print(f"\n✓ Model deployment completed")
+    print(f"\nModel deployment completed")
     print(f"  Model Type: {best_model_name}")
     print(f"  Version: {production_version}")
     print(f"  Performance: R²={metadata['test_r2']:.4f}, MAE={metadata['test_mae']:.2f}")
@@ -396,9 +393,9 @@ def cleanup_temp_files(**context):
         for file in glob.glob(pattern):
             try:
                 os.remove(file)
-                print(f"✓ Removed {file}")
+                print(f"Removed {file}")
             except Exception as e:
-                print(f"✗ Could not remove {file}: {e}")
+                print(f"Could not remove {file}: {e}")
 with dag:
     start = DummyOperator(task_id='start')
     
