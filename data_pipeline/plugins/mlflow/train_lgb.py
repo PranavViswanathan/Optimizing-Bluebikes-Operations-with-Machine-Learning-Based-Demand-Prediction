@@ -27,7 +27,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client=None, use_cv=False, config=None):
+def train_lightgbm(X_train, y_train, X_test, y_test, mlflow_client=None, use_cv=False):
     """
     Train LightGBM model with MLflow tracking
     
@@ -66,13 +66,8 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
             'n_jobs': -1
         }
         
-
-        if config is not None:
-            params = {**lgb_params, **config}
-        else:
-            params = lgb_params
         # Log parameters
-        mlflow.log_params(params)
+        mlflow.log_params(lgb_params)
         mlflow.set_tag("model_type", "LightGBM")
         mlflow.set_tag("optimizer", "manual_tuning")
         
@@ -118,7 +113,7 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         # Train final model
         logger.info("Training final LightGBM model...")
         train_data = lgb.Dataset(X_train, label=y_train)
-        valid_data = lgb.Dataset(X_val, label=y_val, reference=train_data)
+        valid_data = lgb.Dataset(X_test, label=y_test, reference=train_data)
         
         evals_result = {}
         lgb_model = lgb.train(
@@ -140,7 +135,6 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         
         # Make predictions
         y_pred_train = lgb_model.predict(X_train, num_iteration=lgb_model.best_iteration)
-        y_pred_val = lgb_model.predict(X_val, num_iteration=lgb_model.best_iteration)
         y_pred_test = lgb_model.predict(X_test, num_iteration=lgb_model.best_iteration)
         
         # Calculate metrics
@@ -149,11 +143,6 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         train_rmse = np.sqrt(mean_squared_error(y_train, y_pred_train))
         train_mape = np.mean(np.abs((y_train - y_pred_train) / (y_train + 1e-10))) * 100
         
-        val_r2 = r2_score(y_val, y_pred_val)
-        val_mae = mean_absolute_error(y_val, y_pred_val)
-        val_rmse = np.sqrt(mean_squared_error(y_val, y_pred_val))
-        val_mape = np.mean(np.abs((y_val - y_pred_val) / (y_val + 1e-10))) * 100
-
         test_r2 = r2_score(y_test, y_pred_test)
         test_mae = mean_absolute_error(y_test, y_pred_test)
         test_rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
@@ -164,10 +153,6 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
             'train_mae': train_mae,
             'train_rmse': train_rmse,
             'train_mape': train_mape,
-            'val_r2': val_r2,
-            'val_mae': val_mae,
-            'val_rmse': val_rmse,
-            'val_mape': val_mape,
             'test_r2': test_r2,
             'test_mae': test_mae,
             'test_rmse': test_rmse,
@@ -180,7 +165,6 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         
         logger.info(f"Model Performance:")
         logger.info(f"  Train R²: {train_r2:.4f}, MAE: {train_mae:.2f}, RMSE: {train_rmse:.2f}")
-        logger.info(f"  Val R²: {val_r2:.4f}, MAE: {val_mae:.2f}, RMSE: {val_rmse:.2f}")
         logger.info(f"  Test R²: {test_r2:.4f}, MAE: {test_mae:.2f}, RMSE: {test_rmse:.2f}")
         logger.info(f"  Best Iteration: {lgb_model.best_iteration}")
         
@@ -205,7 +189,7 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         plt.close()
         
         # Plot predictions scatter
-        fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 6))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
         
         # Training set
         ax1.scatter(y_train, y_pred_train, alpha=0.5, s=1)
@@ -223,13 +207,6 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         ax2.set_title(f'Test Set (R² = {test_r2:.4f})')
         ax2.grid(True, alpha=0.3)
         
-        ax3.scatter(y_val, y_pred_val, alpha=0.5, s=1)
-        ax3.plot([y_val.min(), y_val.max()], [y_val.min(), y_val.max()], 'r--', lw=2)
-        ax3.set_xlabel('Actual Rides')
-        ax3.set_ylabel('Predicted Rides')
-        ax3.set_title(f'Test Set (R² = {test_r2:.4f})')
-        ax3.grid(True, alpha=0.3)
-
         plt.tight_layout()
         mlflow.log_figure(fig, "predictions_scatter_lightgbm.png")
         plt.close()
@@ -250,7 +227,6 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         ax2.set_xlabel('Residuals')
         ax2.set_ylabel('Frequency')
         ax2.set_title(f'Residual Distribution (Mean: {residuals_test.mean():.2f}, Std: {residuals_test.std():.2f})')
-        
         
         plt.tight_layout()
         mlflow.log_figure(fig, "residuals_lightgbm.png")
@@ -273,77 +249,10 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
             'features': list(feature_columns),
             'performance': metrics,
             'best_iteration': lgb_model.best_iteration,
-            'hyperparameters': params,
+            'hyperparameters': lgb_params,
             'timestamp': datetime.now().isoformat()
         }
         joblib.dump(metadata, 'lightgbm_model_metadata.pkl')
         mlflow.log_artifact('lightgbm_model_metadata.pkl')
         
         return lgb_model, metrics
-    
-
-def tune_lightgbm(
-    X_train, y_train,
-    X_val,   y_val,
-    X_test,  y_test,
-    mlflow_client=None,
-    param_grid=None,
-    max_combinations=6
-):
-    """
-    Lightweight hyperparameter tuning for LightGBM using validation MAE.
-    Calls train_lightgbm for each combination (nested MLflow runs).
-    """
-
-    import random
-    from itertools import product
-
-    if param_grid is None:
-        # Small, safe grid
-        param_grid = {
-            "num_leaves": [63, 127],
-            "learning_rate": [0.05],
-            "feature_fraction": [0.8, 0.9],
-            "bagging_fraction": [0.8],
-            "n_estimators": [500],  # smaller than 1000 during tuning
-        }
-
-    all_combos = [
-        dict(zip(param_grid.keys(), v))
-        for v in product(*param_grid.values())
-    ]
-
-    if len(all_combos) > max_combinations:
-        all_combos = random.sample(all_combos, max_combinations)
-
-    print(f"Testing {len(all_combos)} LightGBM parameter combinations...")
-
-    best_val_mae = float("inf")
-    best_model = None
-    best_params = None
-    best_metrics = None
-
-    for cfg in all_combos:
-        print(f"\nLightGBM tuning config: {cfg}")
-
-        model, metrics = train_lightgbm(
-            X_train, y_train,
-            X_val,   y_val,
-            X_test,  y_test,
-            mlflow_client=mlflow_client,
-            use_cv=False,
-            config=cfg,
-        )
-
-        val_mae = metrics["val_mae"]
-        if val_mae < best_val_mae:
-            best_val_mae = val_mae
-            best_model = model
-            best_params = cfg
-            best_metrics = metrics
-
-    print("\nBest LightGBM parameters found:")
-    print(f"  Params: {best_params}")
-    print(f"  Val MAE: {best_val_mae:.2f}")
-
-    return best_model, best_metrics
