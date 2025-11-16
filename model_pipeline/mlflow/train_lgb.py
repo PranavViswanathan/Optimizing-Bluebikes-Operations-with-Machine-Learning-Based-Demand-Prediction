@@ -2,7 +2,7 @@
 LightGBM Training Module for BlueBikes Demand Prediction
 Adapted from original W&B version to work with MLflow
 """
-
+from __future__ import annotations
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split, KFold
@@ -18,8 +18,8 @@ import mlflow
 import mlflow.lightgbm
 
 warnings.filterwarnings('ignore')
-#plt.style.use('seaborn-v0_8-darkgrid')
-#sns.set_palette("husl")
+plt.style.use('seaborn-v0_8-darkgrid')
+sns.set_palette("husl")
 
 logging.basicConfig(
     level=logging.INFO,

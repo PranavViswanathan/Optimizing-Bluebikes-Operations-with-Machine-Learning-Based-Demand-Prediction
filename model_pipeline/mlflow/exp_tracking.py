@@ -1,3 +1,4 @@
+from __future__ import annotations
 import mlflow
 import mlflow.sklearn
 import mlflow.xgboost
@@ -15,6 +16,7 @@ from train_xgb import train_xgboost, tune_xgboost
 from train_lgb import train_lightgbm, tune_lightgbm
 from train_catbst import train_catboost, tune_catboost
 from feature_generation import load_and_prepare_data
+from train_random_forest import train_random_forest, tune_random_forest
 
 
 class BlueBikesModelTrainer:
@@ -84,7 +86,7 @@ class BlueBikesModelTrainer:
     def train_all_models(self, X_train, X_test, X_val, y_train, y_test, y_val, models_to_train=None, tune=False):
         
         if models_to_train is None:
-            models_to_train = ['xgboost', 'lightgbm','catboost']
+            models_to_train = ['xgboost', 'lightgbm','catboost', 'randomforest']
         
         print("\n" + "="*60)
         print("TRAINING MODELS")
@@ -178,6 +180,30 @@ class BlueBikesModelTrainer:
                                 max_results=1
                             )
                             run_id = runs[0].info.run_id if runs else None
+                    elif model_name == 'randomforest':
+                        if tune:
+                            print("With Hyperparameter Tuning...")
+                            model, metrics = tune_random_forest(
+                                X_train, y_train, X_val, y_val, X_test, y_test, mlflow
+                            )
+                            runs = self.client.search_runs(
+                                experiment_ids=[self.experiment.experiment_id],
+                                filter_string="tags.model_type = 'RandomForest'",
+                                order_by=["start_time DESC"],
+                                max_results=1
+                            )
+                            run_id = runs[0].info.run_id if runs else None
+                        else:
+                            model, metrics = train_random_forest(
+                                X_train, y_train,X_val, y_val, X_test, y_test, mlflow_client=mlflow
+                            )
+                            runs = self.client.search_runs(
+                                experiment_ids=[self.experiment.experiment_id],
+                                filter_string="tags.model_type = 'RandomForest'",
+                                order_by=["start_time DESC"],
+                                max_results=1
+                            )
+                            run_id = runs[0].info.run_id if runs else None
                     
                     else:
                         print(f"Warning: Model {model_name} not implemented yet")
@@ -193,7 +219,6 @@ class BlueBikesModelTrainer:
                     import traceback
                     traceback.print_exc()
                     continue
-            
             if results:
                 best_model_name = min(results.keys(), 
                                     key=lambda x: results[x][1]['test_mae'])
@@ -341,13 +366,15 @@ class BlueBikesModelTrainer:
 
 
 def main():
+    
     print(" BLUEBIKES DEMAND PREDICTION - MODEL TRAINING PIPELINE ".center(80))
+    
     trainer = BlueBikesModelTrainer(
         experiment_name="bluebikes_model_comparison_v3"
     )
     
     X_train, X_test, X_val, y_train, y_test, y_val = trainer.load_and_prepare_data()
-    models_to_train = ['xgboost', 'lightgbm', 'catboost']  
+    models_to_train = ['xgboost', 'lightgbm', 'catboost', 'randomforest']  # Now includes both models!
     results = trainer.train_all_models(
         X_train, X_test, X_val, y_train, y_test, y_val,
         models_to_train=models_to_train, tune=True
@@ -360,19 +387,24 @@ def main():
             metric='test_r2'
         )
         
+        
         comparison_df.to_csv("model_comparison.csv", index=False)
         print(f"\n Comparison saved to: model_comparison.csv")
         
         import joblib
         joblib.dump(best_model, f"best_model_{best_model_name}.pkl")
         print(f"Best model saved to: best_model_{best_model_name}.pkl")
-        trainer.register_model(best_model_name, best_run_id, best_model_name)
+        
+        register = input("\nRegister the best model for deployment? (y/n): ").lower()
+        if register == 'y':
+            trainer.register_model(best_model_name, best_run_id, best_model_name)
     
     print("PIPELINE COMPLETE")
     print("\nView detailed results in MLflow UI:")
     print("   $ mlflow ui --port 5000")
     print("   Then open: http://localhost:5000")
     print(f"\nExperiment: {trainer.experiment_name}")
+    
     return results
 
 

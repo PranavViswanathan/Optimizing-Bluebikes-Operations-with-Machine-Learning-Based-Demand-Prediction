@@ -2,7 +2,7 @@
 CatBoost Training Module for BlueBikes Demand Prediction
 Structured similarly to train_lgb.py for consistency.
 """
-
+from __future__ import annotations
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import KFold
@@ -13,6 +13,7 @@ import seaborn as sns
 import joblib
 import warnings
 import logging
+from typing import Optional, Dict, List
 from datetime import datetime
 import mlflow
 import mlflow.catboost
@@ -45,7 +46,7 @@ def train_catboost(
     categorical_features=None,
     mlflow_client=None,   # kept for API symmetry with train_lightgbm
     use_cv: bool = False,
-    config: dict | None = None,
+    config: Optional[Dict] = None,
 ):
     """
     Train CatBoost model with MLflow tracking.
