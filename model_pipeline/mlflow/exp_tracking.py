@@ -347,7 +347,7 @@ def main():
     )
     
     X_train, X_test, X_val, y_train, y_test, y_val = trainer.load_and_prepare_data()
-    models_to_train = ['xgboost', 'lightgbm', 'catboost']  # Now includes both models!
+    models_to_train = ['xgboost', 'lightgbm', 'catboost']  
     results = trainer.train_all_models(
         X_train, X_test, X_val, y_train, y_test, y_val,
         models_to_train=models_to_train, tune=True

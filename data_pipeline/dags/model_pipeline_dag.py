@@ -1,9 +1,3 @@
-"""
-Airflow DAG for BlueBikes Model Training Pipeline
-This version handles the import issues in Docker environment
-Place this file in: data_pipeline/dags/model_pipeline_dag.py
-"""
-
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
@@ -12,13 +6,10 @@ from airflow.operators.dummy_operator import DummyOperator
 import sys
 import os
 from pathlib import Path
-# Add plugins/mlflow to Python path
 sys.path.insert(0, '/opt/airflow/plugins/mlflow')
 
-# Now import your modules
 from exp_tracking import BlueBikesModelTrainer
 import joblib
-# Default arguments for the DAG
 default_args = {
     'owner': 'data-team',
     'depends_on_past': False,
@@ -29,7 +20,6 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-# Define the DAG
 dag = DAG(
     'bluebikes_model_training',
     default_args=default_args,
@@ -41,10 +31,6 @@ dag = DAG(
 )
 
 def run_training_pipeline(**context):
-    """
-    Run the complete training pipeline
-    This function imports modules inside to avoid Docker path issues
-    """
     import subprocess
     import json
     
@@ -53,11 +39,6 @@ def run_training_pipeline(**context):
     print("="*80)
     print(f"Execution Date: {context['ds']}")
     print(f"Run ID: {context['run_id']}")
-    
-    # Option 1: Run the training script directly using subprocess
-    # This is the most reliable way in Docker environment
-    
-    # Create a Python script that will be executed
     training_script = """
 import sys
 import os
@@ -116,12 +97,9 @@ else:
     raise Exception("No models trained successfully")
 """.format(date=context['ds_nodash'])
     
-    # Write the script to a temporary file
     script_path = f'/tmp/training_script_{context["ds_nodash"]}.py'
     with open(script_path, 'w') as f:
         f.write(training_script)
-    
-    # Execute the script
     try:
         result = subprocess.run(
             [sys.executable, script_path],
@@ -165,16 +143,11 @@ else:
             os.remove(script_path)
 
 def run_training_simple(**context):
-    """
-    Alternative simpler approach - run the exp_tracking.py directly
-    """
     import subprocess
     
     print("="*80)
     print(" Running Model Training Script ")
     print("="*80)
-    
-    # Run the training script directly
     cmd = [
         sys.executable,
         '/opt/airflow/model_pipeline/mlflow/exp_tracking.py'
@@ -194,25 +167,15 @@ def run_training_simple(**context):
     
     if result.returncode != 0:
         raise Exception(f"Training script failed with return code {result.returncode}")
-    
-    # Extract results from output or files
-    # You may need to modify exp_tracking.py to save results to a known location
-    
     return {'status': 'success', 'return_code': result.returncode}
 
 def validate_model_performance(**context):
-    """
-    Validate model performance
-    """
     ti = context['task_instance']
-    
-    # Try to get metrics from XCom
     test_r2 = ti.xcom_pull(task_ids='run_training', key='test_r2')
     test_mae = ti.xcom_pull(task_ids='run_training', key='test_mae')
     best_model = ti.xcom_pull(task_ids='run_training', key='best_model')
     
     if test_r2 is None:
-        # If metrics aren't in XCom, try reading from file
         results_file = f'/tmp/training_results_{context["ds_nodash"]}.json'
         if os.path.exists(results_file):
             import json
@@ -221,8 +184,6 @@ def validate_model_performance(**context):
             test_r2 = results.get('test_r2')
             test_mae = results.get('test_mae')
             best_model = results.get('best_model')
-    
-    # Define thresholds
     MIN_R2 = 0.70
     MAX_MAE = 100
     
@@ -236,19 +197,16 @@ def validate_model_performance(**context):
         print(f"MAE: {test_mae:.2f} (threshold: <{MAX_MAE})")
         
         if test_r2 >= MIN_R2 and test_mae <= MAX_MAE:
-            print("✅ Model passed validation!")
+            print("Model passed validation!")
             return True
         else:
-            print("❌ Model failed validation")
+            print("Model failed validation")
             raise Exception("Model did not meet performance thresholds")
     else:
-        print("⚠️ No metrics found for validation")
+        print("No metrics found for validation")
         return False
 
 def cleanup_temp_files(**context):
-    """
-    Clean up temporary files
-    """
     import glob
     
     patterns = [
@@ -262,43 +220,30 @@ def cleanup_temp_files(**context):
         for file in glob.glob(pattern):
             try:
                 os.remove(file)
-                print(f"✅ Removed {file}")
+                print(f" Removed {file}")
             except Exception as e:
-                print(f"⚠️ Could not remove {file}: {e}")
-
-# Define DAG tasks
+                print(f"Could not remove {file}: {e}")
 
 with dag:
-    # Start
     start = DummyOperator(task_id='start')
-    
-    # Run training
     run_training = PythonOperator(
         task_id='run_training',
-        python_callable=run_training_pipeline,  # or use run_training_simple for simpler approach
+        python_callable=run_training_pipeline,  
         provide_context=True
     )
-    
-    # Validate model
     validate = PythonOperator(
         task_id='validate_model',
         python_callable=validate_model_performance,
         provide_context=True
     )
-    
-    # Cleanup
     cleanup = PythonOperator(
         task_id='cleanup',
         python_callable=cleanup_temp_files,
         provide_context=True,
         trigger_rule='all_done'
     )
-    
-    # End
     end = DummyOperator(
         task_id='end',
         trigger_rule='all_done'
     )
-    
-    # Define dependencies
     start >> run_training >> validate >> cleanup >> end
