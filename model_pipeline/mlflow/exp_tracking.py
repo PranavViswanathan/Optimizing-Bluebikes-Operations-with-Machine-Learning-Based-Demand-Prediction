@@ -12,8 +12,9 @@ from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
-from train_xgb import train_xgboost
-from train_lgb import train_lightgbm 
+from train_xgb import train_xgboost, tune_xgboost
+from train_lgb import train_lightgbm, tune_lightgbm
+from train_catbst import train_catboost, tune_catboost
 from feature_generation import load_and_prepare_data
 
 
@@ -35,22 +36,56 @@ class BlueBikesModelTrainer:
         print("LOADING AND PREPARING DATA")
                 
         X, y, feature_columns = load_and_prepare_data()
-        X_train, X_test, y_train, y_test = train_test_split(
-            X, y, test_size=0.2, random_state=42, shuffle=True
-        )
+        # X_train, X_test, y_train, y_test = train_test_split(
+        #     X, y, test_size=0.2, random_state=42, shuffle=True
+        # )
+        X["date"] = pd.to_datetime(X["date"])
+
+        train_start = pd.Timestamp("2024-06-01")
+        train_end   = pd.Timestamp("2025-06-30")
+        test_start  = pd.Timestamp("2025-07-01")
+        test_end = pd.Timestamp("2025-07-31")
+
+        # build masks WITHOUT .dt.date
+        train_mask_full = (X["date"] >= train_start) & (X["date"] <= train_end)
+        test_mask  = (X["date"] >= test_start) & (X["date"] <= test_end)
+
+        X_train_full = X.loc[train_mask_full].copy()
+        y_train_full = y.loc[train_mask_full].copy()
+        X_test = X.loc[test_mask].copy()
+        y_test = y.loc[test_mask].copy()
+
+        val_start = pd.Timestamp("2025-05-01")
+
+        val_mask = X_train_full['date'] >= val_start
+        tr_mask = X_train_full['date'] < val_start
+
+        X_train = X_train_full.loc[tr_mask].drop(columns=["date"])
+        y_train = y_train_full.loc[tr_mask]
+
+        X_val   = X_train_full.loc[val_mask].drop(columns=["date"])
+        y_val   = y_train_full.loc[val_mask]
+
+        X_test = X_test.drop(columns=["date"])
+        # # drop date from features after splitting
+        # X_train = X.loc[train_mask].drop(columns=["date"])
+        # X_test  = X.loc[test_mask].drop(columns=["date"])
+        # y_train = y.loc[train_mask]
+        # y_test  = y.loc[test_mask]
         
         print(f"Dataset shape: {X.shape}")
         print(f"Training samples: {len(X_train):,}")
         print(f"Test samples: {len(X_test):,}")
+        print(f"Validation samples: {len(X_val):,}")
         print(f"Features: {X_train.shape[1]}")
         print(f"Target range: [{y.min():.1f}, {y.max():.1f}]")
         
-        return X_train, X_test, y_train, y_test
+        return X_train, X_test, X_val, y_train, y_test, y_val
     
-    def train_all_models(self, X_train, X_test, y_train, y_test, models_to_train=None):
+    def train_all_models(self, X_train, X_test, X_val, y_train, y_test, y_val, models_to_train=None, tune=False):
         
         if models_to_train is None:
-            models_to_train = ['xgboost', 'lightgbm']
+            models_to_train = ['xgboost', 'lightgbm','catboost']
         
         print("\n" + "="*60)
         print("TRAINING MODELS")
@@ -71,28 +106,79 @@ class BlueBikesModelTrainer:
                 
                 try:
                     if model_name == 'xgboost':
-                        model, metrics = train_xgboost(
-                            X_train, y_train, X_test, y_test, mlflow
-                        )
-                        runs = self.client.search_runs(
-                            experiment_ids=[self.experiment.experiment_id],
-                            filter_string="tags.model_type = 'XGBoost'",
-                            order_by=["start_time DESC"],
-                            max_results=1
-                        )
-                        run_id = runs[0].info.run_id if runs else None
+                        if tune:
+                            print("With Hyperparameter Tuning...")
+                            model, metrics = tune_xgboost(
+                                X_train, y_train, X_val, y_val, X_test, y_test, mlflow
+                            )
+                            runs = self.client.search_runs(
+                                experiment_ids=[self.experiment.experiment_id],
+                                filter_string="tags.model_type = 'XGBoost'",
+                                order_by=["start_time DESC"],
+                                max_results=1
+                            )
+                            run_id = runs[0].info.run_id if runs else None
+                        else:
+                            model, metrics = train_xgboost(
+                                X_train, y_train, X_val, y_val, X_test, y_test, mlflow
+                            )
+                            runs = self.client.search_runs(
+                                experiment_ids=[self.experiment.experiment_id],
+                                filter_string="tags.model_type = 'XGBoost'",
+                                order_by=["start_time DESC"],
+                                max_results=1
+                            )
+                            run_id = runs[0].info.run_id if runs else None
                     
                     elif model_name == 'lightgbm':
-                        model, metrics = train_lightgbm(
-                            X_train, y_train, X_test, y_test, mlflow, use_cv=False
-                        )
-                        runs = self.client.search_runs(
-                            experiment_ids=[self.experiment.experiment_id],
-                            filter_string="tags.model_type = 'LightGBM'",
-                            order_by=["start_time DESC"],
-                            max_results=1
-                        )
-                        run_id = runs[0].info.run_id if runs else None
+                        if tune:
+                            print("With Hyperparameter Tuning...")
+                            model, metrics = tune_lightgbm(
+                                X_train, y_train, X_val, y_val, X_test, y_test, mlflow
+                            )
+                            runs = self.client.search_runs(
+                                experiment_ids=[self.experiment.experiment_id],
+                                filter_string="tags.model_type = 'LightGBM'",
+                                order_by=["start_time DESC"],
+                                max_results=1
+                            )
+                            run_id = runs[0].info.run_id if runs else None
+                        else:
+                            model, metrics = train_lightgbm(
+                                X_train, y_train, X_val, y_val, X_test, y_test, mlflow, use_cv=False
+                            )
+                            runs = self.client.search_runs(
+                                experiment_ids=[self.experiment.experiment_id],
+                                filter_string="tags.model_type = 'LightGBM'",
+                                order_by=["start_time DESC"],
+                                max_results=1
+                            )
+                            run_id = runs[0].info.run_id if runs else None
+
+                    elif model_name == 'catboost':
+                        if tune:
+                            print("With Hyperparameter Tuning...")
+                            model, metrics = tune_catboost(
+                                X_train, y_train, X_val, y_val, X_test, y_test, mlflow
+                            )
+                            runs = self.client.search_runs(
+                                experiment_ids=[self.experiment.experiment_id],
+                                filter_string="tags.model_type = 'CatBoost'",
+                                order_by=["start_time DESC"],
+                                max_results=1
+                            )
+                            run_id = runs[0].info.run_id if runs else None
+                        else:
+                            model, metrics = train_catboost(
+                                X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client=mlflow
+                            )
+                            runs = self.client.search_runs(
+                                experiment_ids=[self.experiment.experiment_id],
+                                filter_string="tags.model_type = 'CatBoost'",
+                                order_by=["start_time DESC"],
+                                max_results=1
+                            )
+                            run_id = runs[0].info.run_id if runs else None
                     
                     else:
                         print(f"Warning: Model {model_name} not implemented yet")
@@ -262,11 +348,11 @@ def main():
         experiment_name="bluebikes_model_comparison_v3"
     )
     
-    X_train, X_test, y_train, y_test = trainer.load_and_prepare_data()
-    models_to_train = ['xgboost', 'lightgbm']  # Now includes both models!
+    X_train, X_test, X_val, y_train, y_test, y_val = trainer.load_and_prepare_data()
+    models_to_train = ['xgboost', 'lightgbm', 'catboost']  # Now includes both models!
     results = trainer.train_all_models(
-        X_train, X_test, y_train, y_test,
-        models_to_train=models_to_train
+        X_train, X_test, X_val, y_train, y_test, y_val,
+        models_to_train=models_to_train, tune=True
     )
     
     if results:

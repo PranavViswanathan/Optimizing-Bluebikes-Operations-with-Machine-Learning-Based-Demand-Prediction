@@ -161,8 +161,20 @@ def load_and_prepare_data():
         'duration_mean', 'duration_std', 'duration_median',
         'distance_mean', 'distance_std', 'distance_median', 'member_ratio'
     ]
+    x_cols = ['date',
+        'hour', 'day_of_week', 'month', 'year', 'day',
+        'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'month_sin', 'month_cos',
+        'is_morning_rush', 'is_evening_rush', 'is_night', 'is_midday', 'is_weekend',
+        'weekend_night', 'weekday_morning_rush', 'weekday_evening_rush',
+        'TMAX', 'TMIN', 'PRCP', 'temp_range', 'temp_avg',
+        'is_rainy', 'is_heavy_rain', 'is_cold', 'is_hot',
+        'rides_last_hour', 'rides_same_hour_yesterday', 'rides_same_hour_last_week',
+        'rides_rolling_3h', 'rides_rolling_24h',
+        'duration_mean', 'duration_std', 'duration_median',
+        'distance_mean', 'distance_std', 'distance_median', 'member_ratio'
+    ]
     
-    X = model_data[feature_columns]
+    X = model_data[x_cols]
     y = model_data['ride_count']
     
     return X, y, feature_columns
