@@ -9,7 +9,7 @@ on:
     branches:
       - main
       - develop
-  workflow_dispatch: 
+  workflow_dispatch:  
 
 jobs:
   validate-airflow-dags:
@@ -91,7 +91,6 @@ jobs:
       - name: Run health check
         id: health_check
         run: |
-          cd data_pipeline
           chmod +x ./airflow-health-check.sh
           ./airflow-health-check.sh
         timeout-minutes: 5
