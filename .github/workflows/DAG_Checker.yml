@@ -35,7 +35,7 @@ jobs:
       - name: Run Airflow setup
         run: |
           chmod +x ./run-airflow.sh
-          ./run-airflow.sh
+          ./start-airflow.sh
         timeout-minutes: 10
 
       - name: Wait for Airflow to be ready
@@ -67,7 +67,7 @@ jobs:
         id: health_check
         run: |
           chmod +x ./health-check.sh
-          ./health-check.sh
+          ./airflow-health-check.sh
         timeout-minutes: 5
 
       - name: Display DAG validation results
