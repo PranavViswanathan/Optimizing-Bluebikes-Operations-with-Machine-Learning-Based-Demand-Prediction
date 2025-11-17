@@ -9,7 +9,7 @@ on:
     branches:
       - main
       - develop
-  workflow_dispatch:  
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
 
 jobs:
   validate-airflow-dags:
@@ -36,34 +36,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Build custom Airflow image
+      - name: Build and start Airflow
         run: |
           cd data_pipeline
-          if [ -f Dockerfile ]; then
-            echo "Building custom Airflow image..."
-            docker build -t custom-airflow:latest .
-            echo "Image built successfully!"
-            docker images | grep custom-airflow
-          else
-            echo "No Dockerfile found in data_pipeline/"
-            exit 1
-          fi
-
-      - name: Verify image exists
-        run: |
-          echo "Checking for custom-airflow image..."
-          docker images
-          if docker images | grep -q "custom-airflow"; then
-            echo "custom-airflow image found"
-          else
-            echo "custom-airflow image not found"
-            exit 1
-          fi
-
-      - name: Run Airflow setup
-        run: |
-          chmod +x ./start-airflow.sh
-          ./start-airflow.sh
+          echo "Building and starting Airflow containers..."
+          docker compose up -d --build
+          echo "Airflow containers started successfully!"
         timeout-minutes: 10
 
       - name: Wait for Airflow to be ready
@@ -94,6 +72,7 @@ jobs:
       - name: Run health check
         id: health_check
         run: |
+          cd data_pipeline
           chmod +x ./airflow-health-check.sh
           ./airflow-health-check.sh
         timeout-minutes: 5
@@ -108,27 +87,27 @@ jobs:
       - name: Cleanup on failure
         if: failure()
         run: |
+          cd data_pipeline
           echo "Health check failed. Cleaning up..."
-          chmod +x ./stop-airflow.sh
-          ./stop-airflow.sh || docker-compose down -v || true
+          docker compose down -v || true
           docker system prune -f || true
 
       - name: Cleanup on success
         if: success()
         run: |
+          cd data_pipeline
           echo "All checks passed!"
-          chmod +x ./stop-airflow.sh
-          ./stop-airflow.sh || docker-compose down -v || true
+          docker compose down -v || true
 
       - name: Notify on failure
         if: failure()
         run: |
-          echo " Pipeline failed - DAG validation unsuccessful"
+          echo "❌ Pipeline failed - DAG validation unsuccessful"
           echo "The push will be rejected. Please fix the issues and try again."
           exit 1
 
       - name: Notify on success
         if: success()
         run: |
-          echo "Pipeline passed - All DAGs are valid"
+          echo "✅ Pipeline passed - All DAGs are valid"
           echo "Push accepted successfully!"
