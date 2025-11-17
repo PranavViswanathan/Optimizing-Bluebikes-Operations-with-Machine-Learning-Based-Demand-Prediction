@@ -28,9 +28,9 @@ logger = logging.getLogger(__name__)
 
 def load_and_prepare_data():
     logger.info("Loading data files.")
-    bluebike_data = pd.read_pickle('/opt/airflow/working_data/processed/bluebikes/after_duplicates.pkl')
-    weather_data = pd.read_pickle('/opt/airflow/working_data/processed/NOAA_weather/after_duplicates.pkl')
-    college_data = pd.read_pickle('/opt/airflow/working_data/processed/boston_clg/after_duplicates.pkl')
+    bluebike_data = pd.read_pickle('F:/MS in CS/MlOps/Project/Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction/data_pipeline/data/processed/bluebikes/after_duplicates.pkl')
+    weather_data = pd.read_pickle('F:/MS in CS/MlOps/Project/Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction/data_pipeline/data/processed/NOAA_weather/after_missing_data.pkl')
+    college_data = pd.read_pickle('F:/MS in CS/MlOps/Project/Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction/data_pipeline/data/processed/boston_clg/after_duplicates.pkl')
     
     logger.info(f"Data loaded: {len(bluebike_data):,} rides")
     
