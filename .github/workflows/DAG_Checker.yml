@@ -9,7 +9,7 @@ on:
     branches:
       - main
       - develop
-  workflow_dispatch:  # Allows manual triggering from GitHub UI
+  workflow_dispatch: 
 
 jobs:
   validate-airflow-dags:
@@ -39,17 +39,29 @@ jobs:
       - name: Build custom Airflow image
         run: |
           cd data_pipeline
-          echo "Building custom Airflow image..."
+          echo "Building custom Airflow image from data_pipeline/Dockerfile..."
           docker build -t custom-airflow:latest .
+          echo "Image built successfully!"
           docker images | grep custom-airflow
 
       - name: Start Airflow containers
         run: |
           cd data_pipeline
-          echo "Starting Airflow containers..."
+          echo "Starting Airflow containers (using pre-built image)..."
           docker compose up -d --no-build
           echo "Airflow containers started successfully!"
         timeout-minutes: 10
+        continue-on-error: true
+
+      - name: Check airflow-init logs
+        if: always()
+        run: |
+          cd data_pipeline
+          echo "=== Airflow Init Logs ==="
+          docker compose logs airflow-init || true
+          echo ""
+          echo "=== All Container Status ==="
+          docker ps -a
 
       - name: Wait for Airflow to be ready
         run: |
@@ -109,12 +121,12 @@ jobs:
       - name: Notify on failure
         if: failure()
         run: |
-          echo "❌ Pipeline failed - DAG validation unsuccessful"
+          echo "Pipeline failed - DAG validation unsuccessful"
           echo "The push will be rejected. Please fix the issues and try again."
           exit 1
 
       - name: Notify on success
         if: success()
         run: |
-          echo "✅ Pipeline passed - All DAGs are valid"
+          echo "Pipeline passed - All DAGs are valid"
           echo "Push accepted successfully!"
