@@ -9,7 +9,7 @@ on:
     branches:
       - main
       - develop
-  workflow_dispatch: 
+  workflow_dispatch:  
 
 jobs:
   validate-airflow-dags:
@@ -38,11 +38,26 @@ jobs:
 
       - name: Build custom Airflow image
         run: |
+          cd data_pipeline
           if [ -f Dockerfile ]; then
             echo "Building custom Airflow image..."
             docker build -t custom-airflow:latest .
+            echo "Image built successfully!"
+            docker images | grep custom-airflow
           else
-            echo "No Dockerfile found, skipping custom build"
+            echo "No Dockerfile found in data_pipeline/"
+            exit 1
+          fi
+
+      - name: Verify image exists
+        run: |
+          echo "Checking for custom-airflow image..."
+          docker images
+          if docker images | grep -q "custom-airflow"; then
+            echo "custom-airflow image found"
+          else
+            echo "custom-airflow image not found"
+            exit 1
           fi
 
       - name: Run Airflow setup
@@ -79,8 +94,8 @@ jobs:
       - name: Run health check
         id: health_check
         run: |
-          chmod +x ./health-check.sh
-          ./health-check.sh
+          chmod +x ./airflow-health-check.sh
+          ./airflow-health-check.sh
         timeout-minutes: 5
 
       - name: Display DAG validation results
@@ -94,19 +109,21 @@ jobs:
         if: failure()
         run: |
           echo "Health check failed. Cleaning up..."
-          docker-compose down -v || true
+          chmod +x ./stop-airflow.sh
+          ./stop-airflow.sh || docker-compose down -v || true
           docker system prune -f || true
 
       - name: Cleanup on success
         if: success()
         run: |
           echo "All checks passed!"
-          docker-compose down -v || true
+          chmod +x ./stop-airflow.sh
+          ./stop-airflow.sh || docker-compose down -v || true
 
       - name: Notify on failure
         if: failure()
         run: |
-          echo "Pipeline failed - DAG validation unsuccessful"
+          echo " Pipeline failed - DAG validation unsuccessful"
           echo "The push will be rejected. Please fix the issues and try again."
           exit 1
 
