@@ -250,6 +250,9 @@ class IntegratedBlueBikesTrainer:
         import os
         if os.path.exists('bias_analysis_plots.png'):
             plot_filename = f'bias_analysis_plots_{stage}.png'
+            # Remove existing file if it exists (Windows compatibility)
+            if os.path.exists(plot_filename):
+                os.remove(plot_filename)
             os.rename('bias_analysis_plots.png', plot_filename)
             print(f"Bias plots saved to: {plot_filename}")
         
@@ -537,19 +540,6 @@ class IntegratedBlueBikesTrainer:
         """
         Run the complete integrated pipeline.
         """
-        print("="*80)
-        print(" INTEGRATED PIPELINE WORKFLOW ".center(80))
-        print("="*80)
-        print("\n1. Load data")
-        print("2. Train models")
-        print("3. Select and save best model")
-        print("4. Bias analysis (baseline)")
-        print("5. Apply bias mitigation")
-        print("6. Retrain with mitigation")
-        print("7. Bias analysis (mitigated)")
-        print("8. Compare results")
-        print("="*80)
-        
         # Step 1: Load data
         X_train, X_test, X_val, y_train, y_test, y_val = self.load_and_prepare_data()
         
@@ -561,7 +551,7 @@ class IntegratedBlueBikesTrainer:
         )
         
         if not results:
-            print("❌ No models trained successfully. Exiting.")
+            print("No models trained successfully. Exiting.")
             return None
         
         # Step 3: Select best model
@@ -645,4 +635,3 @@ def main():
 
 if __name__ == "__main__":
     trainer, results = main()
-    
