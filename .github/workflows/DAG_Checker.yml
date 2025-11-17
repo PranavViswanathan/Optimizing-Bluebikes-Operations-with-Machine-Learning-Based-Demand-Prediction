@@ -9,11 +9,15 @@ on:
     branches:
       - main
       - develop
-  workflow_dispatch:  
+  workflow_dispatch: 
 
 jobs:
   validate-airflow-dags:
     runs-on: ubuntu-latest
+    
+    env:
+      NOAA_API_KEY: ${{ secrets.NOAA_API_KEY }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     
     steps:
       - name: Checkout code
@@ -31,6 +35,15 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+
+      - name: Build custom Airflow image
+        run: |
+          if [ -f Dockerfile ]; then
+            echo "Building custom Airflow image..."
+            docker build -t custom-airflow:latest .
+          else
+            echo "No Dockerfile found, skipping custom build"
+          fi
 
       - name: Run Airflow setup
         run: |
@@ -66,8 +79,8 @@ jobs:
       - name: Run health check
         id: health_check
         run: |
-          chmod +x ./airflow-health-check.sh
-          ./airflow-health-check.sh
+          chmod +x ./health-check.sh
+          ./health-check.sh
         timeout-minutes: 5
 
       - name: Display DAG validation results
