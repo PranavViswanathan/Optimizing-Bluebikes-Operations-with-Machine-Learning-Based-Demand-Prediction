@@ -1,0 +1,103 @@
+name: Airflow DAG Validation
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  validate-airflow-dags:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      - name: Run Airflow setup
+        run: |
+          chmod +x ./run-airflow.sh
+          ./run-airflow.sh
+        timeout-minutes: 10
+
+      - name: Wait for Airflow to be ready
+        run: |
+          echo "Waiting for Airflow services to be healthy..."
+          sleep 30
+          
+          max_attempts=30
+          attempt=0
+          
+          while [ $attempt -lt $max_attempts ]; do
+            if docker ps | grep -q "healthy"; then
+              echo "Airflow services are healthy"
+              break
+            fi
+            echo "Attempt $((attempt + 1))/$max_attempts: Waiting for services..."
+            sleep 10
+            attempt=$((attempt + 1))
+          done
+          
+          if [ $attempt -eq $max_attempts ]; then
+            echo "Timeout waiting for Airflow services"
+            docker ps -a
+            docker logs $(docker ps -aq) --tail 100
+            exit 1
+          fi
+
+      - name: Run health check
+        id: health_check
+        run: |
+          chmod +x ./health-check.sh
+          ./health-check.sh
+        timeout-minutes: 5
+
+      - name: Display DAG validation results
+        if: always()
+        run: |
+          echo "=== DAG Validation Results ==="
+          docker exec $(docker ps -q -f name=airflow-webserver) airflow dags list || true
+          docker exec $(docker ps -q -f name=airflow-webserver) airflow dags list-import-errors || true
+
+      - name: Cleanup on failure
+        if: failure()
+        run: |
+          echo "Health check failed. Cleaning up..."
+          docker-compose down -v || true
+          docker system prune -f || true
+
+      - name: Cleanup on success
+        if: success()
+        run: |
+          echo "All checks passed!"
+          docker-compose down -v || true
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Pipeline failed - DAG validation unsuccessful"
+          echo "The push will be rejected. Please fix the issues and try again."
+          exit 1
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "Pipeline passed - All DAGs are valid"
+          echo "Push accepted successfully!"
