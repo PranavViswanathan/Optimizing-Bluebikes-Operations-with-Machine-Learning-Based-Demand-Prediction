@@ -1,6 +1,6 @@
 """
 Comprehensive Model Bias Detection for Bluebikes Demand Prediction
-Implements slicing techniques to detect and document bias across multiple dimensions
+Implements slicing techniques to detect and document bias across multiple dimensions.
 """
 
 import pandas as pd
