@@ -36,11 +36,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Build and start Airflow
+      - name: Build custom Airflow image
         run: |
           cd data_pipeline
-          echo "Building and starting Airflow containers..."
-          docker compose up -d --build
+          echo "Building custom Airflow image..."
+          docker build -t custom-airflow:latest .
+          docker images | grep custom-airflow
+
+      - name: Start Airflow containers
+        run: |
+          cd data_pipeline
+          echo "Starting Airflow containers..."
+          docker compose up -d --no-build
           echo "Airflow containers started successfully!"
         timeout-minutes: 10
 
