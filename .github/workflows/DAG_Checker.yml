@@ -34,7 +34,7 @@ jobs:
 
       - name: Run Airflow setup
         run: |
-          chmod +x ./run-airflow.sh
+          chmod +x ./start-airflow.sh
           ./start-airflow.sh
         timeout-minutes: 10
 
@@ -66,7 +66,7 @@ jobs:
       - name: Run health check
         id: health_check
         run: |
-          chmod +x ./health-check.sh
+          chmod +x ./airflow-health-check.sh
           ./airflow-health-check.sh
         timeout-minutes: 5
 
