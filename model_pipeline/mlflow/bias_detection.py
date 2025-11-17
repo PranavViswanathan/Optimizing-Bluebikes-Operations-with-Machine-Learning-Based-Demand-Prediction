@@ -1,10 +1,12 @@
 """
 Comprehensive Model Bias Detection for Bluebikes Demand Prediction
-Implements slicing techniques to detect and document bias across multiple dimensions.
+Implements slicing techniques to detect and document bias across multiple dimensions
 """
 
 import pandas as pd
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
@@ -331,6 +333,123 @@ class BikeShareBiasDetector:
             print("Insufficient data for interaction analysis")
             return None
     
+    def generate_bias_report(self):
+        """Generate comprehensive bias report with mitigation recommendations."""
+         
+        report = {
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'total_samples': len(self.y_test),
+            'overall_performance': self.calculate_metrics(self.y_test.values, self.y_pred, "Overall"),
+            'bias_detected': [],
+            'recommendations': []
+        }
+        
+        for category, results in self.slice_results.items():
+            if results is None or (isinstance(results, dict) and len(results) == 0):
+                continue
+                
+            
+            if isinstance(results, dict):
+                # Handle temporal results (dict of DataFrames)
+                for subcategory, df in results.items():
+                    mae_range = df['mae'].max() - df['mae'].min()
+                    mae_cv = df['mae'].std() / df['mae'].mean() if df['mae'].mean() > 0 else 0
+                    
+                    if mae_cv > 0.3:  # High variability
+                        bias_info = {
+                            'category': f"{category} - {subcategory}",
+                            'type': 'High Variability',
+                            'severity': 'Medium' if mae_cv < 0.5 else 'High',
+                            'metric': f"CV={mae_cv:.3f}",
+                            'details': f"MAE range: {mae_range:.2f}"
+                        }
+                        report['bias_detected'].append(bias_info)
+                     
+            elif isinstance(results, pd.DataFrame):
+                # Handle single DataFrame results
+                if 'mae' in results.columns:
+                    mae_range = results['mae'].max() - results['mae'].min()
+                    mae_cv = results['mae'].std() / results['mae'].mean() if results['mae'].mean() > 0 else 0
+                    
+                    if mae_cv > 0.2:
+                        bias_info = {
+                            'category': category,
+                            'type': 'Performance Disparity',
+                            'severity': 'Medium' if mae_cv < 0.4 else 'High',
+                            'metric': f"CV={mae_cv:.3f}",
+                            'details': results[['slice_name', 'mae']].to_dict('records')
+                        }
+                        report['bias_detected'].append(bias_info)
+                       
+               
+        if len(report['bias_detected']) == 0:
+            report['recommendations'].append("Continue monitoring model performance across slices.")
+        else:    
+            # Generate specific recommendations
+            recommendations = []
+            
+            for bias in report['bias_detected']:
+                if 'temporal' in bias['category'].lower():
+                    recommendations.append({
+                        'issue': f"Temporal bias in {bias['category']}",
+                        'mitigation': [
+                            "Add more temporal features (holidays, events)",
+                            "Use separate models for different time periods",
+                            "Implement time-based sample weighting"
+                        ]
+                    })
+                
+                elif 'weather' in bias['category'].lower():
+                    recommendations.append({
+                        'issue': f"Weather-related bias in {bias['category']}",
+                        'mitigation': [
+                            "Oversample adverse weather conditions",
+                            "Add weather interaction features",
+                            "Use weather-specific decision thresholds"
+                        ]
+                    })
+                
+                elif 'demand' in bias['category'].lower():
+                    recommendations.append({
+                        'issue': f"Demand-level bias in {bias['category']}",
+                        'mitigation': [
+                            "Apply quantile regression for different demand levels",
+                            "Use separate models for high/low demand periods",
+                            "Implement demand-based sample weighting"
+                        ]
+                    })
+                
+                else:
+                    recommendations.append({
+                        'issue': f"Bias detected in {bias['category']}",
+                        'mitigation': [
+                            "Analyze feature importance for this slice",
+                            "Consider slice-specific model calibration",
+                            "Collect more data for underperforming slices"
+                        ]
+                    })
+            
+            # Remove duplicates and display
+            seen = set()
+            unique_recs = []
+            for rec in recommendations:
+                key = rec['issue']
+                if key not in seen:
+                    seen.add(key)
+                    unique_recs.append(rec)
+            
+            report['recommendations'] = unique_recs
+            
+        # Save report
+        report_filename = f'bias_detection_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+        with open(report_filename, 'w') as f:
+            json.dump(report, f, indent=2, default=str)
+        
+        print(f"\n📄 Full report saved to: {report_filename}")
+        
+        self.bias_report = report
+        return report
+    
     def visualize_bias(self, save_path='bias_analysis_plots.png'):
         """Create comprehensive visualization of bias across slices."""
         fig, axes = plt.subplots(3, 2, figsize=(16, 14))
@@ -449,6 +568,7 @@ class BikeShareBiasDetector:
         self.interaction_bias_analysis()
         
         # Generate report and visualizations
+        self.generate_bias_report()
         self.visualize_bias()
         
         print("\n" + "="*80)
