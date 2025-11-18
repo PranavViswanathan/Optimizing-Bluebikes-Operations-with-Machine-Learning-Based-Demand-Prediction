@@ -4,7 +4,7 @@ import mlflow.sklearn
 import mlflow.xgboost
 import mlflow.lightgbm
 from mlflow.tracking import MlflowClient
-
+from bias_detection import BikeShareBiasDetector
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
@@ -597,7 +597,20 @@ def main():
     print("   Then open: http://localhost:5000")
     print(f"\nExperiment: {trainer.experiment_name}")
     
+    detector = BikeShareBiasDetector(
+        model_path=f"best_model_{best_model_name}.pkl",
+        X_test=X_test,
+        y_test=y_test
+    )
+    
+    # Run full bias analysis
+    bias_report = detector.run_full_analysis()
+    
+    print("Bias detection complete. Check generated reports and visualizations.")
+
+
     return results
+
 
 
 if __name__ == "__main__":
