@@ -67,7 +67,7 @@ jobs:
         id: health_check
         run: |
           chmod +x ./airflow-health-check.sh
-          ./health-check.sh
+          ./airflow-health-check.sh
         timeout-minutes: 5
 
       - name: Display DAG validation results
