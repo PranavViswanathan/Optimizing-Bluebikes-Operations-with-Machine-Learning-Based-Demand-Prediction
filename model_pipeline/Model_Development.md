@@ -664,6 +664,78 @@ print(f"Best R²: {best_run.data.metrics['test_r2']:.4f}")
 
 ## CI/CD Pipeline
 
+### Overview
+
+The CI/CD pipeline consists of two main components:
+1. **GitHub Actions** - Validates DAG syntax and runs pre-deployment checks
+2. **Apache Airflow** - Orchestrates the end-to-end ML pipeline execution
+
+### GitHub Actions Workflow
+
+GitHub Actions automatically validates the Airflow DAG on every push and pull request to ensure code quality and prevent deployment of broken DAGs.
+
+**Workflow Configuration** (`.github/workflows/validate-dag.yml`):
+
+**What GitHub Actions Validates:**
+
+1. ✅ **Docker Image Build**: Builds custom Airflow image with all dependencies
+2. ✅ **Container Health**: Ensures all Airflow services start correctly
+3. ✅ **DAG Import**: Verifies DAGs can be imported without errors
+4. ✅ **DAG Structure**: Validates DAG configuration and task definitions
+5. ✅ **Health Check Script**: Runs comprehensive health check via `airflow-health-check.sh`
+6. ✅ **Service Availability**: Checks webserver, scheduler, and database connectivity
+7. ✅ **Environment Variables**: Validates required secrets (NOAA_API_KEY, DISCORD_WEBHOOK_URL)
+
+**GitHub Actions Output:**
+
+```bash
+✓ Checkout code
+✓ Set up Docker Buildx
+✓ Cache Docker layers
+✓ Build custom Airflow image - SUCCESS
+✓ Fix permissions for Airflow
+✓ Start Airflow containers
+✓ Check airflow-init logs
+✓ Wait for Airflow to be ready - Services healthy
+✓ Run health check - PASSED
+✓ Display DAG validation results:
+  - bluebikes_integrated_bias_training [VALID]
+  - data_pipeline_dag [VALID]
+  - No import errors found
+✓ Cleanup on success
+✓ Notify on success - Pipeline passed
+```
+
+![github_actions](assets/github_actions.png)
+
+
+**Required GitHub Secrets:**
+
+Configure these secrets in your repository (Settings → Secrets and variables → Actions):
+
+```bash
+NOAA_API_KEY              # API key for NOAA weather data
+DISCORD_WEBHOOK_URL       # Webhook for notifications
+```
+
+**Workflow Triggers:**
+
+The validation workflow runs on:
+- Every push to `main` or `develop` branches
+- Every pull request targeting `main` or `develop`
+- Manual trigger via `workflow_dispatch` (GitHub Actions UI)
+
+**Docker-Based Validation:**
+
+The workflow uses Docker Compose to:
+1. Build the exact Airflow image used in production
+2. Start all required services (webserver, scheduler, database)
+3. Wait for services to become healthy (with timeout)
+4. Run DAG validation in the actual Airflow environment
+5. Clean up containers after validation
+
+This ensures **100% parity** between CI validation and production deployment.
+
 ### Airflow DAG Overview
 
 The `Model_pipeline_withBias_check.py` DAG automates the entire pipeline:
@@ -696,6 +768,8 @@ cleanup
   ↓
 end
 ```
+
+![workflow](assets/airflow_dag_graph.png)
 
 ### Task Details
 
@@ -818,8 +892,57 @@ airflow dags list
 # View task logs
 airflow tasks logs bluebikes_integrated_bias_training run_integrated_pipeline <execution_date>
 ```
+### CI/CD Best Practices
 
+**Pre-Deployment (GitHub Actions):**
+1. All code changes trigger automated validation
+2. Pull requests require passing checks before merge
+3. Failed validations block deployment
+4. Test coverage reports generated automatically
+
+**Deployment (Airflow):**
+1. Only validated DAGs are deployed to Airflow
+2. DAG changes are version controlled
+3. Rollback capability for failed deployments
+4. Automated notifications on failures
+
+**Monitoring:**
+1. GitHub Actions sends status notifications
+2. Airflow sends Discord alerts on DAG success/failure
+3. MLflow tracks all model experiments
+4. Model performance monitored in production
+
+### Complete CI/CD Flow
+
+```
+Developer commits code
+         ↓
+GitHub Actions triggered
+         ↓
+    Validate DAG syntax
+    Check imports
+    Run unit tests
+         ↓
+    [PASS] → Merge to main
+    [FAIL] → Block merge, notify developer
+         ↓
+Airflow scheduler detects new DAG
+         ↓
+DAG executes on schedule (@weekly)
+         ↓
+    Load data
+    Train models
+    Detect bias
+    Apply mitigation
+    Validate model
+    Promote if approved
+         ↓
+Discord notification sent
+Model deployed to production
+MLflow experiment logged
+```
 ---
+
 
 ## Model Validation & Promotion
 
@@ -944,6 +1067,13 @@ bias_comparison_20250118_145200.json
 bias_analysis_plots_baseline.png
 bias_analysis_plots_mitigated.png
 ```
+Basline Plot
+![baseline](assets/bias_analysis_plots_baseline.png)
+
+Mitigated Plot
+![mitigated](assets/bias_analysis_plots_mitigated.png)
+
+
 
 ### MLflow Artifacts
 
@@ -990,3 +1120,14 @@ mlruns/
 - **Bias Issues Reduction**: 30-50%
 - **R² Change**: ±1% (minimal impact)
 - **RMSE Reduction**: 3-6%
+
+
+## Quick Reference
+
+### File Locations
+
+- **Models**: `/opt/airflow/models/`
+- **Data**: `data_splits/` and `data_splits_mitigated/`
+- **Experiments**: `mlruns/`
+- **Logs**: `/opt/airflow/logs/`
+- **Reports**: `bias_detection_report_*.json`
