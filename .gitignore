@@ -52,3 +52,17 @@ test.py
 logs/
 *.log
 !logs/.gitkeep
+
+# MLflow specific
+mlruns/
+mlflow.db
+mlartifacts/
+*.db
+
+# MLflow UI
+mlflow-ui.pid
+
+# Temporary MLflow files
+*.log
+.mlflow/
+tmp/
