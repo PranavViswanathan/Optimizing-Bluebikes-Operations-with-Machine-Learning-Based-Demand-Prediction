@@ -9,11 +9,15 @@ on:
     branches:
       - main
       - develop
-  workflow_dispatch:
+  workflow_dispatch:  
 
 jobs:
   validate-airflow-dags:
     runs-on: ubuntu-latest
+    
+    env:
+      NOAA_API_KEY: ${{ secrets.NOAA_API_KEY }}
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
     
     steps:
       - name: Checkout code
@@ -32,11 +36,40 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
-      - name: Run Airflow setup
+      - name: Build custom Airflow image
         run: |
-          chmod +x ./run-airflow.sh
-          ./run-airflow.sh
+          cd data_pipeline
+          echo "Building custom Airflow image from data_pipeline/Dockerfile..."
+          docker build -t custom-airflow:latest .
+          echo "Image built successfully!"
+          docker images | grep custom-airflow
+
+      - name: Fix permissions for Airflow
+        run: |
+          cd data_pipeline
+          echo "Setting up Airflow directories with proper permissions..."
+          mkdir -p ./logs ./dags ./plugins ./config
+          echo -e "AIRFLOW_UID=$(id -u)" > .env
+          chmod -R 777 ./logs ./dags ./plugins ./config 2>/dev/null || true
+
+      - name: Start Airflow containers
+        run: |
+          cd data_pipeline
+          echo "Starting Airflow containers (using pre-built image)..."
+          docker compose up -d --no-build
+          echo "Airflow containers started successfully!"
         timeout-minutes: 10
+        continue-on-error: true
+
+      - name: Check airflow-init logs
+        if: always()
+        run: |
+          cd data_pipeline
+          echo "=== Airflow Init Logs ==="
+          docker compose logs airflow-init || true
+          echo ""
+          echo "=== All Container Status ==="
+          docker ps -a
 
       - name: Wait for Airflow to be ready
         run: |
@@ -66,8 +99,8 @@ jobs:
       - name: Run health check
         id: health_check
         run: |
-          chmod +x ./health-check.sh
-          ./health-check.sh
+          chmod +x ./airflow-health-check.sh
+          ./airflow-health-check.sh
         timeout-minutes: 5
 
       - name: Display DAG validation results
@@ -80,15 +113,17 @@ jobs:
       - name: Cleanup on failure
         if: failure()
         run: |
+          cd data_pipeline
           echo "Health check failed. Cleaning up..."
-          docker-compose down -v || true
+          docker compose down -v || true
           docker system prune -f || true
 
       - name: Cleanup on success
         if: success()
         run: |
+          cd data_pipeline
           echo "All checks passed!"
-          docker-compose down -v || true
+          docker compose down -v || true
 
       - name: Notify on failure
         if: failure()
