@@ -610,9 +610,11 @@ mlflow.set_experiment("bluebikes_pipeline")
 **Artifacts:**
 - Trained model files
 - Feature importance plots
+- Error comparison plots
+- Model comparison plots
 - Prediction scatter plots
 - Residual analysis plots
-- Model metadata JSON
+- Model metadata JSON 
 
 **Tags:**
 - `model_type`: XGBoost, LightGBM, or RandomForest
@@ -635,6 +637,24 @@ open http://localhost:5000
 - Download artifacts
 - View plots inline
 - Export results to CSV
+
+**Experiment Run History**  
+MLflow's run management interface showing tracked experiments over multiple days, each with logged duration, source code, and model artifacts, enabling full reproducibility and version control of the machine learning pipeline.
+
+![mlflowui](assets/mlflow_ui.png)
+
+**Model Performance Comparison Dashboard**  
+Visualization showing XGBoost outperforming other models with the lowest MAE (95.618) and highest R² score (0.937). The radar chart on the right provides a normalized view of all metrics, clearly illustrating XGBoost's superior performance across all evaluation criteria.
+![model_performance](assets/comparison.png)
+
+
+**Error Metrics Comparison**  
+Side-by-side comparison of model error metrics logged in MLflow, demonstrating XGBoost's consistent advantage with approximately 10% lower MAE and RMSE compared to LightGBM and 25% lower than RandomForest, while maintaining the highest R² score.
+![error_comparison](assets/errors.png)
+
+**Figure 2: MLflow Experiment Tracking Interface**  
+Real-time experiment tracking showing multiple training runs with their respective metrics. The interface enables quick comparison of model iterations.
+![model_comparison](assets/comparison2.png)
 
 ### Programmatic Access
 

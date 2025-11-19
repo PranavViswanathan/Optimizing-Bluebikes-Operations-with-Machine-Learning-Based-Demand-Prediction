@@ -10,6 +10,8 @@ notebooks/test.py
 *.xlsx
 *.xls
 *.json
+*.tsv
+*.tfevents
 
 # Data directories
 data/processed/
