@@ -115,9 +115,9 @@ Key features:
     
         section Milestones
         Project Scoping          :done,    ms1, 2025-09-30, 1d
-        Data Pipeline            :active,  ms2, 2025-10-01, 2025-10-28
-        Model Development        :         ms3, 2025-10-29, 2025-11-18
-        Model Deployment         :         ms4, 2025-11-19, 2025-12-09
+        Data Pipeline            :done,  ms2, 2025-10-01, 2025-10-28
+        Model Development        :done,         ms3, 2025-10-29, 2025-11-18
+        Model Deployment         :active,         ms4, 2025-11-19, 2025-12-09
         MLOps Expo               :milestone, ms5, 2025-12-12, 1d
 ```
 
