@@ -652,7 +652,7 @@ Visualization showing XGBoost outperforming other models with the lowest MAE (95
 Side-by-side comparison of model error metrics logged in MLflow, demonstrating XGBoost's consistent advantage with approximately 10% lower MAE and RMSE compared to LightGBM and 25% lower than RandomForest, while maintaining the highest R² score.
 ![error_comparison](assets/errors.png)
 
-**Figure 2: MLflow Experiment Tracking Interface**  
+**MLflow Experiment Tracking Interface**  
 Real-time experiment tracking showing multiple training runs with their respective metrics. The interface enables quick comparison of model iterations.
 ![model_comparison](assets/comparison2.png)
 
