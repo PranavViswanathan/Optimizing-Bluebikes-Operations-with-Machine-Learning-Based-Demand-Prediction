@@ -10,10 +10,10 @@ Bluebikes serves 4.7 million annual rides but faces persistent challenges with b
 Bluebikes generates rich spatiotemporal datasets capturing cycling patterns, station utilization, and user behavior. By leveraging this data through predictive modeling, we can anticipate demand and proactively optimize bike distribution.
 
 ### Goals
-- Reduce revenue loss from unavailable bikes
-- Improve user satisfaction by ensuring bike availability
-- Enable proactive operations instead of reactive responses
-- Support city-wide sustainability and traffic reduction initiatives
+- Reduce revenue loss from unavailable bikes.
+- Improve user satisfaction by ensuring bike availability.
+- Enable proactive operations instead of reactive responses.
+- Support city-wide sustainability and traffic reduction initiatives.
 
 ### Approach
 Develop predictive models using historical ridership patterns, weather data, seasonal variations, and event-driven demand spikes to forecast when and where bikes will be needed most.
