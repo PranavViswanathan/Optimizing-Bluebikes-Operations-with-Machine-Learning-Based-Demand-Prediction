@@ -750,7 +750,7 @@ git add dvc.lock
 git commit -m "record data after manual run"
 ```
 
-
+![dvc_setup]('/assets/dvc.png')
 ## Components
 
 Each of the component is modularized. 
