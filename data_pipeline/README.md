@@ -772,32 +772,60 @@ They are listed below:
     - `BostonCollege.py` — API to download zoning data and store into csv
     - `NOAA_DataAcq.py` — API to fetch weather data from NOAA website
 
-### Cleaning of Data
-- `scripts/data_loader.py`
-    - This script is responsible for loading the raw data from various sources into a standardized format. It reads the input files, performs initial schema validation, converts data types where required, and saves the processed output as a pickle file for downstream tasks. Also includes logging to track file loading status and handle errors.
-- `scripts/duplicate_data.py`
-    - This script identifies and handles duplicate records in the given dataset. It supports multiple duplicate-handling strategies including keeping the first/last occurrence and removing all duplicates. It can also auto-detect key columns for duplicate detection when not explicitly defined.
-- `scripts/missing_value.py`
-    - This script detects and treats missing values across the dataset. It logs a summary of missing data per information and applies configurable strategies such as dropping missing records and filling values using statistical imputation.
+### Data Preprocessing
+Our preprocessing pipeline handles three key datasets—Bluebikes trip data, weather records, and Boston colleges data—each with distinct characteristics, formats, and potential issues. The goal of preprocessing is to standardize, clean, and prepare these datasets so they can be merged and used reliably for modeling bike demand.
+
+- Data Loading & Standardization
+
+  - All datasets are first ingested using `scripts/data_loader.py`. This step ensures that all data sources conform to a consistent internal structure:
+
+  - **Bluebikes trip data**: Contains information about individual bike trips, including start/end stations, timestamps, and user types. We standardize datetime formats, convert categorical fields, and validate essential columns (e.g., trip duration, station IDs).
+
+  - **Weather data**: Hourly weather metrics such as temperature, precipitation, and wind speed are read and converted to consistent types. Any missing timestamps are interpolated or flagged.
+
+  - **Boston colleges data**: Includes information about college locations, student populations, and academic calendars. Columns are standardized, and geospatial data is verified for consistency.
+
+- Handling Duplicates
+
+  - Duplicate records are addressed to prevent skewed demand predictions:
+
+  - **Bluebikes trips:** Some trips may be recorded twice due to system errors; duplicates are removed based on unique trip IDs or timestamp/station combinations.
+
+  - **Weather records:** Duplicates are removed to maintain one value per timestamp.
+
+  - **Colleges dataset:** Duplicates are rare but any repeated entries are removed, typically based on college names or unique identifiers.
+
+The duplicate handling module `scripts/duplicate_data.py` allows flexible strategies, such as keeping the first/last occurrence or dropping all duplicates, while generating a detailed log for transparency.
+
+- Handling Missing Values
+
+  - Missing data can impact the quality of downstream modeling, so each dataset is treated individually:
+
+  - **Bluebikes trips:** Missing station IDs or trip durations are either removed or imputed when feasible, depending on the proportion of missing values.
+
+  - **Weather data:** Missing hourly metrics are filled using statistical imputation or temporal interpolation to ensure continuity.
+ 
+  - **Colleges data:** Missing population counts or location details are filled using domain knowledge or external sources where available.
+
+A summary report of missing values is generated, allowing configurable strategies per dataset and ensuring that no critical information is lost.
+
+Once cleaned, all three datasets are saved as pickle files with standardized columns and formats. This ensures efficient downstream processing for feature engineering and model training, allowing the datasets to be merged seamlessly based on time, location, or other relevant keys.
 
 
 ## Logging and Testing 
-Logger.py is a linchpin of the process. It uses Python’s built-in logging module and sets up
-both console and file output with timestamps. Every module imports the same get logger() function so all
-logs go to one place — the logs/ folder — with daily rotating filenames like data pipeline 20251026.log.
-This makes debugging way easier since every INFO, WARNING, and ERROR is timestamped and searchable.
-Testing. All core scripts are covered by pytest tests under the tests/ directory. test data collection.py
-mocks the external APIs so tests run offline. test data loader.py checks that CSVs are loaded correctly and
-converted into pickles. test duplicate data.py validates deduplication behaviour under different modes,
-while test missing value.py verifies all filling strategies. test logger.py ensures log creation, formatting,
-and handler setup work as expected. All tests write to temporary directories so nothing in the actual data
-folders gets touched.
-Other setup files. The environment is containerised through a Dockerfile and docker-compose.yaml,
-while requirements.txt locks dependencies for reproducibility. dvc.yaml and dvc.lock handle version
-tracking for data, and small shell scripts (start-airflow.sh and stop-airflow.sh) spin Airflow up and
-down for orchestration tests.
-In short, the goal was to make the whole system clean, testable, and consistent — one logger, one test
-flow, and modular scripts that can run independently or as part of the bigger pipeline
+
+- Logging
+
+  `Logger.py` is a linchpin of the process. It uses Python’s built-in logging module and sets up both console and file output with timestamps. Every module imports the same get logger() function so all logs go to one place — the logs/ folder — with daily rotating filenames like data pipeline 20251026.log. This makes debugging way easier since every INFO, WARNING, and ERROR is timestamped and searchable.
+
+- Testing 
+
+  All core scripts are covered by pytest tests under the tests/ directory. test data collection.py mocks the external APIs so tests run offline. test data loader.py checks that CSVs are loaded correctly and converted into pickles. test duplicate `data.py` validates deduplication behaviour under different modes, while `test_missing_value.py` verifies all filling strategies. `test_logger.py` ensures log creation, formatting, and handler setup work as expected. All tests write to temporary directories so nothing in the actual data
+  folders gets touched.
+
+- Other setup files
+
+  The environment is containerised through a Dockerfile and docker-compose.yaml, while `requirements.txt` locks dependencies for reproducibility. `dvc.yaml` and `dvc.lock` handle version tracking for data, and small shell scripts (`start-airflow.sh` and `stop-airflow.sh`) spin Airflow up and down for orchestration tests. In short, the goal was to make the whole system clean, testable, and consistent — one logger, one test flow, and modular scripts that can run independently or as part of the bigger pipeline
 
 ## Anomaly Detection and Alerts
 
