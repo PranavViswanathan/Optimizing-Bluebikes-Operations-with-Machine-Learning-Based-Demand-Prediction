@@ -106,6 +106,10 @@ Key features:
 - Discord alert notifications for pipeline monitoring
 - Dockerized deployment for reproducibility
 
+## Model Pipeline
+
+**[View detailed model pipeline documentation](https://github.com/PranavViswanathan/Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction/blob/main/model_pipeline/README.md)**
+
 ## Preliminary Project Timeline
 ```mermaid
     gantt
