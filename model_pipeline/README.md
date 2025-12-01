@@ -6,14 +6,14 @@ Pipeline for automated training of machine learning models every week to predict
 
 ## Features 
 
-- Multi-Model Training: Trains and compares XGBoost, LightGBM, and Random Forest models
-- Bias Detection & Mitigation: Automatically identifies and corrects prediction bias across different features
-- Hyperparameter Tuning: Lightweight tuning for optimal model performance
-- MLflow Integration: Complete experiment tracking and model versioning
-- Airflow Orchestration: Automated weekly training pipeline with failure handling
-- Model Validation: Automated quality gates for production deployment
-- Version Control: Comprehensive model versioning with metadata tracking
-- Discord Notifications: Real-time alerts for pipeline success/failure
+- Multi-Model Training: Trains and compares XGBoost, LightGBM, and Random Forest models.
+- Bias Detection & Mitigation: Automatically identifies and corrects prediction bias across different features.
+- Hyperparameter Tuning: Lightweight tuning for optimal model performance.
+- MLflow Integration: Complete experiment tracking and model versioning.
+- Airflow Orchestration: Automated weekly training pipeline with failure handling.
+- Model Validation: Automated quality gates for production deployment.
+- Version Control: Comprehensive model versioning with metadata tracking.
+- Discord Notifications: Real-time alerts for pipeline success/failure.
 
 
 
