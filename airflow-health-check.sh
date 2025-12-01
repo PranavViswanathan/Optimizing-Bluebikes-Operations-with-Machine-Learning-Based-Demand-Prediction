@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
-PROJECT_DIR="$(cd "$(dirname "$0")/data_pipeline" && pwd)"
-COMPOSE_FILE="$PROJECT_DIR/docker-compose.yaml"
+COMPOSE_FILE="docker-compose.yaml"
 
 echo "Checking Docker and Airflow environment status"
 echo "----------------------------------------------------------"

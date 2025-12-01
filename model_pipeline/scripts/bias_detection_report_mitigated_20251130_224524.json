@@ -1,0 +1,135 @@
+{
+  "timestamp": "2025-11-30 22:45:22",
+  "total_samples": 744,
+  "overall_performance": {
+    "slice_name": "Overall",
+    "n_samples": 744,
+    "mae": 100.38153839111328,
+    "rmse": 147.53252422135603,
+    "r2": 0.9296782612800598,
+    "mape": 22.384320436444884,
+    "mean_actual": 723.5712365591398,
+    "mean_predicted": "730.1031",
+    "bias": 6.531857904567514,
+    "std_residual": 147.3878550528427
+  },
+  "bias_detected": [
+    {
+      "category": "temporal - Hour of Day",
+      "type": "High Variability",
+      "severity": "High",
+      "metric": "CV=0.641",
+      "details": "MAE range: 214.59"
+    },
+    {
+      "category": "rush_hour",
+      "type": "Performance Disparity",
+      "severity": "Medium",
+      "metric": "CV=0.380",
+      "details": [
+        {
+          "slice_name": "Morning Rush",
+          "mae": 123.11637878417969
+        },
+        {
+          "slice_name": "Evening Rush",
+          "mae": 163.19471740722656
+        },
+        {
+          "slice_name": "Midday",
+          "mae": 71.01058959960938
+        },
+        {
+          "slice_name": "Night",
+          "mae": 63.718414306640625
+        },
+        {
+          "slice_name": "Off-Peak",
+          "mae": 126.07234954833984
+        }
+      ]
+    },
+    {
+      "category": "demand_level",
+      "type": "Performance Disparity",
+      "severity": "High",
+      "metric": "CV=0.597",
+      "details": [
+        {
+          "slice_name": "Very Low Demand",
+          "mae": 28.241899490356445
+        },
+        {
+          "slice_name": "Low Demand",
+          "mae": 115.46793365478516
+        },
+        {
+          "slice_name": "Medium Demand",
+          "mae": 85.75164794921875
+        },
+        {
+          "slice_name": "High Demand",
+          "mae": 172.06468200683594
+        }
+      ]
+    },
+    {
+      "category": "interactions",
+      "type": "Performance Disparity",
+      "severity": "Medium",
+      "metric": "CV=0.321",
+      "details": [
+        {
+          "slice_name": "Weekend + Rainy",
+          "mae": 109.65032196044922
+        },
+        {
+          "slice_name": "Weekday + Morning Rush",
+          "mae": 141.92471313476562
+        },
+        {
+          "slice_name": "Weekday + Evening Rush",
+          "mae": 181.74313354492188
+        },
+        {
+          "slice_name": "Weekend + Night",
+          "mae": 85.57301330566406
+        }
+      ]
+    }
+  ],
+  "recommendations": [
+    {
+      "issue": "Temporal bias in temporal - Hour of Day",
+      "mitigation": [
+        "Add more temporal features (holidays, events)",
+        "Use separate models for different time periods",
+        "Implement time-based sample weighting"
+      ]
+    },
+    {
+      "issue": "Bias detected in rush_hour",
+      "mitigation": [
+        "Analyze feature importance for this slice",
+        "Consider slice-specific model calibration",
+        "Collect more data for underperforming slices"
+      ]
+    },
+    {
+      "issue": "Demand-level bias in demand_level",
+      "mitigation": [
+        "Apply quantile regression for different demand levels",
+        "Use separate models for high/low demand periods",
+        "Implement demand-based sample weighting"
+      ]
+    },
+    {
+      "issue": "Bias detected in interactions",
+      "mitigation": [
+        "Analyze feature importance for this slice",
+        "Consider slice-specific model calibration",
+        "Collect more data for underperforming slices"
+      ]
+    }
+  ]
+}

@@ -4,9 +4,9 @@ from datetime import datetime, timedelta
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scripts"))
+# sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scripts"))
 
-from datapipeline import (
+from scripts.data_pipeline.data_pipeline import (
     collect_bluebikes_data,
     collect_boston_college_data,
     collect_NOAA_Weather_data,
@@ -15,9 +15,9 @@ from datapipeline import (
     process_missing,
     process_duplicates
 )
-from data_loader import load_data
-from correlation_matrix import correlation_matrix
-from discord_notifier import send_discord_alert, send_dag_success_alert
+from scripts.data_pipeline.data_loader import load_data
+from scripts.data_pipeline.correlation_matrix import correlation_matrix
+from scripts.data_pipeline.discord_notifier import send_discord_alert, send_dag_success_alert
 
 
 def load_and_process_dataset(dataset):
@@ -80,13 +80,13 @@ def load_and_process_dataset(dataset):
 
 def collect_boston_college_wrapper():
     """Wrapper to collect boston college data to Airflow path."""
-    output_path = "/opt/airflow/working_data/raw/boston_clg"
+    output_path = "/opt/airflow/data/raw/boston_clg"
     collect_boston_college_data(output_path=output_path)
 
 
 def collect_noaa_weather_wrapper():
     """Wrapper to collect NOAA weather data to Airflow path."""
-    output_path = "/opt/airflow/working_data/raw/NOAA_weather"
+    output_path = "/opt/airflow/data/raw/NOAA_weather"
     collect_NOAA_Weather_data(output_path=output_path)
 
 
@@ -136,10 +136,10 @@ with DAG(
         python_callable=collect_bluebikes_data,
         op_kwargs={
             "index_url": "https://s3.amazonaws.com/hubway-data/index.html",
-            "years": ["2023", "2024", "2025"],
-            "download_dir": "/opt/airflow/working_data/temp/bluebikes",
-            "parquet_dir": "/opt/airflow/working_data/raw/bluebikes",
-            "log_path": "/opt/airflow/working_data/read_log.csv",
+            "years": ["2024", "2025"],
+            "download_dir": "/opt/airflow/data/temp/bluebikes",
+            "parquet_dir": "/opt/airflow/data/raw/bluebikes",
+            "log_path": "/opt/airflow/data/read_log.csv",
         },
     )
 
