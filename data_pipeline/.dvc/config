@@ -1,7 +1,0 @@
-[core]
-    remote = gcs
-[cache]
-    dir = C:\dvc_cache
-['remote "gcs"']
-    url = gs://bluebikes-dvc-storage
-    credentialpath = ../gcp-dvc-shared.json
