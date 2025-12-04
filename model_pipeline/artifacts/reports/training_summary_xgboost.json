@@ -1,6 +1,6 @@
 {
   "model_type": "XGBoost",
-  "timestamp": "2025-12-01T01:37:02.901504",
+  "timestamp": "2025-12-04T01:40:31.803147",
   "best_iteration": 307,
   "metrics": {
     "train_r2": 0.9972342848777771,
@@ -11,19 +11,19 @@
     "val_rmse": 110.28504881527459,
     "val_mae": 74.71854400634766,
     "val_mape": 20.357072839366513,
-    "test_r2": 0.9353594779968262,
-    "test_rmse": 141.44752505346284,
-    "test_mae": 97.10047149658203,
-    "test_mape": 22.36568070766519,
+    "test_r2": 0.9353653788566589,
+    "test_rmse": 141.44714532953643,
+    "test_mae": 97.09893798828125,
+    "test_mape": 22.380493649637074,
     "test_max_error": 768.5867919921875,
     "test_median_absolute_error": 62.84942626953125,
     "test_90th_percentile_error": 241.819189453125,
     "test_95th_percentile_error": 294.7341552734375
   },
   "performance_summary": {
-    "test_mae": 97.10047149658203,
-    "test_rmse": 141.44752505346284,
-    "test_r2": 0.9353594779968262,
+    "test_mae": 97.09893798828125,
+    "test_rmse": 141.44714532953643,
+    "test_r2": 0.9353653788566589,
     "improvement_over_baseline": null
   }
 }

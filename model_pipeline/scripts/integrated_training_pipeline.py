@@ -30,7 +30,8 @@ from train_xgb import train_xgboost, tune_xgboost
 from train_lgb import train_lightgbm, tune_lightgbm
 from train_random_forest import train_random_forest, tune_random_forest
 from feature_generation import load_and_prepare_data
-
+from sensitivity_analysis import run_sensitivity_analysis
+from artifact_manager import ArtifactManager
 
 class IntegratedBlueBikesTrainer:
     """
@@ -218,8 +219,10 @@ class IntegratedBlueBikesTrainer:
         # Save the model
         self.best_model = best_model
         self.best_model_name = best_model_name
-        self.best_model_path = f"best_model_{best_model_name}.pkl"
+        # self.best_model_path = f"best_model_{best_model_name}.pkl"
         
+        # joblib.dump(best_model, self.best_model_path)
+        self.best_model_path = ArtifactManager.get_best_model_path(best_model_name)
         joblib.dump(best_model, self.best_model_path)
         print(f"\nBest model saved to: {self.best_model_path}")
         
@@ -451,8 +454,10 @@ class IntegratedBlueBikesTrainer:
             
             # Save mitigated model
             self.mitigated_model = model
-            self.mitigated_model_path = f"mitigated_model_{self.best_model_name}.pkl"
+            # self.mitigated_model_path = f"mitigated_model_{self.best_model_name}.pkl"
+            self.mitigated_model_path = ArtifactManager.get_mitigated_model_path(self.best_model_name)
             joblib.dump(model, self.mitigated_model_path)
+
             print(f"\nMitigated model saved to: {self.mitigated_model_path}")
             
             return model, metrics
@@ -465,10 +470,28 @@ class IntegratedBlueBikesTrainer:
         
         if not self.baseline_bias_report or not self.final_bias_report:
             print("Warning: Missing bias reports for comparison")
-            return
+            return None
         
         baseline_overall = self.baseline_bias_report.get('overall_performance', {})
         final_overall = self.final_bias_report.get('overall_performance', {})
+        
+        # Helper to safely convert to float
+        def to_float(val, default=0.0):
+            if val is None or val == 'N/A':
+                return default
+            try:
+                return float(val)
+            except (ValueError, TypeError):
+                return default
+        
+        # Helper to safely convert to int
+        def to_int(val, default=0):
+            if val is None:
+                return default
+            try:
+                return int(val)
+            except (ValueError, TypeError):
+                return default
         
         print("\nOverall Performance Comparison:")
         print("="*60)
@@ -476,8 +499,8 @@ class IntegratedBlueBikesTrainer:
         metrics = ['mae', 'rmse', 'r2', 'mape']
         
         for metric in metrics:
-            baseline_val = baseline_overall.get(metric, 0)
-            final_val = final_overall.get(metric, 0)
+            baseline_val = to_float(baseline_overall.get(metric))
+            final_val = to_float(final_overall.get(metric))
             
             if metric == 'r2':
                 diff = final_val - baseline_val
@@ -490,7 +513,7 @@ class IntegratedBlueBikesTrainer:
             
             symbol = "+" if better else "-"
             print(f"{metric.upper():6s}: {baseline_val:8.4f} -> {final_val:8.4f} "
-                  f"({symbol}{abs(pct_change):.2f}%)")
+                f"({symbol}{abs(pct_change):.2f}%)")
         
         print("\nBias Issues Comparison:")
         print("="*60)
@@ -509,30 +532,36 @@ class IntegratedBlueBikesTrainer:
         else:
             print(f"No change in number of bias issues")
         
-        # Save comparison report
+        # Create comparison report with EXPLICIT type conversions
+        # This prevents numpy types from causing JSON serialization issues
         comparison_report = {
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            'baseline_model': self.best_model_path,
-            'mitigated_model': self.mitigated_model_path,
-            'baseline_metrics': {k: float(v) if isinstance(v, (np.float32, np.float64)) else v 
-                                for k, v in baseline_overall.items()},
-            'mitigated_metrics': {k: float(v) if isinstance(v, (np.float32, np.float64)) else v 
-                                 for k, v in final_overall.items()},
-            'baseline_bias_issues': int(baseline_issues),
-            'mitigated_bias_issues': int(final_issues),
+            'baseline_model': str(self.best_model_path) if self.best_model_path else '',
+            'mitigated_model': str(self.mitigated_model_path) if self.mitigated_model_path else '',
+            'baseline_metrics': {
+                k: to_float(v) for k, v in baseline_overall.items()
+            },
+            'mitigated_metrics': {
+                k: to_float(v) for k, v in final_overall.items()
+            },
+            'baseline_bias_issues': to_int(baseline_issues),
+            'mitigated_bias_issues': to_int(final_issues),
             'improvement': {
-                'mae_improvement': float(baseline_overall.get('mae', 0) - final_overall.get('mae', 0)),
-                'rmse_improvement': float(baseline_overall.get('rmse', 0) - final_overall.get('rmse', 0)),
-                'r2_improvement': float(final_overall.get('r2', 0) - baseline_overall.get('r2', 0)),
-                'bias_issues_reduction': int(reduction)
+                'mae_improvement': to_float(baseline_overall.get('mae')) - to_float(final_overall.get('mae')),
+                'rmse_improvement': to_float(baseline_overall.get('rmse')) - to_float(final_overall.get('rmse')),
+                'r2_improvement': to_float(final_overall.get('r2')) - to_float(baseline_overall.get('r2')),
+                'bias_issues_reduction': to_int(reduction)
             }
         }
         
-        comparison_filename = f'comparison_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
-        with open(comparison_filename, 'w') as f:
-            json.dump(comparison_report, f, indent=2)
-        
-        print(f"\nComparison report saved to: {comparison_filename}")
+        # Save comparison report
+        comparison_filename = ArtifactManager.get_comparison_report_path(timestamp=True)
+        try:
+            with open(comparison_filename, 'w') as f:
+                json.dump(comparison_report, f, indent=2)
+            print(f"\nComparison report saved to: {comparison_filename}")
+        except Exception as e:
+            print(f"Warning: Could not save comparison report: {e}")
         
         return comparison_report
     
@@ -540,6 +569,7 @@ class IntegratedBlueBikesTrainer:
         """
         Run the complete integrated pipeline.
         """
+        ArtifactManager.setup()
         # Step 1: Load data
         X_train, X_test, X_val, y_train, y_test, y_val = self.load_and_prepare_data()
         
@@ -579,6 +609,10 @@ class IntegratedBlueBikesTrainer:
         # Step 7: Bias analysis on mitigated model
         final_bias_report = self.run_bias_analysis(
             self.mitigated_model_path, X_test_mit, y_test_mit, stage="mitigated"
+        )
+
+        sensitivity_report = run_sensitivity_analysis(
+            self.best_model_path, X_test, y_test, stage="baseline"
         )
         
         # Step 8: Compare results

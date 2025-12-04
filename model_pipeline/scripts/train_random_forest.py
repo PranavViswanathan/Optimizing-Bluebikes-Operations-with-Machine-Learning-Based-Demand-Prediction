@@ -16,6 +16,7 @@ from typing import Optional, Dict, List
 from datetime import datetime
 import mlflow
 import mlflow.sklearn
+from artifact_manager import ArtifactManager
 
 warnings.filterwarnings('ignore')
 # plt.style.use('seaborn-v0_8-darkgrid')
@@ -136,8 +137,12 @@ def train_random_forest(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_c
         ax.set_xlabel('Feature Importance')
         ax.set_title('Top 20 Feature Importances - Random Forest')
         plt.tight_layout()
-        mlflow.log_figure(fig, "feature_importance_random_forest.png")
+        # mlflow.log_figure(fig, "feature_importance_random_forest.png")
+        save_path = ArtifactManager.get_feature_importance_path("randomforest")
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        mlflow.log_artifact(str(save_path))
         plt.close()
+        # plt.close()
         
         # Plot predictions scatter
         fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 6))
@@ -167,7 +172,11 @@ def train_random_forest(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_c
         ax3.grid(True, alpha=0.3)
         
         plt.tight_layout()
-        mlflow.log_figure(fig, "predictions_scatter_random_forest.png")
+        # mlflow.log_figure(fig, "predictions_scatter_random_forest.png")
+        # plt.close()
+        save_path = ArtifactManager.get_predictions_plot_path("randomforest")
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        mlflow.log_artifact(str(save_path))
         plt.close()
         
         # Plot residuals
@@ -188,7 +197,11 @@ def train_random_forest(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_c
         ax2.set_title(f'Residual Distribution (Mean: {residuals_test.mean():.2f}, Std: {residuals_test.std():.2f})')
         
         plt.tight_layout()
-        mlflow.log_figure(fig, "residuals_random_forest.png")
+        # mlflow.log_figure(fig, "residuals_random_forest.png")
+        # plt.close()
+        save_path = ArtifactManager.get_residuals_plot_path("randomforest")
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        mlflow.log_artifact(str(save_path))
         plt.close()
         
         # Save model
@@ -198,8 +211,11 @@ def train_random_forest(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_c
             registered_model_name=None  # Will be registered by main script if selected as best
         )
         
-        joblib.dump(rf_model, 'random_forest_bikeshare_model.pkl')
-        mlflow.log_artifact('random_forest_bikeshare_model.pkl')
+        # joblib.dump(rf_model, 'random_forest_bikeshare_model.pkl')
+        # mlflow.log_artifact('random_forest_bikeshare_model.pkl')
+        model_path = ArtifactManager.get_model_path("randomforest", stage="training")
+        joblib.dump(rf_model, model_path)
+        mlflow.log_artifact(str(model_path))
         
         metadata = {
             'model': 'RandomForest',
@@ -209,9 +225,12 @@ def train_random_forest(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_c
             'hyperparameters': params,
             'timestamp': datetime.now().isoformat()
         }
-        joblib.dump(metadata, 'random_forest_model_metadata.pkl')
-        mlflow.log_artifact('random_forest_model_metadata.pkl')
-        
+        # joblib.dump(metadata, 'random_forest_model_metadata.pkl')
+        # mlflow.log_artifact('random_forest_model_metadata.pkl')
+        metadata_path = ArtifactManager.REPORTS_DIR / "randomforest_model_metadata.pkl"
+        joblib.dump(metadata, metadata_path)
+        mlflow.log_artifact(str(metadata_path))
+
         return rf_model, metrics
     
 def tune_random_forest(

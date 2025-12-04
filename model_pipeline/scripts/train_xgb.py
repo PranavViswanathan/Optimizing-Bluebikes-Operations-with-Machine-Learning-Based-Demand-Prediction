@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import json
 from datetime import datetime
-
+from artifact_manager import ArtifactManager
 
 def train_xgboost(X_train, y_train, X_val, y_val, X_test, y_test, mlflow, config=None):
     """
@@ -200,8 +200,11 @@ def log_feature_importance(model, feature_names, mlflow):
                 mlflow.log_metric(f"feature_importance_{row['feature']}", row['importance'])
             
             # Save full importance as artifact
-            importance_df.to_csv("xgboost_feature_importance.csv", index=False)
-            mlflow.log_artifact("xgboost_feature_importance.csv")
+            # importance_df.to_csv("xgboost_feature_importance.csv", index=False)
+            save_path = ArtifactManager.get_feature_importance_csv_path("xgboost")
+            importance_df.to_csv(save_path, index=False)
+            # mlflow.log_artifact("xgboost_feature_importance.csv")
+            mlflow.log_artifact(str(save_path))
             
     except Exception as e:
         print(f"Warning: Could not log feature importance: {e}")
@@ -273,11 +276,14 @@ def create_and_log_plots(y_train, y_pred_train, y_test, y_pred_test, y_val, y_pr
         ax.grid(True, alpha=0.3)
         
         plt.tight_layout()
-        plt.savefig("xgboost_predictions_analysis.png", dpi=100, bbox_inches='tight')
+        # plt.savefig("xgboost_predictions_analysis.png", dpi=100, bbox_inches='tight')
+        save_path = ArtifactManager.get_predictions_plot_path("xgboost")
+        plt.savefig(save_path, dpi=100, bbox_inches='tight')
+        mlflow.log_artifact(str(save_path))   
         plt.close()
         
         # Log the plot
-        mlflow.log_artifact("xgboost_predictions_analysis.png")
+        # mlflow.log_artifact("xgboost_predictions_analysis.png")
         
     except Exception as e:
         print(f"Warning: Could not create plots: {e}")
@@ -299,10 +305,13 @@ def save_model_summary(model, metrics, mlflow):
         }
     }
     
-    with open("xgboost_model_summary.json", "w") as f:
+    # with open("xgboost_model_summary.json", "w") as f:
+    save_path = ArtifactManager.get_training_summary_path("xgboost")
+    with open(save_path, "w") as f:
         json.dump(summary, f, indent=2)
     
-    mlflow.log_artifact("xgboost_model_summary.json")
+    # mlflow.log_artifact("xgboost_model_summary.json")
+    mlflow.log_artifact(str(save_path))
 
 
 # Hyperparameter tuning function

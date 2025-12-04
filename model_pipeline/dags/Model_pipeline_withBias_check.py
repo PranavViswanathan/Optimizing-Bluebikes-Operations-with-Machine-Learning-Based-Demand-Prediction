@@ -44,92 +44,149 @@ def run_integrated_pipeline(**context):
     
     date_str = context['ds_nodash']
     
+    # Key fix: Write results file IMMEDIATELY after getting results,
+    # and handle the case where comparison_report might have serialization issues
     training_script = f"""
 import sys
 import os
 import traceback
 import logging
+import json
+import numpy as np
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("integrated_pipeline")
 
-
-# Add paths
 sys.path.insert(0, '/opt/airflow/scripts/model_pipeline')
 sys.path.append('/opt/airflow/scripts/model_pipeline')
 os.chdir('/opt/airflow/scripts/model_pipeline')
 
-# Define date variable for use in script
 date_str = '{date_str}'
+results_file = '/tmp/integrated_results_' + date_str + '.json'
+
+def safe_float(val, default=0.0):
+    '''Safely convert any numeric type to float'''
+    if val is None:
+        return default
+    try:
+        if isinstance(val, (np.floating, np.integer)):
+            return float(val)
+        return float(val)
+    except (ValueError, TypeError):
+        return default
+
+def safe_int(val, default=0):
+    '''Safely convert any numeric type to int'''
+    if val is None:
+        return default
+    try:
+        if isinstance(val, (np.floating, np.integer)):
+            return int(val)
+        return int(val)
+    except (ValueError, TypeError):
+        return default
 
 try:
-    # Import from integrated_training_pipeline.py
     from integrated_training_pipeline import IntegratedBlueBikesTrainer
-    import json
 
-    # Initialize integrated trainer
     trainer = IntegratedBlueBikesTrainer(
         experiment_name='bluebikes_bias_integrated_' + date_str
     )
 
-    # Run complete pipeline
     log.info("Starting integrated pipeline...")
     results = trainer.run_complete_pipeline(
         models_to_train=['xgboost', 'lightgbm', 'randomforest'],
         tune=False
     )
 
-    if results:
-        # Extract metrics
-        baseline_metrics = results['baseline_metrics']
-        mitigated_metrics = results['mitigated_metrics']
-        comparison = results['comparison_report']
-        
-        # Prepare output for Airflow
-        pipeline_results = {{
-            'best_model': trainer.best_model_name,
-            'baseline_test_r2': float(baseline_metrics['test_r2']),
-            'baseline_test_mae': float(baseline_metrics['test_mae']),
-            'baseline_test_rmse': float(baseline_metrics['test_rmse']),
-            'mitigated_test_r2': float(mitigated_metrics['test_r2']),
-            'mitigated_test_mae': float(mitigated_metrics['test_mae']),
-            'mitigated_test_rmse': float(mitigated_metrics['test_rmse']),
-            'baseline_bias_issues': comparison['baseline_bias_issues'],
-            'mitigated_bias_issues': comparison['mitigated_bias_issues'],
-            'r2_improvement': comparison['improvement']['r2_improvement'],
-            'mae_improvement': comparison['improvement']['mae_improvement'],
-            'bias_issues_reduction': comparison['improvement']['bias_issues_reduction'],
-            'baseline_model_path': trainer.best_model_path,
-            'mitigated_model_path': trainer.mitigated_model_path
-        }}
-        
-        # Save results
-        results_file = '/tmp/integrated_results_' + date_str + '.json'
-        with open(results_file, 'w') as f:
-            json.dump(pipeline_results, f, indent=2)
-        
-        log.info("="*80)
-        log.info(" Pipeline Complete ")
-        log.info("="*80)
-        log.info(f"Best Model: {{trainer.best_model_name}}")
-        log.info(f"Baseline R²: {{baseline_metrics['test_r2']:.4f}}")
-        log.info(f"Mitigated R²: {{mitigated_metrics['test_r2']:.4f}}")
-        log.info(f"Bias Issues: {{comparison['baseline_bias_issues']}} -> {{comparison['mitigated_bias_issues']}}")
-        log.info(f"Results saved to: {{results_file}}")
-    else:
-        raise Exception("Pipeline failed to complete - results is None")
+    if results is None:
+        raise Exception("Pipeline returned None")
+    
+    baseline_metrics = results.get('baseline_metrics', {{}})
+    mitigated_metrics = results.get('mitigated_metrics', {{}})
+    comparison = results.get('comparison_report', {{}})
+    
+    if not baseline_metrics or not mitigated_metrics:
+        raise Exception("Missing metrics in results")
+    
+    # Build pipeline_results with SAFE type conversion
+    # This handles numpy types that can cause JSON serialization issues
+    improvement = comparison.get('improvement', {{}}) if comparison else {{}}
+    
+    pipeline_results = {{
+        'best_model': str(trainer.best_model_name) if trainer.best_model_name else 'unknown',
+        'baseline_test_r2': safe_float(baseline_metrics.get('test_r2')),
+        'baseline_test_mae': safe_float(baseline_metrics.get('test_mae')),
+        'baseline_test_rmse': safe_float(baseline_metrics.get('test_rmse')),
+        'mitigated_test_r2': safe_float(mitigated_metrics.get('test_r2')),
+        'mitigated_test_mae': safe_float(mitigated_metrics.get('test_mae')),
+        'mitigated_test_rmse': safe_float(mitigated_metrics.get('test_rmse')),
+        'baseline_bias_issues': safe_int(comparison.get('baseline_bias_issues') if comparison else 0),
+        'mitigated_bias_issues': safe_int(comparison.get('mitigated_bias_issues') if comparison else 0),
+        'r2_improvement': safe_float(improvement.get('r2_improvement')),
+        'mae_improvement': safe_float(improvement.get('mae_improvement')),
+        'bias_issues_reduction': safe_int(improvement.get('bias_issues_reduction')),
+        'baseline_model_path': str(trainer.best_model_path) if trainer.best_model_path else '',
+        'mitigated_model_path': str(trainer.mitigated_model_path) if trainer.mitigated_model_path else ''
+    }}
+    
+    # Save results IMMEDIATELY - before any logging that might fail
+    log.info(f"Writing results to {{results_file}}")
+    with open(results_file, 'w') as f:
+        json.dump(pipeline_results, f, indent=2)
+    log.info(f"Results file written successfully")
+    
+    # Now do the summary logging (if this fails, results are already saved)
+    log.info("="*80)
+    log.info(" Pipeline Complete ")
+    log.info("="*80)
+    log.info(f"Best Model: {{pipeline_results['best_model']}}")
+    log.info(f"Baseline R2: {{pipeline_results['baseline_test_r2']:.4f}}")
+    log.info(f"Mitigated R2: {{pipeline_results['mitigated_test_r2']:.4f}}")
+    
+    # Explicit successful exit
+    sys.exit(0)
 
 except Exception as e:
-    log.info("="*80)
-    log.info("PIPELINE ERROR")
-    log.info("="*80)
-    log.info(f"Error type: {{type(e).__name__}}")
-    log.info(f"Error message: {{str(e)}}")
-    log.info("\\nFull traceback:")
+    log.error("="*80)
+    log.error("PIPELINE ERROR")
+    log.error("="*80)
+    log.error(f"Error type: {{type(e).__name__}}")
+    log.error(f"Error message: {{str(e)}}")
+    log.error("Full traceback:")
     traceback.print_exc()
     
-    # Try to save partial results if possible
-    log.info("\\nAttempting to save error information...")
+    # Check if we have partial results from trainer
+    try:
+        if 'trainer' in dir() and trainer is not None:
+            # Try to salvage what we can
+            partial_results = {{
+                'best_model': str(getattr(trainer, 'best_model_name', 'unknown')),
+                'baseline_model_path': str(getattr(trainer, 'best_model_path', '')),
+                'mitigated_model_path': str(getattr(trainer, 'mitigated_model_path', '')),
+                'error': str(e),
+                'partial': True
+            }}
+            
+            # Try to get metrics if available
+            if hasattr(trainer, 'baseline_bias_report') and trainer.baseline_bias_report:
+                overall = trainer.baseline_bias_report.get('overall_performance', {{}})
+                partial_results['baseline_test_r2'] = safe_float(overall.get('r2'))
+                partial_results['baseline_test_mae'] = safe_float(overall.get('mae'))
+                partial_results['baseline_test_rmse'] = safe_float(overall.get('rmse'))
+            
+            if hasattr(trainer, 'final_bias_report') and trainer.final_bias_report:
+                overall = trainer.final_bias_report.get('overall_performance', {{}})
+                partial_results['mitigated_test_r2'] = safe_float(overall.get('r2'))
+                partial_results['mitigated_test_mae'] = safe_float(overall.get('mae'))
+                partial_results['mitigated_test_rmse'] = safe_float(overall.get('rmse'))
+            
+            with open(results_file, 'w') as f:
+                json.dump(partial_results, f, indent=2)
+            log.info(f"Partial results saved to: {{results_file}}")
+    except Exception as save_err:
+        log.error(f"Could not save partial results: {{save_err}}")
+    
     error_info = {{
         'error': str(e),
         'error_type': type(e).__name__,
@@ -140,9 +197,9 @@ except Exception as e:
         error_file = '/tmp/integrated_error_' + date_str + '.json'
         with open(error_file, 'w') as f:
             json.dump(error_info, f, indent=2)
-        log.info(f"Error info saved to: {{error_file}}")
+        log.error(f"Error info saved to: {{error_file}}")
     except:
-        log.info("Could not save error info")
+        pass
     
     sys.exit(1)
 """
@@ -170,49 +227,58 @@ except Exception as e:
             log.info(result.stderr)
         log.info("="*80)
         
-        if result.returncode != 0:
-            log.info(f"\nSubprocess exited with code {result.returncode}")
-            results_file = f'/tmp/integrated_results_{date_str}.json'
-            if os.path.exists(results_file):
-                log.info("Found partial results file, attempting to use it...")
-            else:
-                log.info("No results file found")
-                raise Exception(f"Subprocess failed with exit code {result.returncode}")
-        
+        # IMPORTANT: Check for results file FIRST, regardless of return code
+        # The pipeline might have succeeded but exited with wrong code
         results_file = f'/tmp/integrated_results_{date_str}.json'
+        
         if os.path.exists(results_file):
             with open(results_file, 'r') as f:
                 results = json.load(f)
             
+            # Check if this is a partial result due to error
+            if results.get('partial'):
+                log.warning("Results file contains partial data due to error")
+                if result.returncode != 0:
+                    raise Exception(f"Pipeline failed with partial results: {results.get('error', 'Unknown error')}")
+            
             for key, value in results.items():
-                context['task_instance'].xcom_push(key=key, value=value)
+                if key != 'partial' and key != 'error':
+                    context['task_instance'].xcom_push(key=key, value=value)
             
             log.info("="*80)
             log.info(" Results Summary ")
             log.info("="*80)
-            log.info(f"Model: {results['best_model']}")
-            log.info(f"Mitigated R²: {results['mitigated_test_r2']:.4f}")
-            log.info(f"Mitigated MAE: {results['mitigated_test_mae']:.2f}")
-            log.info(f"Bias Reduction: {results['bias_issues_reduction']} issues")
+            log.info(f"Model: {results.get('best_model', 'N/A')}")
+            log.info(f"Mitigated R²: {results.get('mitigated_test_r2', 'N/A')}")
+            log.info(f"Mitigated MAE: {results.get('mitigated_test_mae', 'N/A')}")
+            log.info(f"Bias Reduction: {results.get('bias_issues_reduction', 'N/A')} issues")
             
             return results
         else:
-            log.info("\nResults file not found at:", results_file)
-            log.info("\nChecking /tmp directory:")
+            # No results file found
+            log.error(f"Results file not found at: {results_file}")
+            log.info("Checking /tmp directory:")
             import glob
             tmp_files = glob.glob('/tmp/integrated_*')
             for f in tmp_files:
                 log.info(f"  Found: {f}")
             
-            raise Exception("Results file not found - pipeline may have crashed during execution")
+            # Check for error file
+            error_file = f'/tmp/integrated_error_{date_str}.json'
+            if os.path.exists(error_file):
+                with open(error_file, 'r') as f:
+                    error_info = json.load(f)
+                raise Exception(f"Pipeline failed: {error_info.get('error', 'Unknown error')}")
+            
+            raise Exception(f"Results file not found and subprocess exited with code {result.returncode}")
             
     except subprocess.CalledProcessError as e:
-        log.info(f"Error running integrated pipeline: {e}")
-        log.info(f"STDOUT: {e.stdout}")
-        log.info(f"STDERR: {e.stderr}")
+        log.error(f"Error running integrated pipeline: {e}")
+        log.error(f"STDOUT: {e.stdout}")
+        log.error(f"STDERR: {e.stderr}")
         raise
     except Exception as e:
-        log.info(f"Unexpected error: {e}")
+        log.error(f"Unexpected error: {e}")
         import traceback
         traceback.print_exc()
         raise

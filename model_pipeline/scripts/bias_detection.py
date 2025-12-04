@@ -16,6 +16,8 @@ from datetime import datetime
 import json
 from scipy import stats
 
+
+from artifact_manager import ArtifactManager
 warnings.filterwarnings('ignore')
 
 class BikeShareBiasDetector:
@@ -441,16 +443,22 @@ class BikeShareBiasDetector:
             report['recommendations'] = unique_recs
             
         # Save report
-        report_filename = f'bias_detection_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
-        with open(report_filename, 'w') as f:
+        # report_filename = f'bias_detection_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json'
+        # with open(report_filename, 'w') as f:
+        report_path = ArtifactManager.get_bias_report_path(stage="baseline", timestamp=True)
+        with open(report_path, 'w') as f:
             json.dump(report, f, indent=2, default=str)
         
-        print(f"\n📄 Full report saved to: {report_filename}")
+        # print(f"\n📄 Full report saved to: {report_filename}")
+        print(f"\n📄 Full report saved to: {report_path}")
         
         self.bias_report = report
         return report
     
-    def visualize_bias(self, save_path='bias_analysis_plots.png'):
+    # def visualize_bias(self, save_path='bias_analysis_plots.png'):
+    def visualize_bias(self, save_path=None, stage="baseline"):
+        if save_path is None:
+            save_path = ArtifactManager.get_bias_plot_path(stage)
         """Create comprehensive visualization of bias across slices."""
         fig, axes = plt.subplots(3, 2, figsize=(16, 14))
         fig.suptitle('Model Bias Analysis Across Data Slices', fontsize=16, fontweight='bold')

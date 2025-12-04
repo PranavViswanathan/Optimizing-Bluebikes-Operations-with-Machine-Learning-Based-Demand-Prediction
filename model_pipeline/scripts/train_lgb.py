@@ -16,6 +16,8 @@ import logging
 from datetime import datetime
 import mlflow
 import mlflow.lightgbm
+from artifact_manager import ArtifactManager
+
 
 warnings.filterwarnings('ignore')
 # plt.style.use('seaborn-v0_8-darkgrid')
@@ -201,7 +203,11 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         ax.set_xlabel('Feature Importance')
         ax.set_title('Top 20 Feature Importances - LightGBM')
         plt.tight_layout()
-        mlflow.log_figure(fig, "feature_importance_lightgbm.png")
+        # mlflow.log_figure(fig, "feature_importance_lightgbm.png")
+        save_path = ArtifactManager.get_feature_importance_path("lightgbm")
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        # mlflow.log_figure(fig, "feature_importance_lightgbm.png")
+        mlflow.log_artifact(str(save_path))
         plt.close()
         
         # Plot predictions scatter
@@ -231,7 +237,10 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         ax3.grid(True, alpha=0.3)
 
         plt.tight_layout()
-        mlflow.log_figure(fig, "predictions_scatter_lightgbm.png")
+        # mlflow.log_figure(fig, "predictions_scatter_lightgbm.png")
+        save_path = ArtifactManager.get_predictions_plot_path("lightgbm")
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        mlflow.log_artifact(str(save_path))
         plt.close()
         
         # Plot residuals
@@ -253,7 +262,10 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         
         
         plt.tight_layout()
-        mlflow.log_figure(fig, "residuals_lightgbm.png")
+        # mlflow.log_figure(fig, "residuals_lightgbm.png")
+        save_path = ArtifactManager.get_residuals_plot_path("lightgbm")
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        mlflow.log_artifact(str(save_path))
         plt.close()
         
         # Save model
@@ -264,8 +276,11 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
         )
         
         # Save model locally as backup
-        joblib.dump(lgb_model, 'lightgbm_bikeshare_model.pkl')
-        mlflow.log_artifact('lightgbm_bikeshare_model.pkl')
+        # joblib.dump(lgb_model, 'lightgbm_bikeshare_model.pkl')
+        model_path = ArtifactManager.get_model_path("lightgbm", stage="training")
+        joblib.dump(lgb_model, model_path)
+        # mlflow.log_artifact('lightgbm_bikeshare_model.pkl')
+        mlflow.log_artifact(str(model_path))
         
         # Save metadata
         metadata = {
@@ -276,8 +291,11 @@ def train_lightgbm(X_train, y_train, X_val, y_val, X_test, y_test, mlflow_client
             'hyperparameters': params,
             'timestamp': datetime.now().isoformat()
         }
-        joblib.dump(metadata, 'lightgbm_model_metadata.pkl')
-        mlflow.log_artifact('lightgbm_model_metadata.pkl')
+        # joblib.dump(metadata, 'lightgbm_model_metadata.pkl')
+        # mlflow.log_artifact('lightgbm_model_metadata.pkl')
+        metadata_path = ArtifactManager.get_model_metadata_pkl_path("lightgbm")
+        joblib.dump(metadata, metadata_path)
+        mlflow.log_artifact(str(metadata_path))
         
         return lgb_model, metrics
     
