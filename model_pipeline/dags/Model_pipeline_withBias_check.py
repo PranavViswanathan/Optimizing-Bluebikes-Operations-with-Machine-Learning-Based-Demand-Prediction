@@ -9,8 +9,6 @@ logging.basicConfig(level=logging.INFO, format='[PIPELINE] %(message)s')
 log = logging.getLogger("pipeline")
 
 
-# sys.path.insert(0, '/opt/airflow/model_pipeline/scripts')
-# sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scripts"))
 from scripts.data_pipeline.discord_notifier import send_discord_alert, send_dag_success_alert
 
 default_args = {
@@ -421,7 +419,7 @@ def promote_mitigated_model(**context):
         
         new_version = len(version_history["versions"]) + 1
         
-        temp_model_path = f'/opt/airflow/scripts/model_pipeline/mitigated_model_{model_name}.pkl'
+        temp_model_path = f'/opt/airflow/artifacts/model_pipeline/models/mitigated_model_{model_name}.pkl'
         versioned_model_path = f"{version_dir}/model_v{new_version}_{context['ds_nodash']}_bias_mitigated.pkl"
         
         if os.path.exists(temp_model_path):
@@ -522,28 +520,18 @@ def promote_mitigated_model(**context):
         raise
 
 def push_model_to_github(**context):
-    """
-    Push the current production model + metadata to GitHub Release
-    treating GitHub as a lightweight artifact registry.
-    """
+    """Push the current production model + metadata to GitHub Release"""
     import os
     import subprocess
 
     ti = context['task_instance']
-
-    # From your promotion task (already in XCom)
-    production_version = ti.xcom_pull(
-        task_ids='promote_mitigated_model', key='production_version'
-    )
-    model_promoted = ti.xcom_pull(
-        task_ids='promote_mitigated_model', key='model_promoted'
-    )
+    production_version = ti.xcom_pull(task_ids='promote_mitigated_model', key='production_version')
+    model_promoted = ti.xcom_pull(task_ids='promote_mitigated_model', key='model_promoted')
 
     if not model_promoted:
         log.info("Model was not promoted to production; skipping GitHub upload.")
         return {'uploaded': False, 'reason': 'Model not promoted'}
 
-    # Paths written in deploy_mitigated_model
     model_path = "/opt/airflow/models/production/current_model.pkl"
     metadata_path = "/opt/airflow/models/production/current_metadata.json"
 
@@ -558,7 +546,6 @@ def push_model_to_github(**context):
     if not github_repo or not github_token:
         raise RuntimeError("GITHUB_REPO or GITHUB_TOKEN not set in environment")
 
-    # Tag the release using Airflow execution date + version number
     date_str = context['ds_nodash']
     tag = f"model-v{production_version}-{date_str}"
 
@@ -567,13 +554,25 @@ def push_model_to_github(**context):
     log.info("=" * 60)
     log.info(f"Repo: {github_repo}")
     log.info(f"Tag: {tag}")
-    log.info(f"Model: {model_path}")
-    log.info(f"Metadata: {metadata_path}")
 
     env = os.environ.copy()
     env["GITHUB_TOKEN"] = github_token
 
-    # 1) Create release (idempotent: will error if tag exists; keep simple for now)
+    # Check if release already exists
+    result = subprocess.run(
+        ["gh", "release", "view", tag, "--repo", github_repo],
+        env=env,
+        capture_output=True
+    )
+    
+    if result.returncode == 0:
+        log.info(f"Release {tag} already exists - deleting to recreate with fresh artifacts")
+        subprocess.check_call(
+            ["gh", "release", "delete", tag, "--repo", github_repo, "--yes"],
+            env=env
+        )
+
+    # Create release
     subprocess.check_call(
         [
             "gh", "release", "create", tag,
@@ -584,12 +583,11 @@ def push_model_to_github(**context):
         env=env,
     )
 
-    # 2) Upload artifacts (model + metadata)
+    # Upload artifacts
     subprocess.check_call(
         [
             "gh", "release", "upload", tag,
-            model_path,
-            metadata_path,
+            model_path, metadata_path,
             "--repo", github_repo,
         ],
         env=env,
@@ -662,6 +660,50 @@ def deploy_mitigated_model(**context):
     
     return {'deployed': True, 'metadata': metadata}
 
+
+
+def generate_monitoring_baseline(**context):
+    """
+    Generate Evidently AI baseline after model deployment.
+    This enables drift monitoring for the newly deployed model.
+    """
+    import sys
+    # sys.path.insert(0, '/opt/airflow/model_pipeline/monitoring')
+    sys.path.insert(0, '/opt/airflow/scripts/model_pipeline/monitoring')
+    
+    log.info("="*60)
+    log.info("GENERATING MONITORING BASELINE")
+    log.info("="*60)
+    
+    ti = context['task_instance']
+    
+    # Check if model was promoted
+    model_promoted = ti.xcom_pull(task_ids='promote_mitigated_model', key='model_promoted')
+    
+    if not model_promoted:
+        log.info("Model was not promoted, skipping baseline generation")
+        return {'generated': False, 'reason': 'Model not promoted'}
+    
+    try:
+        from baseline_stats import generate_baseline_from_training
+        
+        # Generate baseline from the newly deployed model
+        baseline_path = generate_baseline_from_training()
+        
+        log.info(f"✓ Monitoring baseline generated: {baseline_path}")
+        
+        return {
+            'generated': True,
+            'baseline_path': str(baseline_path),
+        }
+        
+    except Exception as e:
+        log.error(f"Failed to generate monitoring baseline: {e}")
+        import traceback
+        traceback.print_exc()
+        # Don't fail the DAG - baseline can be generated manually
+        return {'generated': False, 'error': str(e)}
+
 def cleanup_temp_files(**context):
     """Cleanup temporary files"""
     import glob
@@ -716,6 +758,12 @@ with dag:
         provide_context=True
     )
 
+    generate_baseline = PythonOperator(
+        task_id='generate_monitoring_baseline',
+        python_callable=generate_monitoring_baseline,
+        provide_context=True,
+    )
+
     cleanup = PythonOperator(
         task_id='cleanup',
         python_callable=cleanup_temp_files,
@@ -735,5 +783,5 @@ with dag:
         trigger_rule='one_failed'
     )
     
-    start >> run_pipeline >> validate >> promote >> deploy >> push_to_github >> cleanup >> end
-    [run_pipeline, validate, promote, deploy, push_to_github] >> failure_cleanup
+    start >> run_pipeline >> validate >> promote >> deploy >> [push_to_github, generate_baseline] >> cleanup >> end
+    [run_pipeline, validate, promote, deploy] >> failure_cleanup

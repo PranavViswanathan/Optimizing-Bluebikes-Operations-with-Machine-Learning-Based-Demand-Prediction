@@ -204,7 +204,9 @@ class BiasMitigator:
             print(f"  Test MAPE: {metrics['test_mape']:.2f}%")
             
             # Save mitigated model
-            mitigated_model_path = f"mitigated_model_{model_name}.pkl"
+            # mitigated_model_path = f"mitigated_model_{model_name}.pkl"
+            from artifact_manager import ArtifactManager
+            mitigated_model_path = ArtifactManager.get_mitigated_model_path(model_name)
             joblib.dump(model, mitigated_model_path)
             print(f"\nMitigated model saved to: {mitigated_model_path}")
             

@@ -29,6 +29,8 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/scripts:/opt/airflow/scripts/model_pipeline
     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/mlruns:/opt/airflow/scripts/model_pipeline/mlruns
     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/artifacts:/opt/airflow/artifacts/model_pipeline
+    - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/monitoring:/opt/airflow/scripts/model_pipeline/monitoring
+    - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/models:/opt/airflow/models
 
     # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/dags:/opt/airflow/dags/model_pipeline
     # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/mlruns:/opt/airflow/mlruns/model_pipeline
@@ -101,8 +103,8 @@ services:
   airflow-worker:
     <<: *airflow-common
     command: celery worker
-    mem_limit: 9g
-    mem_reservation: 8g
+    mem_limit: 13g
+    mem_reservation: 12g
     healthcheck:
       test: ["CMD-SHELL", 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"']
       interval: 10s

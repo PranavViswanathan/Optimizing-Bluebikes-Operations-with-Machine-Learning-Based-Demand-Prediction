@@ -1,0 +1,665 @@
+"""
+Drift Detector Module
+Implements statistical tests for detecting feature and prediction drift.
+"""
+
+import numpy as np
+import pandas as pd
+import json
+from pathlib import Path
+from datetime import datetime
+from typing import Dict, List, Optional, Any, Tuple
+from dataclasses import dataclass
+from enum import Enum
+import logging
+from scipy import stats
+
+from monitoring_config import (
+    MonitoringConfig,
+    get_config,
+    get_drift_report_path,
+    REPORTS_DIR
+)
+from baseline_stats import BaselineStatistics
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+
+class DriftSeverity(Enum):
+    """Severity levels for drift detection."""
+    NONE = "none"
+    WARNING = "warning"
+    CRITICAL = "critical"
+
+
+@dataclass
+class DriftResult:
+    """Result of drift detection for a single feature."""
+    feature: str
+    has_drift: bool
+    severity: DriftSeverity
+    drift_score: float
+    test_used: str
+    p_value: Optional[float]
+    baseline_stats: Dict[str, Any]
+    current_stats: Dict[str, Any]
+    details: str
+
+
+@dataclass
+class DriftReport:
+    """Complete drift detection report."""
+    timestamp: str
+    overall_drift_detected: bool
+    severity: DriftSeverity
+    features_checked: int
+    features_with_drift: int
+    critical_drift_count: int
+    warning_drift_count: int
+    feature_results: List[DriftResult]
+    prediction_drift: Optional[Dict[str, Any]]
+    recommendations: List[str]
+    should_trigger_retrain: bool
+
+
+class DriftDetector:
+    """
+    Detects drift between baseline and current data distributions.
+    Supports multiple statistical tests for both numerical and categorical features.
+    """
+    
+    def __init__(self, config: MonitoringConfig = None):
+        self.config = config if config else get_config()
+        self.baseline_stats = None
+        self.baseline_loader = BaselineStatistics(self.config)
+        
+    def load_baseline(self, version: str = "current") -> Dict[str, Any]:
+        """Load baseline statistics for comparison."""
+        self.baseline_stats = self.baseline_loader.load_baseline(version)
+        return self.baseline_stats
+    
+    def calculate_psi(
+        self, 
+        baseline_proportions: List[float], 
+        current_proportions: List[float],
+        epsilon: float = 1e-10
+    ) -> float:
+        """
+        Calculate Population Stability Index (PSI).
+        
+        PSI measures the shift in distribution between baseline and current data.
+        PSI < 0.1: No significant change
+        PSI 0.1-0.2: Moderate change
+        PSI > 0.2: Significant change
+        
+        Args:
+            baseline_proportions: Proportion of samples in each bin (baseline)
+            current_proportions: Proportion of samples in each bin (current)
+            epsilon: Small value to avoid division by zero
+            
+        Returns:
+            PSI score
+        """
+        baseline = np.array(baseline_proportions) + epsilon
+        current = np.array(current_proportions) + epsilon
+        
+        # Normalize to ensure they sum to 1
+        baseline = baseline / baseline.sum()
+        current = current / current.sum()
+        
+        psi = np.sum((current - baseline) * np.log(current / baseline))
+        
+        return float(psi)
+    
+    def calculate_js_divergence(
+        self,
+        baseline_proportions: List[float],
+        current_proportions: List[float],
+        epsilon: float = 1e-10
+    ) -> float:
+        """
+        Calculate Jensen-Shannon divergence.
+        
+        JS divergence is a symmetric measure of similarity between distributions.
+        Range: 0 (identical) to 1 (completely different)
+        
+        Args:
+            baseline_proportions: Baseline distribution
+            current_proportions: Current distribution
+            epsilon: Small value for numerical stability
+            
+        Returns:
+            JS divergence score
+        """
+        baseline = np.array(baseline_proportions) + epsilon
+        current = np.array(current_proportions) + epsilon
+        
+        # Normalize
+        baseline = baseline / baseline.sum()
+        current = current / current.sum()
+        
+        # Calculate midpoint distribution
+        m = (baseline + current) / 2
+        
+        # Calculate KL divergences
+        kl_baseline_m = np.sum(baseline * np.log(baseline / m))
+        kl_current_m = np.sum(current * np.log(current / m))
+        
+        js = (kl_baseline_m + kl_current_m) / 2
+        
+        return float(np.sqrt(js))  # Return sqrt for 0-1 range
+    
+    def ks_test(
+        self,
+        baseline_values: np.ndarray,
+        current_values: np.ndarray
+    ) -> Tuple[float, float]:
+        """
+        Perform Kolmogorov-Smirnov test.
+        
+        Tests whether two samples come from the same distribution.
+        
+        Args:
+            baseline_values: Baseline sample values
+            current_values: Current sample values
+            
+        Returns:
+            Tuple of (KS statistic, p-value)
+        """
+        statistic, p_value = stats.ks_2samp(baseline_values, current_values)
+        return float(statistic), float(p_value)
+    
+    def chi_square_test(
+        self,
+        baseline_counts: List[int],
+        current_counts: List[int]
+    ) -> Tuple[float, float]:
+        """
+        Perform Chi-square test for categorical features.
+        
+        Args:
+            baseline_counts: Counts per category (baseline)
+            current_counts: Counts per category (current)
+            
+        Returns:
+            Tuple of (chi-square statistic, p-value)
+        """
+        # Normalize to expected counts
+        baseline = np.array(baseline_counts)
+        current = np.array(current_counts)
+        
+        # Scale baseline to match current total
+        expected = baseline * (current.sum() / baseline.sum())
+        
+        # Perform chi-square test
+        statistic, p_value = stats.chisquare(current, expected)
+        
+        return float(statistic), float(p_value)
+    
+    def detect_numerical_drift(
+        self,
+        feature: str,
+        current_data: pd.Series,
+        baseline_feature_stats: Dict[str, Any]
+    ) -> DriftResult:
+        """
+        Detect drift for a numerical feature.
+        
+        Uses PSI and KS test for detection.
+        """
+        current_values = current_data.dropna().values
+        
+        if len(current_values) < self.config.drift.min_samples_for_detection:
+            return DriftResult(
+                feature=feature,
+                has_drift=False,
+                severity=DriftSeverity.NONE,
+                drift_score=0.0,
+                test_used="insufficient_data",
+                p_value=None,
+                baseline_stats=baseline_feature_stats,
+                current_stats={'count': len(current_values)},
+                details=f"Insufficient samples ({len(current_values)} < {self.config.drift.min_samples_for_detection})"
+            )
+        
+        # Compute current statistics
+        current_stats = {
+            'count': int(len(current_values)),
+            'mean': float(np.mean(current_values)),
+            'std': float(np.std(current_values)),
+            'min': float(np.min(current_values)),
+            'max': float(np.max(current_values)),
+            'median': float(np.median(current_values))
+        }
+        
+        # Calculate PSI using histogram bins from baseline
+        baseline_hist = baseline_feature_stats.get('histogram', {})
+        if baseline_hist:
+            bin_edges = baseline_hist.get('bin_edges', [])
+            baseline_proportions = baseline_hist.get('proportions', [])
+            
+            if bin_edges and baseline_proportions:
+                # Compute current histogram with same bins
+                current_hist, _ = np.histogram(current_values, bins=bin_edges)
+                current_proportions = current_hist / len(current_values)
+                
+                psi = self.calculate_psi(baseline_proportions, list(current_proportions))
+                current_stats['psi'] = psi
+        else:
+            psi = 0.0
+        
+        # Calculate mean shift percentage
+        baseline_mean = baseline_feature_stats.get('mean', 0)
+        if baseline_mean != 0:
+            mean_shift_pct = abs((current_stats['mean'] - baseline_mean) / baseline_mean) * 100
+        else:
+            mean_shift_pct = 0.0
+        
+        current_stats['mean_shift_pct'] = mean_shift_pct
+        
+        # Determine severity
+        severity = DriftSeverity.NONE
+        has_drift = False
+        
+        if psi > self.config.drift.psi_critical:
+            severity = DriftSeverity.CRITICAL
+            has_drift = True
+        elif psi > self.config.drift.psi_warning:
+            severity = DriftSeverity.WARNING
+            has_drift = True
+        elif mean_shift_pct > self.config.drift.mean_shift_critical_pct:
+            severity = DriftSeverity.CRITICAL
+            has_drift = True
+        elif mean_shift_pct > self.config.drift.mean_shift_warning_pct:
+            severity = DriftSeverity.WARNING
+            has_drift = True
+        
+        details = f"PSI={psi:.4f}, Mean shift={mean_shift_pct:.2f}%"
+        
+        return DriftResult(
+            feature=feature,
+            has_drift=has_drift,
+            severity=severity,
+            drift_score=psi,
+            test_used="PSI + Mean Shift",
+            p_value=None,
+            baseline_stats=baseline_feature_stats,
+            current_stats=current_stats,
+            details=details
+        )
+    
+    def detect_categorical_drift(
+        self,
+        feature: str,
+        current_data: pd.Series,
+        baseline_feature_stats: Dict[str, Any]
+    ) -> DriftResult:
+        """
+        Detect drift for a categorical feature.
+        
+        Uses JS divergence for detection.
+        """
+        current_values = current_data.dropna()
+        
+        if len(current_values) < self.config.drift.min_samples_for_detection:
+            return DriftResult(
+                feature=feature,
+                has_drift=False,
+                severity=DriftSeverity.NONE,
+                drift_score=0.0,
+                test_used="insufficient_data",
+                p_value=None,
+                baseline_stats=baseline_feature_stats,
+                current_stats={'count': len(current_values)},
+                details=f"Insufficient samples ({len(current_values)})"
+            )
+        
+        # Get baseline distribution
+        baseline_dist = baseline_feature_stats.get('value_distribution', {})
+        
+        if not baseline_dist:
+            return DriftResult(
+                feature=feature,
+                has_drift=False,
+                severity=DriftSeverity.NONE,
+                drift_score=0.0,
+                test_used="no_baseline",
+                p_value=None,
+                baseline_stats=baseline_feature_stats,
+                current_stats={},
+                details="No baseline distribution available"
+            )
+        
+        # Compute current distribution
+        current_dist = current_values.value_counts(normalize=True).to_dict()
+        current_dist = {str(k): float(v) for k, v in current_dist.items()}
+        
+        # Align distributions (handle new/missing categories)
+        all_categories = set(baseline_dist.keys()) | set(current_dist.keys())
+        baseline_props = [baseline_dist.get(cat, 0) for cat in all_categories]
+        current_props = [current_dist.get(cat, 0) for cat in all_categories]
+        
+        # Calculate JS divergence
+        js_div = self.calculate_js_divergence(baseline_props, current_props)
+        
+        current_stats = {
+            'count': int(len(current_values)),
+            'unique_count': int(current_values.nunique()),
+            'value_distribution': current_dist,
+            'js_divergence': js_div
+        }
+        
+        # Determine severity
+        severity = DriftSeverity.NONE
+        has_drift = False
+        
+        if js_div > self.config.drift.js_divergence_critical:
+            severity = DriftSeverity.CRITICAL
+            has_drift = True
+        elif js_div > self.config.drift.js_divergence_warning:
+            severity = DriftSeverity.WARNING
+            has_drift = True
+        
+        details = f"JS Divergence={js_div:.4f}"
+        
+        return DriftResult(
+            feature=feature,
+            has_drift=has_drift,
+            severity=severity,
+            drift_score=js_div,
+            test_used="Jensen-Shannon Divergence",
+            p_value=None,
+            baseline_stats=baseline_feature_stats,
+            current_stats=current_stats,
+            details=details
+        )
+    
+    def detect_feature_drift(
+        self,
+        feature: str,
+        current_data: pd.Series
+    ) -> DriftResult:
+        """
+        Detect drift for a single feature.
+        
+        Automatically selects appropriate test based on feature type.
+        """
+        if self.baseline_stats is None:
+            raise ValueError("Baseline not loaded. Call load_baseline() first.")
+        
+        baseline_feature_stats = self.baseline_stats.get('feature_statistics', {}).get(feature, {})
+        
+        if not baseline_feature_stats:
+            return DriftResult(
+                feature=feature,
+                has_drift=False,
+                severity=DriftSeverity.NONE,
+                drift_score=0.0,
+                test_used="no_baseline",
+                p_value=None,
+                baseline_stats={},
+                current_stats={},
+                details=f"No baseline available for feature '{feature}'"
+            )
+        
+        feature_type = baseline_feature_stats.get('type', 'numerical')
+        
+        if feature_type == 'categorical':
+            return self.detect_categorical_drift(feature, current_data, baseline_feature_stats)
+        else:
+            return self.detect_numerical_drift(feature, current_data, baseline_feature_stats)
+    
+    def detect_prediction_drift(
+        self,
+        current_predictions: np.ndarray
+    ) -> Dict[str, Any]:
+        """
+        Detect drift in model predictions.
+        """
+        if self.baseline_stats is None:
+            raise ValueError("Baseline not loaded. Call load_baseline() first.")
+        
+        baseline_pred_stats = self.baseline_stats.get('prediction_statistics', {})
+        
+        if not baseline_pred_stats:
+            return {
+                'has_drift': False,
+                'severity': 'none',
+                'details': 'No baseline predictions available'
+            }
+        
+        current_predictions = np.array(current_predictions).flatten()
+        current_predictions = current_predictions[~np.isnan(current_predictions)]
+        
+        if len(current_predictions) < self.config.drift.min_samples_for_detection:
+            return {
+                'has_drift': False,
+                'severity': 'none',
+                'details': f'Insufficient predictions ({len(current_predictions)})'
+            }
+        
+        # Calculate current statistics
+        current_mean = float(np.mean(current_predictions))
+        current_std = float(np.std(current_predictions))
+        
+        baseline_mean = baseline_pred_stats.get('mean', 0)
+        baseline_std = baseline_pred_stats.get('std', 1)
+        
+        # Calculate shifts
+        if baseline_mean != 0:
+            mean_shift_pct = abs((current_mean - baseline_mean) / baseline_mean) * 100
+        else:
+            mean_shift_pct = 0.0
+        
+        if baseline_std != 0:
+            std_shift_pct = abs((current_std - baseline_std) / baseline_std) * 100
+        else:
+            std_shift_pct = 0.0
+        
+        # Determine severity
+        severity = DriftSeverity.NONE
+        has_drift = False
+        
+        if mean_shift_pct > self.config.prediction.mean_shift_critical_pct:
+            severity = DriftSeverity.CRITICAL
+            has_drift = True
+        elif mean_shift_pct > self.config.prediction.mean_shift_warning_pct:
+            severity = DriftSeverity.WARNING
+            has_drift = True
+        elif std_shift_pct > self.config.prediction.variance_change_critical_pct:
+            severity = DriftSeverity.CRITICAL
+            has_drift = True
+        elif std_shift_pct > self.config.prediction.variance_change_warning_pct:
+            severity = DriftSeverity.WARNING
+            has_drift = True
+        
+        return {
+            'has_drift': has_drift,
+            'severity': severity.value,
+            'baseline_mean': baseline_mean,
+            'baseline_std': baseline_std,
+            'current_mean': current_mean,
+            'current_std': current_std,
+            'mean_shift_pct': mean_shift_pct,
+            'std_shift_pct': std_shift_pct,
+            'sample_count': len(current_predictions),
+            'details': f"Mean shift={mean_shift_pct:.2f}%, Std shift={std_shift_pct:.2f}%"
+        }
+    
+    def run_drift_detection(
+        self,
+        current_data: pd.DataFrame,
+        current_predictions: Optional[np.ndarray] = None
+    ) -> DriftReport:
+        """
+        Run complete drift detection on current data.
+        
+        Args:
+            current_data: Current feature DataFrame
+            current_predictions: Optional current model predictions
+            
+        Returns:
+            Complete drift report
+        """
+        if self.baseline_stats is None:
+            raise ValueError("Baseline not loaded. Call load_baseline() first.")
+        
+        logger.info("Starting drift detection...")
+        
+        # Get features to check
+        features_to_check = self.baseline_stats.get('features_monitored', [])
+        features_to_check = [f for f in features_to_check if f in current_data.columns]
+        
+        # Detect drift for each feature
+        feature_results = []
+        critical_count = 0
+        warning_count = 0
+        
+        for feature in features_to_check:
+            result = self.detect_feature_drift(feature, current_data[feature])
+            feature_results.append(result)
+            
+            if result.severity == DriftSeverity.CRITICAL:
+                critical_count += 1
+                logger.warning(f"CRITICAL drift in '{feature}': {result.details}")
+            elif result.severity == DriftSeverity.WARNING:
+                warning_count += 1
+                logger.warning(f"WARNING drift in '{feature}': {result.details}")
+        
+        # Detect prediction drift if predictions provided
+        prediction_drift = None
+        if current_predictions is not None:
+            prediction_drift = self.detect_prediction_drift(current_predictions)
+            if prediction_drift.get('has_drift'):
+                logger.warning(f"Prediction drift detected: {prediction_drift.get('details')}")
+        
+        # Determine overall severity
+        if critical_count > 0 or (prediction_drift and prediction_drift.get('severity') == 'critical'):
+            overall_severity = DriftSeverity.CRITICAL
+        elif warning_count > 0 or (prediction_drift and prediction_drift.get('severity') == 'warning'):
+            overall_severity = DriftSeverity.WARNING
+        else:
+            overall_severity = DriftSeverity.NONE
+        
+        # Generate recommendations
+        recommendations = self._generate_recommendations(
+            feature_results, prediction_drift, critical_count, warning_count
+        )
+        
+        # Determine if retraining should be triggered
+        should_retrain = (
+            self.config.retraining.auto_retrain_enabled and
+            (
+                (self.config.retraining.trigger_on_critical_drift and critical_count > 0) or
+                (self.config.retraining.trigger_on_consecutive_warnings and 
+                 warning_count >= self.config.retraining.warning_count_threshold)
+            )
+        )
+        
+        features_with_drift = critical_count + warning_count
+        
+        report = DriftReport(
+            timestamp=datetime.now().isoformat(),
+            overall_drift_detected=features_with_drift > 0,
+            severity=overall_severity,
+            features_checked=len(features_to_check),
+            features_with_drift=features_with_drift,
+            critical_drift_count=critical_count,
+            warning_drift_count=warning_count,
+            feature_results=feature_results,
+            prediction_drift=prediction_drift,
+            recommendations=recommendations,
+            should_trigger_retrain=should_retrain
+        )
+        
+        logger.info(f"Drift detection complete: {features_with_drift}/{len(features_to_check)} features with drift")
+        
+        return report
+    
+    def _generate_recommendations(
+        self,
+        feature_results: List[DriftResult],
+        prediction_drift: Optional[Dict],
+        critical_count: int,
+        warning_count: int
+    ) -> List[str]:
+        """Generate actionable recommendations based on drift results."""
+        recommendations = []
+        
+        if critical_count == 0 and warning_count == 0:
+            recommendations.append("No significant drift detected. Continue monitoring.")
+            return recommendations
+        
+        if critical_count > 0:
+            recommendations.append(
+                f"CRITICAL: {critical_count} features show significant drift. "
+                "Model retraining is recommended."
+            )
+        
+        if warning_count > 0:
+            recommendations.append(
+                f"WARNING: {warning_count} features show moderate drift. "
+                "Monitor closely and prepare for potential retraining."
+            )
+        
+        # Identify critical features
+        critical_features = [r.feature for r in feature_results if r.severity == DriftSeverity.CRITICAL]
+        if critical_features:
+            recommendations.append(
+                f"Critical drift in features: {', '.join(critical_features[:5])}"
+            )
+        
+        if prediction_drift and prediction_drift.get('has_drift'):
+            recommendations.append(
+                f"Prediction distribution has shifted: {prediction_drift.get('details')}"
+            )
+        
+        return recommendations
+    
+    def save_report(self, report: DriftReport) -> Path:
+        """Save drift report to JSON file."""
+        REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        report_path = get_drift_report_path(timestamp)
+        
+        # Convert report to dict
+        report_dict = {
+            'timestamp': report.timestamp,
+            'overall_drift_detected': report.overall_drift_detected,
+            'severity': report.severity.value,
+            'features_checked': report.features_checked,
+            'features_with_drift': report.features_with_drift,
+            'critical_drift_count': report.critical_drift_count,
+            'warning_drift_count': report.warning_drift_count,
+            'feature_results': [
+                {
+                    'feature': r.feature,
+                    'has_drift': r.has_drift,
+                    'severity': r.severity.value,
+                    'drift_score': r.drift_score,
+                    'test_used': r.test_used,
+                    'details': r.details
+                }
+                for r in report.feature_results
+            ],
+            'prediction_drift': report.prediction_drift,
+            'recommendations': report.recommendations,
+            'should_trigger_retrain': report.should_trigger_retrain
+        }
+        
+        with open(report_path, 'w') as f:
+            json.dump(report_dict, f, indent=2, default=str)
+        
+        logger.info(f"Drift report saved to: {report_path}")
+        return report_path
+
+
+if __name__ == "__main__":
+    print("Drift Detector Module")
+    print("=" * 50)
+    print("Usage:")
+    print("  1. Load baseline: detector.load_baseline()")
+    print("  2. Run detection: detector.run_drift_detection(current_data)")
+    print("  3. Save report: detector.save_report(report)")

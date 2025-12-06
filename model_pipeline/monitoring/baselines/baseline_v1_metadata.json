@@ -1,0 +1,594 @@
+{
+  "metadata": {
+    "version": 1,
+    "model_name": "xgboost",
+    "created_at": "2025-12-05T16:54:04.015930",
+    "train_samples": 8016,
+    "test_samples": 744,
+    "reference_samples": 744,
+    "n_features": 48,
+    "feature_names": [
+      "hour",
+      "day_of_week",
+      "month",
+      "year",
+      "day",
+      "hour_sin",
+      "hour_cos",
+      "dow_sin",
+      "dow_cos",
+      "month_sin",
+      "month_cos",
+      "is_morning_rush",
+      "is_evening_rush",
+      "is_night",
+      "is_midday",
+      "is_weekend",
+      "weekend_night",
+      "weekday_morning_rush",
+      "weekday_evening_rush",
+      "TMAX",
+      "TMIN",
+      "PRCP",
+      "temp_range",
+      "temp_avg",
+      "is_rainy",
+      "is_heavy_rain",
+      "is_cold",
+      "is_hot",
+      "rides_last_hour",
+      "rides_same_hour_yesterday",
+      "rides_same_hour_last_week",
+      "rides_rolling_3h",
+      "rides_rolling_24h",
+      "duration_mean",
+      "duration_std",
+      "duration_median",
+      "distance_mean",
+      "distance_std",
+      "distance_median",
+      "member_ratio",
+      "is_hour_8",
+      "is_hour_17_18",
+      "rush_intensity",
+      "high_demand_flag",
+      "low_demand_flag",
+      "demand_volatility",
+      "problem_period",
+      "hour_group"
+    ]
+  },
+  "feature_stats": {
+    "hour": {
+      "type": "numerical",
+      "mean": 11.5,
+      "std": 6.922618365947163,
+      "min": 0.0,
+      "max": 23.0,
+      "median": 11.5,
+      "q25": 5.75,
+      "q75": 17.25,
+      "n_samples": 8016
+    },
+    "day_of_week": {
+      "type": "numerical",
+      "mean": 1.0778443113772456,
+      "std": 1.8669207352691735,
+      "min": 0.0,
+      "max": 6.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 2.0,
+      "n_samples": 8016
+    },
+    "month": {
+      "type": "numerical",
+      "mean": 0.9341317365269461,
+      "std": 1.5031354859322477,
+      "min": 0.0,
+      "max": 12.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 2.0,
+      "n_samples": 8016
+    },
+    "year": {
+      "type": "numerical",
+      "mean": 733.6047904191616,
+      "std": 973.3888490862199,
+      "min": 0.0,
+      "max": 2025.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 2025.0,
+      "n_samples": 8016
+    },
+    "day": {
+      "type": "numerical",
+      "mean": 5.6706586826347305,
+      "std": 9.192761662833636,
+      "min": 0.0,
+      "max": 31.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 10.0,
+      "n_samples": 8016
+    },
+    "hour_sin": {
+      "type": "numerical",
+      "mean": -1.9057720582387918e-17,
+      "std": 0.7071508912755575,
+      "min": -1.0,
+      "max": 1.0,
+      "median": 6.123233995736766e-17,
+      "q25": -0.7071067811865472,
+      "q75": 0.7071067811865475,
+      "n_samples": 8016
+    },
+    "hour_cos": {
+      "type": "numerical",
+      "mean": -5.517874912807664e-17,
+      "std": 0.7071508912755575,
+      "min": -1.0,
+      "max": 1.0,
+      "median": -6.123233995736765e-17,
+      "q25": -0.7071067811865476,
+      "q75": 0.7071067811865475,
+      "n_samples": 8016
+    },
+    "dow_sin": {
+      "type": "numerical",
+      "mean": 0.0052597586666163175,
+      "std": 0.4275684000018703,
+      "min": -0.9749279121818236,
+      "max": 0.9749279121818236,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n_samples": 8016
+    },
+    "dow_cos": {
+      "type": "numerical",
+      "mean": 0.6389250564907257,
+      "std": 0.6395359258119544,
+      "min": -0.9009688679024191,
+      "max": 1.0,
+      "median": 1.0,
+      "q25": 0.6234898018587334,
+      "q75": 1.0,
+      "n_samples": 8016
+    },
+    "month_sin": {
+      "type": "numerical",
+      "mean": 0.2896092018547828,
+      "std": 0.40299411316154166,
+      "min": -2.4492935982947064e-16,
+      "max": 1.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.8660254037844386,
+      "n_samples": 8016
+    },
+    "month_cos": {
+      "type": "numerical",
+      "mean": 0.7181041542434659,
+      "std": 0.48795352396788955,
+      "min": -0.4999999999999998,
+      "max": 1.0,
+      "median": 1.0,
+      "q25": 0.5000000000000001,
+      "q75": 1.0,
+      "n_samples": 8016
+    },
+    "is_morning_rush": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.875,
+        "1": 0.125
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "is_evening_rush": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.875,
+        "1": 0.125
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "is_night": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.6666666666666666,
+        "1": 0.3333333333333333
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "is_midday": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.8333333333333334,
+        "1": 0.16666666666666666
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "is_weekend": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.8982035928143712,
+        "1": 0.10179640718562874
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "weekend_night": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.9660678642714571,
+        "1": 0.033932135728542916
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "weekday_morning_rush": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.8877245508982036,
+        "1": 0.1122754491017964
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "weekday_evening_rush": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.8877245508982036,
+        "1": 0.1122754491017964
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "TMAX": {
+      "type": "numerical",
+      "mean": 15.702395209580837,
+      "std": 10.47858282130051,
+      "min": -7.1,
+      "max": 36.7,
+      "median": 16.7,
+      "q25": 6.7,
+      "q75": 24.4,
+      "n_samples": 8016
+    },
+    "TMIN": {
+      "type": "numerical",
+      "mean": 7.293413173652696,
+      "std": 9.35522400168579,
+      "min": -12.7,
+      "max": 23.3,
+      "median": 6.95,
+      "q25": -0.5,
+      "q75": 15.6,
+      "n_samples": 8016
+    },
+    "PRCP": {
+      "type": "numerical",
+      "mean": 2.504491017964072,
+      "std": 6.993684329591804,
+      "min": 0.0,
+      "max": 70.1,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 1.0,
+      "n_samples": 8016
+    },
+    "temp_range": {
+      "type": "numerical",
+      "mean": 8.408982035928142,
+      "std": 3.218464997853733,
+      "min": 1.6999999999999993,
+      "max": 17.8,
+      "median": 7.8,
+      "q25": 6.1,
+      "q75": 10.499999999999998,
+      "n_samples": 8016
+    },
+    "temp_avg": {
+      "type": "numerical",
+      "mean": 11.497904191616765,
+      "std": 9.801572720573144,
+      "min": -9.35,
+      "max": 29.15,
+      "median": 11.100000000000001,
+      "q25": 3.3499999999999996,
+      "q75": 19.700000000000003,
+      "n_samples": 8016
+    },
+    "is_rainy": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.6766467065868264,
+        "1": 0.32335329341317365
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "is_heavy_rain": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.9221556886227545,
+        "1": 0.07784431137724551
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "is_cold": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.5389221556886228,
+        "1": 0.46107784431137727
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "is_hot": {
+      "type": "categorical",
+      "proportions": {
+        "0": 0.9221556886227545,
+        "1": 0.07784431137724551
+      },
+      "n_unique": 2,
+      "n_samples": 8016
+    },
+    "rides_last_hour": {
+      "type": "numerical",
+      "mean": 121.37350299401197,
+      "std": 259.40274357199985,
+      "min": 0.0,
+      "max": 2205.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 103.25,
+      "n_samples": 8016
+    },
+    "rides_same_hour_yesterday": {
+      "type": "numerical",
+      "mean": 121.32622255489022,
+      "std": 258.8645864193498,
+      "min": 0.0,
+      "max": 2205.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 103.25,
+      "n_samples": 8016
+    },
+    "rides_same_hour_last_week": {
+      "type": "numerical",
+      "mean": 121.69810379241517,
+      "std": 260.20037324570166,
+      "min": 0.0,
+      "max": 2205.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 104.0,
+      "n_samples": 8016
+    },
+    "rides_rolling_3h": {
+      "type": "numerical",
+      "mean": 121.40194610778443,
+      "std": 249.3153307409429,
+      "min": 0.0,
+      "max": 1844.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 112.66666666666667,
+      "n_samples": 8016
+    },
+    "rides_rolling_24h": {
+      "type": "numerical",
+      "mean": 121.37625270292747,
+      "std": 187.3168603434712,
+      "min": 0.0,
+      "max": 796.1666666666666,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 232.15625,
+      "n_samples": 8016
+    },
+    "duration_mean": {
+      "type": "numerical",
+      "mean": 4.739401819649007,
+      "std": 7.643572566993445,
+      "min": 0.0,
+      "max": 217.23686250000003,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 11.012735824829932,
+      "n_samples": 8016
+    },
+    "duration_std": {
+      "type": "numerical",
+      "mean": 6.83328197685821,
+      "std": 16.10167896710692,
+      "min": 0.0,
+      "max": 396.86621225790736,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 8.942055116763543,
+      "n_samples": 8016
+    },
+    "duration_median": {
+      "type": "numerical",
+      "mean": 3.318625508358284,
+      "std": 5.035773840260151,
+      "min": 0.0,
+      "max": 199.23568333333333,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 8.381175,
+      "n_samples": 8016
+    },
+    "distance_mean": {
+      "type": "numerical",
+      "mean": 0.6770705701378456,
+      "std": 0.920281358177289,
+      "min": 0.0,
+      "max": 4.608875896827813,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 1.754622596825015,
+      "n_samples": 8016
+    },
+    "distance_std": {
+      "type": "numerical",
+      "mean": 0.4979629166571871,
+      "std": 0.687077431273805,
+      "min": 0.0,
+      "max": 3.9592072737338104,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 1.266601286182485,
+      "n_samples": 8016
+    },
+    "distance_median": {
+      "type": "numerical",
+      "mean": 0.5513629282935074,
+      "std": 0.7541092092810493,
+      "min": 0.0,
+      "max": 4.611077363108011,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 1.4114754189929217,
+      "n_samples": 8016
+    },
+    "member_ratio": {
+      "type": "numerical",
+      "mean": 0.28689529776323053,
+      "std": 0.38941933408491586,
+      "min": 0.0,
+      "max": 1.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.7690934065934066,
+      "n_samples": 8016
+    },
+    "is_hour_8": {
+      "type": "numerical",
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n_samples": 8016
+    },
+    "is_hour_17_18": {
+      "type": "numerical",
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n_samples": 8016
+    },
+    "rush_intensity": {
+      "type": "numerical",
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n_samples": 8016
+    },
+    "high_demand_flag": {
+      "type": "numerical",
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n_samples": 8016
+    },
+    "low_demand_flag": {
+      "type": "numerical",
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n_samples": 8016
+    },
+    "demand_volatility": {
+      "type": "numerical",
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n_samples": 8016
+    },
+    "problem_period": {
+      "type": "numerical",
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n_samples": 8016
+    },
+    "hour_group": {
+      "type": "numerical",
+      "mean": 0.0,
+      "std": 0.0,
+      "min": 0.0,
+      "max": 0.0,
+      "median": 0.0,
+      "q25": 0.0,
+      "q75": 0.0,
+      "n_samples": 8016
+    }
+  },
+  "target_stats": {
+    "mean": 121.34680638722556,
+    "std": 259.3852822079666,
+    "min": 0.0,
+    "max": 2205.0,
+    "median": 0.0,
+    "n_samples": 8016
+  },
+  "prediction_stats": {
+    "mean": 697.2479858398438,
+    "std": 477.034423828125,
+    "min": 10.398573875427246,
+    "max": 1850.248779296875,
+    "median": 728.167236328125,
+    "q10": 55.50804557800292,
+    "q90": 1371.4787109375,
+    "n_predictions": 744
+  },
+  "performance_baseline": {
+    "baseline_r2": 0.9353594779968262,
+    "baseline_mae": 97.10047149658203,
+    "mitigated_r2": 0.9296782612800598,
+    "mitigated_mae": 100.38153839111328,
+    "mitigated_rmse": 147.53252422135603,
+    "r2_improvement": -0.005681216716766357,
+    "mae_improvement": -3.28106689453125
+  }
+}

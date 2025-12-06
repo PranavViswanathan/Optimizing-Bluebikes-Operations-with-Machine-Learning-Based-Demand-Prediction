@@ -1,0 +1,19 @@
+{
+  "retraining_runs": [
+    {
+      "timestamp": "2025-12-05T22:23:57.032018",
+      "trigger": "drift_detected",
+      "drift_status": "CRITICAL",
+      "n_drifted_features": 22,
+      "airflow_run_id": "manual__2025-12-05T22:18:31.891772+00:00"
+    },
+    {
+      "timestamp": "2025-12-06T16:33:30.369300",
+      "trigger": "drift_detected",
+      "drift_status": "CRITICAL",
+      "n_drifted_features": 22,
+      "airflow_run_id": "scheduled__2025-12-05T06:00:00+00:00"
+    }
+  ],
+  "last_retraining": "2025-12-06T16:33:30.369279"
+}

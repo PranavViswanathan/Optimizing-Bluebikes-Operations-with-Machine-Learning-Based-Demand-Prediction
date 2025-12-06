@@ -1,7 +1,7 @@
 {
   "version": "1.0",
-  "created": "2025-12-04T21:19:12.843588",
-  "last_updated": "2025-12-06T00:54:28.029232",
+  "created": "2025-12-05T14:49:41.637382",
+  "last_updated": "2025-12-06T05:10:03.575404",
   "bluebikes": {
     "processed_zips": [
       "202401-bluebikes-tripdata.zip",
@@ -12,9 +12,7 @@
       "202406-bluebikes-tripdata.zip",
       "202407-bluebikes-tripdata.zip",
       "202408-bluebikes-tripdata.zip",
-      "202409-bluebikes-tripdata.zip",
       "202410-bluebikes-tripdata.zip",
-      "202411-bluebikes-tripdata.zip",
       "202412-bluebikes-tripdata.zip",
       "202501-bluebikes-tripdata.zip",
       "202502-bluebikes-tripdata.zip",
@@ -27,16 +25,16 @@
       "202509-bluebikes-tripdata.zip",
       "202510-bluebikes-tripdata.zip"
     ],
-    "last_collection": "2025-12-06T00:18:47.928681",
-    "last_preprocessing": "2025-12-06T00:54:28.026455"
+    "last_collection": "2025-12-06T04:57:13.569364",
+    "last_preprocessing": "2025-12-06T05:10:03.573970"
   },
   "NOAA_weather": {
     "last_date": null,
     "last_collection": null,
-    "last_preprocessing": "2025-12-06T00:18:13.310391"
+    "last_preprocessing": "2025-12-05T14:49:48.109930"
   },
   "boston_clg": {
     "last_collection": null,
-    "last_preprocessing": "2025-12-06T00:17:34.556642"
+    "last_preprocessing": "2025-12-05T14:49:42.822181"
   }
 }
