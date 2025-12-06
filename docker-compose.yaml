@@ -28,6 +28,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/data:/opt/airflow/data
     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/scripts:/opt/airflow/scripts/model_pipeline
     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/mlruns:/opt/airflow/scripts/model_pipeline/mlruns
+    - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/artifacts:/opt/airflow/artifacts/model_pipeline
 
     # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/dags:/opt/airflow/dags/model_pipeline
     # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/mlruns:/opt/airflow/mlruns/model_pipeline
