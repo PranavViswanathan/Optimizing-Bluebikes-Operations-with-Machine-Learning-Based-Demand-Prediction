@@ -10,6 +10,7 @@ notebooks/test.py
 *.xlsx
 *.xls
 *.json
+!bluebikes-ui/**/*.json
 *.tsv
 *.tfevents
 
@@ -42,6 +43,7 @@ __pycache__/
 env/
 venv/
 .env
+!bluebikes-ui/**/.env*
 
 # Jupyter
 .ipynb_checkpoints
