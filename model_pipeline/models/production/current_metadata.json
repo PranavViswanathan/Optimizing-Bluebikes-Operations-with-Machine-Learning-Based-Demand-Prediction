@@ -1,0 +1,23 @@
+{
+  "model_type": "xgboost",
+  "version": 1,
+  "deployed_date": "2025-12-05",
+  "deployment_timestamp": "2025-12-05T16:53:15.147565",
+  "bias_mitigated": true,
+  "metrics": {
+    "baseline_r2": 0.9353594779968262,
+    "baseline_mae": 97.10047149658203,
+    "mitigated_r2": 0.9296782612800598,
+    "mitigated_mae": 100.38153839111328,
+    "mitigated_rmse": 147.53252422135603,
+    "r2_improvement": -0.005681216716766357,
+    "mae_improvement": -3.28106689453125
+  },
+  "bias_metrics": {
+    "baseline_issues": 4,
+    "mitigated_issues": 4,
+    "issues_reduced": 0
+  },
+  "airflow_run_id": "manual__2025-12-05T16:49:41.630805+00:00",
+  "model_path": "/opt/airflow/models/production/current_model.pkl"
+}

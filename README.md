@@ -10,10 +10,10 @@ Bluebikes serves 4.7 million annual rides but faces persistent challenges with b
 Bluebikes generates rich spatiotemporal datasets capturing cycling patterns, station utilization, and user behavior. By leveraging this data through predictive modeling, we can anticipate demand and proactively optimize bike distribution.
 
 ### Goals
-- Reduce revenue loss from unavailable bikes.
-- Improve user satisfaction by ensuring bike availability.
-- Enable proactive operations instead of reactive responses.
-- Support city-wide sustainability and traffic reduction initiatives.
+- Reduce revenue loss from unavailable bikes
+- Improve user satisfaction by ensuring bike availability
+- Enable proactive operations instead of reactive responses
+- Support city-wide sustainability and traffic reduction initiatives
 
 ### Approach
 Develop predictive models using historical ridership patterns, weather data, seasonal variations, and event-driven demand spikes to forecast when and where bikes will be needed most.
@@ -106,10 +106,6 @@ Key features:
 - Discord alert notifications for pipeline monitoring
 - Dockerized deployment for reproducibility
 
-## Model Pipeline
-
-**[View detailed model pipeline documentation](https://github.com/PranavViswanathan/Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction/blob/main/model_pipeline/README.md)**
-
 ## Preliminary Project Timeline
 ```mermaid
     gantt
@@ -119,12 +115,12 @@ Key features:
     
         section Milestones
         Project Scoping          :done,    ms1, 2025-09-30, 1d
-        Data Pipeline            :done,  ms2, 2025-10-01, 2025-10-28
-        Model Development        :done,         ms3, 2025-10-29, 2025-11-18
-        Model Deployment         :active,         ms4, 2025-11-19, 2025-12-09
+        Data Pipeline            :active,  ms2, 2025-10-01, 2025-10-28
+        Model Development        :         ms3, 2025-10-29, 2025-11-18
+        Model Deployment         :         ms4, 2025-11-19, 2025-12-09
         MLOps Expo               :milestone, ms5, 2025-12-12, 1d
 ```
 
 ## Status
-This repository is in the **Model Deployment phase**.  
+This repository is in the **Model Development phase**.  
 Code, data pipelines, and models will be added in upcoming sprints.

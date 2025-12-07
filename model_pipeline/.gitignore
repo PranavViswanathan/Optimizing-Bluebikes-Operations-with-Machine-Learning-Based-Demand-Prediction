@@ -1,0 +1,8 @@
+
+scripts/__pycache__/
+scripts/mlruns
+dags/__pycache__/
+mlruns/
+scripts/*.json
+scripts/*.log
+reports/

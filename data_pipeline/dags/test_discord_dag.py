@@ -4,8 +4,8 @@ from datetime import datetime
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scripts"))
-from discord_notifier import send_discord_alert, send_dag_success_alert
+# sys.path.append(os.path.join(os.path.dirname(__file__), "..", "scripts"))
+from scripts.data_pipeline.discord_notifier import send_discord_alert, send_dag_success_alert
 
 def test_success():
     print("This task will succeed and trigger success notification")

@@ -1,0 +1,37 @@
+{
+  "timestamp": "2025-12-04 01:41:24",
+  "baseline_model": "/opt/airflow/artifacts/model_pipeline/models/best_model_xgboost.pkl",
+  "mitigated_model": "/opt/airflow/artifacts/model_pipeline/models/mitigated_model_xgboost.pkl",
+  "baseline_metrics": {
+    "slice_name": 0.0,
+    "n_samples": 744.0,
+    "mae": 97.09893798828125,
+    "rmse": 141.44714532953643,
+    "r2": 0.9353653788566589,
+    "mape": 22.380493649637074,
+    "mean_actual": 723.5510752688172,
+    "mean_predicted": 735.6296997070312,
+    "bias": 12.078633431465395,
+    "std_residual": 140.93048027604945
+  },
+  "mitigated_metrics": {
+    "slice_name": 0.0,
+    "n_samples": 744.0,
+    "mae": 100.38797760009766,
+    "rmse": 147.53426508780936,
+    "r2": 0.9296826124191284,
+    "mape": 22.414053616245276,
+    "mean_actual": 723.5510752688172,
+    "mean_predicted": 730.08935546875,
+    "bias": 6.538294273038065,
+    "std_residual": 147.38931352632963
+  },
+  "baseline_bias_issues": 4,
+  "mitigated_bias_issues": 4,
+  "improvement": {
+    "mae_improvement": -3.2890396118164062,
+    "rmse_improvement": -6.087119758272934,
+    "r2_improvement": -0.005682766437530518,
+    "bias_issues_reduction": 0
+  }
+}

@@ -19,20 +19,6 @@ Pipeline for automated training of machine learning models every week to predict
 
 ## Architecture 
 ```
-data_pipeline/
-├── docker-compose.yaml       # Container orchestration configuration
-├── Dockerfile               # Custom Airflow image definition
-├── .env                     # Environment variables (API keys, webhooks)
-├── .env.example            # Template for environment variables
-├── dags/                   # Airflow DAG definitions
-│   ├── Model_pipeline_withBias_check.py # model pipeline dag
-├── scripts/ 
-├── working_data/                   # Data storage (gitignored)
-│   ├── raw/
-│   └── processed/
-└── logs/        
-```
-```
 model_pipeline/
 ├── mlflow/ 
 │   ├── data_splits/

@@ -18,12 +18,13 @@ from logger import get_logger
 logger = get_logger("data_loader")
 
 # Project paths
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PROCESSED_FOLDER_PATH = os.path.join(PROJECT_DIR, 'working_data', 'processed')
+DATA_BASE_DIR = os.environ.get("AIRFLOW_DATA_DIR", "/opt/airflow/data")
+
+PROCESSED_FOLDER_PATH = os.path.join(DATA_BASE_DIR, "processed")
 DEFAULT_DATA_PATHS = [
-    os.path.join(PROJECT_DIR, 'data', 'raw', 'bluebikes'),
-    os.path.join(PROJECT_DIR, 'data', 'raw', 'Boston_GIS'),
-    os.path.join(PROJECT_DIR, 'data', 'raw', 'NOAA')
+    os.path.join(DATA_BASE_DIR, "raw", "bluebikes"),
+    os.path.join(DATA_BASE_DIR, "raw", "boston_clg"),
+    os.path.join(DATA_BASE_DIR, "raw", "NOAA_weather"),
 ]
 
 SUPPORTED_EXTENSIONS = ['.csv', '.parquet', '.xlsx', '.xls']

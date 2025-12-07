@@ -1,0 +1,59 @@
+name: Airflow Docker Compose CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-smoke-test:
+    runs-on: ubuntu-latest
+
+    env:
+      # Match your docker-compose usage
+      AIRFLOW_UID: 50000
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+      NOAA_API_KEY: ${{ secrets.NOAA_API_KEY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show Docker version
+        run: |
+          docker version
+          docker compose version
+
+      - name: Validate docker-compose file
+        run: |
+          docker compose -f docker-compose.yaml config
+
+      - name: Build Airflow image and services
+        run: |
+          docker compose -f docker-compose.yaml build
+
+      - name: Start Airflow stack (smoke test)
+        run: |
+          docker compose -f docker-compose.yaml up -d \
+            postgres redis airflow-webserver airflow-scheduler
+
+          # Wait a bit for services to come up
+          sleep 90
+
+          echo "=== docker ps ==="
+          docker ps
+
+          echo "=== Airflow webserver logs (last 100 lines) ==="
+          docker compose -f docker-compose.yaml logs --tail=100 airflow-webserver
+
+      - name: Run simple health check
+        run: |
+          # Check webserver health endpoint
+          docker compose -f docker-compose.yaml exec -T airflow-webserver \
+            curl --fail http://localhost:8080/health || (echo "Health check failed" && exit 1)
+
+      - name: Tear down stack
+        if: always()
+        run: |
+          docker compose -f docker-compose.yaml down -v

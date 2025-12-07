@@ -1,0 +1,9 @@
+logs/
+
+data/raw/
+data/processed/
+
+dags/__pycache__/
+scripts/__pycache__/
+scripts/bluebikes_helpers/__pycache__/
+scripts/school_noaa_data_collectors/__pycache__/
