@@ -148,7 +148,7 @@
 #     train_model()
 
 
-# train_bluebikes_xgb_trips.py
+#xgb_model.py
 import pandas as pd
 import numpy as np
 from pathlib import Path
