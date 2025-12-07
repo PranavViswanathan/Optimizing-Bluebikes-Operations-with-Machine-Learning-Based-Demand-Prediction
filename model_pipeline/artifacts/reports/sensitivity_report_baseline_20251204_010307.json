@@ -1,0 +1,247 @@
+{
+  "timestamp": "2025-12-04 01:03:06",
+  "stage": "baseline",
+  "model_type": "XGBRegressor",
+  "n_features": 40,
+  "n_test_samples": 744,
+  "results": {},
+  "top_sensitive_features": [
+    [
+      "rides_last_hour",
+      5.83824251467983
+    ],
+    [
+      "rides_same_hour_last_week",
+      1.6411289650325973
+    ],
+    [
+      "rides_same_hour_yesterday",
+      1.1630810021112363
+    ],
+    [
+      "rides_rolling_3h",
+      0.6707373463238279
+    ],
+    [
+      "rides_rolling_24h",
+      0.23844594155283025
+    ],
+    [
+      "duration_mean",
+      0.20581109735455053
+    ],
+    [
+      "hour",
+      0.17572066572029144
+    ],
+    [
+      "day",
+      0.10731332749855937
+    ],
+    [
+      "duration_std",
+      0.014400816750518667
+    ],
+    [
+      "PRCP",
+      0.009638342104760037
+    ]
+  ],
+  "stability_summary": {
+    "robust_to_noise": true,
+    "min_correlation": 0.9979423539797182
+  },
+  "top_important_features": [
+    {
+      "feature": "rides_last_hour",
+      "importance_mean": 1.1268641114234925,
+      "importance_std": 0.04654684098333385
+    },
+    {
+      "feature": "distance_mean",
+      "importance_mean": 0.05939854979515076,
+      "importance_std": 0.0038863452145451415
+    },
+    {
+      "feature": "rides_same_hour_last_week",
+      "importance_mean": 0.0568084716796875,
+      "importance_std": 0.00302901887905522
+    },
+    {
+      "feature": "rides_same_hour_yesterday",
+      "importance_mean": 0.05056278705596924,
+      "importance_std": 0.0037242121295737902
+    },
+    {
+      "feature": "duration_median",
+      "importance_mean": 0.016498208045959473,
+      "importance_std": 0.002052205628507857
+    },
+    {
+      "feature": "hour_cos",
+      "importance_mean": 0.015842348337173462,
+      "importance_std": 0.001433105622028017
+    },
+    {
+      "feature": "rides_rolling_3h",
+      "importance_mean": 0.009058511257171631,
+      "importance_std": 0.0006721899047216753
+    },
+    {
+      "feature": "hour_sin",
+      "importance_mean": 0.008847427368164063,
+      "importance_std": 0.0006536993572539927
+    },
+    {
+      "feature": "member_ratio",
+      "importance_mean": 0.0056984543800354,
+      "importance_std": 0.0005511825887589412
+    },
+    {
+      "feature": "hour",
+      "importance_mean": 0.00550195574760437,
+      "importance_std": 0.0003597823742671283
+    }
+  ],
+  "hyperparameter_sensitivity": {
+    "max_depth": {
+      "current_value": 8,
+      "tested_values": [
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "results": [
+        {
+          "value": 4,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 6,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 8,
+          "is_current": true,
+          "note": "baseline"
+        },
+        {
+          "value": 10,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 12,
+          "is_current": false,
+          "note": "alternative"
+        }
+      ]
+    },
+    "learning_rate": {
+      "current_value": 0.05,
+      "tested_values": [
+        0.01,
+        0.05,
+        0.1,
+        0.2
+      ],
+      "results": [
+        {
+          "value": 0.01,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 0.05,
+          "is_current": true,
+          "note": "baseline"
+        },
+        {
+          "value": 0.1,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 0.2,
+          "is_current": false,
+          "note": "alternative"
+        }
+      ]
+    },
+    "n_estimators": {
+      "current_value": 1000,
+      "tested_values": [
+        100,
+        300,
+        500,
+        700
+      ],
+      "results": [
+        {
+          "value": 100,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 300,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 500,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 700,
+          "is_current": false,
+          "note": "alternative"
+        }
+      ]
+    },
+    "subsample": {
+      "current_value": 0.8,
+      "tested_values": [
+        0.6,
+        0.7,
+        0.8,
+        0.9,
+        1.0
+      ],
+      "results": [
+        {
+          "value": 0.6,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 0.7,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 0.8,
+          "is_current": true,
+          "note": "baseline"
+        },
+        {
+          "value": 0.9,
+          "is_current": false,
+          "note": "alternative"
+        },
+        {
+          "value": 1.0,
+          "is_current": false,
+          "note": "alternative"
+        }
+      ]
+    }
+  },
+  "critical_findings": [
+    "No critical sensitivity issues detected"
+  ]
+}
