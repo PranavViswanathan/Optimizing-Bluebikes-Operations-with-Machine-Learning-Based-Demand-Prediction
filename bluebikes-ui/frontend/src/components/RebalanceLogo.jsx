@@ -9,24 +9,32 @@ const RebalanceLogo = ({ size = 240 }) => {
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
+
+        {/* Outer glow softly tinted with new highlight */}
         <radialGradient id="glow" cx="50%" cy="50%" r="70%">
-          <stop offset="0%" stopColor="#00e5ff" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#003b46" stopOpacity="0" />
+          <stop offset="0%" stopColor="#87CBF8" stopOpacity="0.9" />
+          <stop offset="100%" stopColor="#0f172a" stopOpacity="0" />
         </radialGradient>
 
+        {/* Neon ring gradient updated to match design system */}
         <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#18ffff" />
-          <stop offset="100%" stopColor="#00bcd4" />
+          <stop offset="0%" stopColor="#87CBF8" />
+          <stop offset="100%" stopColor="#0ea5e9" />
         </linearGradient>
 
+        {/* Crosshair / balance-beam updated for theme cohesion */}
         <linearGradient id="balanceBeam" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stopColor="#00bcd4" />
-          <stop offset="100%" stopColor="#18ffff" />
+          <stop offset="0%" stopColor="#87CBF8" />
+          <stop offset="50%" stopColor="#7dd3fc" />
+          <stop offset="100%" stopColor="#0ea5e9" />
         </linearGradient>
+
       </defs>
 
+      {/* Outer glow */}
       <circle cx="120" cy="120" r="110" fill="url(#glow)" />
 
+      {/* Neon ring */}
       <circle
         cx="120"
         cy="120"
@@ -36,6 +44,7 @@ const RebalanceLogo = ({ size = 240 }) => {
         fill="none"
       />
 
+      {/* Crosshair beam */}
       <line
         x1="40"
         y1="120"
@@ -44,7 +53,7 @@ const RebalanceLogo = ({ size = 240 }) => {
         stroke="url(#balanceBeam)"
         strokeWidth="6"
         strokeLinecap="round"
-        opacity="0.8"
+        opacity="0.9"
       />
       <line
         x1="120"
@@ -54,12 +63,13 @@ const RebalanceLogo = ({ size = 240 }) => {
         stroke="url(#balanceBeam)"
         strokeWidth="6"
         strokeLinecap="round"
-        opacity="0.6"
+        opacity="0.7"
       />
 
+      {/* Bike lines — recolored to unified neon highlight */}
       <g
         fill="none"
-        stroke="#18ffff"
+        stroke="#87CBF8"
         strokeWidth="6"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -80,18 +90,19 @@ const RebalanceLogo = ({ size = 240 }) => {
         <line x1="100" y1="100" x2="120" y2="100" />
       </g>
 
+      {/* Label text */}
       <text
         x="120"
         y="222"
         fontFamily="Inter, sans-serif"
-        fontSize="16"
-        fill="#18ffff"
+        fontSize="20"
+        fill="#87CBF8"
         textAnchor="middle"
-        opacity="0.9"
+        opacity="0.95"
         letterSpacing="2"
       >
-        REBALANCE AI {/* TODO:change name*/}
-      </text> 
+        REBALANCE AI
+      </text>
     </svg>
   );
 };
