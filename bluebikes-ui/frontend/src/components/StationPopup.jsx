@@ -38,17 +38,17 @@ const StationPopup = ({ station }) => {
             {status ? (
                 <>
                     <div className="popup-section">
-                        <p className="popup-label">🚴 Available Bikes:</p>
+                        <p className="popup-label">Available Bikes:</p>
                         <p className="popup-value bikes-available">{status.num_bikes_available || 0}</p>
                     </div>
 
                     <div className="popup-section">
-                        <p className="popup-label">🅿️ Available Docks:</p>
+                        <p className="popup-label">Available Docks:</p>
                         <p className="popup-value">{status.num_docks_available || 0}</p>
                     </div>
 
                     <div className="popup-section">
-                        <p className="popup-label">📊 Status:</p>
+                        <p className="popup-label">Status:</p>
                         <p className="popup-value">
                             <span className={`status-badge ${status.is_renting && status.is_returning ? 'active' : 'inactive'}`}>
                                 {status.is_renting && status.is_returning ? 'Active' : 'Inactive'}
@@ -64,7 +64,7 @@ const StationPopup = ({ station }) => {
             )}
 
             <div className="popup-section prediction-section">
-                <p className="popup-label">🔮 Predicted Demand (Next Hour):</p>
+                <p className="popup-label">Predicted Demand (Next Hour):</p>
                 {loadingPrediction ? (
                     <div className="popup-loading">
                         <div className="mini-spinner"></div>
@@ -75,7 +75,7 @@ const StationPopup = ({ station }) => {
                             {prediction.predicted_demand} rides
                         </p>
                         {prediction.model_status === 'mock' && (
-                            <p className="prediction-note">⚠️ Using mock data (model not loaded)</p>
+                            <p className="prediction-note">⚠ Using mock data (model not loaded)</p>
                         )}
                     </div>
                 ) : (
