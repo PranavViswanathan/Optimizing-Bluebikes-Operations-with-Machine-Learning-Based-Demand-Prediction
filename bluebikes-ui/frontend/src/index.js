@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './styles/App.css';
+import './styles/AppAdmin.css';
 import './styles/FilterButtons.css';
 import './styles/NearestStations.css';
 import './styles/Rebalancing.css';

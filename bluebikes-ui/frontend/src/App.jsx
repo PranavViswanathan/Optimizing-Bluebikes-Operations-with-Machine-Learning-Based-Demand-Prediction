@@ -1,12 +1,19 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { StationProvider } from './context/StationContext';
 import MapView from './components/MapView';
 import StationList from './components/StationList';
 import StationDetail from './components/StationDetail';
 import RebalancingView from './components/RebalancingView';
 import RebalanceLogo from './components/RebalanceLogo';
+import AdminLogin from './components/AdminLogin';
+import AdminDashboard from './components/AdminDashboard';
 import './styles/App.css';
+
+const ProtectedRoute = ({ children }) => {
+    const isAuthenticated = sessionStorage.getItem('isAdmin') === 'true';
+    return isAuthenticated ? children : <Navigate to="/admin" replace />;
+};
 
 function App() {
     return (
@@ -46,6 +53,12 @@ function App() {
                             <Route path="/stations" element={<StationList />} />
                             <Route path="/stations/:stationId" element={<StationDetail />} />
                             <Route path="/rebalancing" element={<RebalancingView />} />
+                            <Route path="/admin" element={<AdminLogin />} />
+                            <Route path="/admin/dashboard" element={
+                                <ProtectedRoute>
+                                    <AdminDashboard />
+                                </ProtectedRoute>
+                            } />
                         </Routes>
                     </main>
 
@@ -54,6 +67,9 @@ function App() {
                             Real-time data from Bluebikes GBFS API |
                             ML Predictions powered by XGBoost |
                             Built for MLOps Final Project
+                        </p>
+                        <p style={{ marginTop: '0.5rem', fontSize: '0.8rem' }}>
+                            <Link to="/admin" style={{ color: 'rgba(255,255,255,0.3)', textDecoration: 'none' }}>Admin Access</Link>
                         </p>
                     </footer>
 
