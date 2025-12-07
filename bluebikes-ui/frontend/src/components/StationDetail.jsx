@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useStations } from '../context/StationContext';
 
 const StationDetail = () => {
-    const { id } = useParams();
+    const { stationId } = useParams();
     const navigate = useNavigate();
     const { getStationInfo, fetchStationStatus, stationStatus, getPrediction } = useStations();
     const [station, setStation] = useState(null);
@@ -15,23 +15,23 @@ const StationDetail = () => {
             setLoading(true);
 
             // Get station info
-            const stationInfo = getStationInfo(id);
+            const stationInfo = getStationInfo(stationId);
             setStation(stationInfo);
 
             // Fetch current status
-            if (!stationStatus[id]) {
-                await fetchStationStatus(id);
+            if (!stationStatus[stationId]) {
+                await fetchStationStatus(stationId);
             }
 
             // Get prediction
-            const pred = await getPrediction(id);
+            const pred = await getPrediction(stationId);
             setPrediction(pred);
 
             setLoading(false);
         };
 
         loadData();
-    }, [id]);
+    }, [stationId]);
 
     if (loading) {
         return (
@@ -46,7 +46,7 @@ const StationDetail = () => {
         return (
             <div className="error-container">
                 <h2>Station Not Found</h2>
-                <p>No station found with ID: {id}</p>
+                <p>No station found with ID: {stationId}</p>
                 <button className="back-btn" onClick={() => navigate(-1)}>
                     ← Go Back
                 </button>
@@ -54,7 +54,7 @@ const StationDetail = () => {
         );
     }
 
-    const status = stationStatus[id];
+    const status = stationStatus[stationId];
     const bikesAvailable = status?.num_bikes_available || 0;
     const docksAvailable = status?.num_docks_available || 0;
     const isActive = status?.is_renting && status?.is_returning;
