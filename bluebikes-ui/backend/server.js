@@ -7,7 +7,14 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 const GBFS_BASE_URL = process.env.GBFS_BASE_URL || 'https://gbfs.lyft.com/gbfs/1.1/bos/en';
-const ML_SERVICE_URL = `http://localhost:${process.env.ML_SERVICE_PORT || 5001}`;
+
+// ML Service Configuration
+// Set USE_EXTERNAL_ML_API=true to use a deployed model API
+const USE_EXTERNAL_ML_API = process.env.USE_EXTERNAL_ML_API === 'true';
+const EXTERNAL_ML_API_URL = process.env.EXTERNAL_ML_API_URL;
+const ML_SERVICE_URL = USE_EXTERNAL_ML_API && EXTERNAL_ML_API_URL 
+  ? EXTERNAL_ML_API_URL 
+  : `http://localhost:${process.env.ML_SERVICE_PORT || 5001}`;
 
 // Initialize cache with 60-second TTL for real-time data
 const cache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
@@ -134,14 +141,21 @@ app.post('/api/predict', async (req, res) => {
       return res.status(400).json({ error: 'station_id is required' });
     }
 
-    // Forward request to Python ML service
-    const response = await axios.post(`${ML_SERVICE_URL}/predict`, {
+    // Forward request to ML service (local or external)
+    const mlRequestPayload = {
       station_id,
       datetime: datetime || new Date().toISOString(),
-      temperature: temperature || 15, // Default to 15°C if not provided
+      temperature: temperature || 15,
       precipitation: precipitation || 0
-    }, {
-      timeout: 5000 // 5 second timeout
+    };
+
+    const response = await axios.post(`${ML_SERVICE_URL}/predict`, mlRequestPayload, {
+      timeout: 10000, // 10 second timeout for external APIs
+      headers: {
+        'Content-Type': 'application/json',
+        // Add authorization header if using external API with auth
+        ...(process.env.ML_API_KEY && { 'Authorization': `Bearer ${process.env.ML_API_KEY}` })
+      }
     });
 
     res.json(response.data);
@@ -178,6 +192,7 @@ app.listen(PORT, () => {
   console.log(`🚀 Bluebikes Backend Server running on port ${PORT}`);
   console.log(`📍 GBFS API: ${GBFS_BASE_URL}`);
   console.log(`🤖 ML Service: ${ML_SERVICE_URL}`);
+  console.log(`   ML Mode: ${USE_EXTERNAL_ML_API ? '☁️  External API' : '🏠 Local Service'}`);
   console.log(`\nAvailable endpoints:`);
   console.log(`  GET  /api/stations`);
   console.log(`  GET  /api/stations/status`);

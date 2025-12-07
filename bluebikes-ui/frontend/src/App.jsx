@@ -4,6 +4,8 @@ import { StationProvider } from './context/StationContext';
 import MapView from './components/MapView';
 import StationList from './components/StationList';
 import StationDetail from './components/StationDetail';
+import RebalancingView from './components/RebalancingView';
+import './styles/App.css';
 
 function App() {
     return (
@@ -19,6 +21,7 @@ function App() {
                             <nav className="nav-links">
                                 <Link to="/" className="nav-link">Map View</Link>
                                 <Link to="/stations" className="nav-link">List View</Link>
+                                <Link to="/rebalancing" className="nav-link">Rebalancing</Link>
                             </nav>
                         </div>
                     </header>
@@ -27,7 +30,8 @@ function App() {
                         <Routes>
                             <Route path="/" element={<MapView />} />
                             <Route path="/stations" element={<StationList />} />
-                            <Route path="/stations/:id" element={<StationDetail />} />
+                            <Route path="/stations/:stationId" element={<StationDetail />} />
+                            <Route path="/rebalancing" element={<RebalancingView />} />
                         </Routes>
                     </main>
 

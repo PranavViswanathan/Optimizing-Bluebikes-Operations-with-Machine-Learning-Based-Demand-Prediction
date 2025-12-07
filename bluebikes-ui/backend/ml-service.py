@@ -139,25 +139,32 @@ def get_mock_prediction(station_id, dt):
     hour = dt.hour
     day_of_week = dt.weekday()
     
-    # Simple mock logic: higher demand during rush hours on weekdays
-    base_demand = 10
+    # Use station_id to create variation between stations
+    # Some stations will have high demand, others low
+    try:
+        station_num = int(station_id) if isinstance(station_id, str) else station_id
+    except:
+        station_num = hash(str(station_id)) % 1000
+    
+    # Create station-specific demand pattern (0-8 bikes)
+    station_factor = (station_num % 10) / 10  # 0.0 to 0.9
     
     if day_of_week < 5:  # Weekday
         if 7 <= hour <= 9:  # Morning rush
-            demand = base_demand + np.random.randint(20, 40)
+            base_demand = 3 + int(station_factor * 5)  # 3-8 bikes
         elif 17 <= hour <= 19:  # Evening rush
-            demand = base_demand + np.random.randint(25, 45)
+            base_demand = 3 + int(station_factor * 5)  # 3-8 bikes
         elif 11 <= hour <= 14:  # Midday
-            demand = base_demand + np.random.randint(10, 20)
+            base_demand = 1 + int(station_factor * 3)  # 1-4 bikes
         else:
-            demand = base_demand + np.random.randint(0, 10)
+            base_demand = int(station_factor * 2)  # 0-2 bikes
     else:  # Weekend
         if 10 <= hour <= 16:  # Weekend afternoon
-            demand = base_demand + np.random.randint(15, 30)
+            base_demand = 2 + int(station_factor * 4)  # 2-6 bikes
         else:
-            demand = base_demand + np.random.randint(0, 15)
+            base_demand = int(station_factor * 2)  # 0-2 bikes
     
-    return max(0, demand)
+    return max(0, base_demand)
 
 @app.route('/predict', methods=['POST'])
 def predict():

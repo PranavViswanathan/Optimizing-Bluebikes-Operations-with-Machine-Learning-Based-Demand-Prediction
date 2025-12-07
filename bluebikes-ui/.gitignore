@@ -72,3 +72,5 @@ logs/
 .tmp/
 tmp/
 temp/
+*.pid
+

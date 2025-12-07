@@ -63,6 +63,61 @@ const MapView = () => {
     const { stations, stationStatus, fetchStationStatus, fetchAllStationStatus, loading, error } = useStations();
     const [hoveredStation, setHoveredStation] = useState(null);
     const [filter, setFilter] = useState('all'); // 'all', 'available', 'low', 'empty'
+    const [userLocation, setUserLocation] = useState(null);
+    const [locationError, setLocationError] = useState(null);
+
+    // Get user's location on mount
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    });
+                },
+                (error) => {
+                    console.error('Error getting location:', error);
+                    setLocationError('Could not get your location. Please enable location services.');
+                }
+            );
+        } else {
+            setLocationError('Geolocation is not supported by your browser.');
+        }
+    }, []);
+
+    // Calculate distance between two coordinates (Haversine formula)
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+        const R = 3958.8; // Radius of the Earth in miles (was 6371 km)
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        return R * c; // Distance in miles
+    };
+
+    // Get nearest stations to user
+    const getNearestStations = () => {
+        if (!userLocation || stations.length === 0) return [];
+
+        return stations
+            .map(station => ({
+                ...station,
+                distance: calculateDistance(
+                    userLocation.lat,
+                    userLocation.lng,
+                    station.lat,
+                    station.lon
+                )
+            }))
+            .sort((a, b) => a.distance - b.distance)
+            .slice(0, 5); // Get top 5 nearest
+    };
+
+    const nearestStations = getNearestStations();
 
     // Fetch all station statuses on mount
     useEffect(() => {
@@ -208,7 +263,96 @@ const MapView = () => {
                         </Marker>
                     );
                 })}
+
+                {/* User Location Marker */}
+                {userLocation && (
+                    <Marker
+                        position={[userLocation.lat, userLocation.lng]}
+                        icon={L.divIcon({
+                            className: 'user-location-marker',
+                            html: `
+                                <div style="
+                                    background-color: #3b82f6;
+                                    width: 20px;
+                                    height: 20px;
+                                    border-radius: 50%;
+                                    border: 4px solid white;
+                                    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+                                    animation: pulse 2s ease-in-out infinite;
+                                "></div>
+                            `,
+                            iconSize: [20, 20],
+                            iconAnchor: [10, 10],
+                        })}
+                    >
+                        <Popup>
+                            <div style={{ textAlign: 'center', padding: '8px' }}>
+                                <strong>📍 Your Location</strong>
+                                <p style={{ margin: '4px 0', fontSize: '12px' }}>
+                                    {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+                                </p>
+                            </div>
+                        </Popup>
+                    </Marker>
+                )}
             </MapContainer>
+
+            {/* Nearest Stations Section */}
+            {userLocation && nearestStations.length > 0 && (
+                <div className="nearest-stations-section">
+                    <h3 className="nearest-title">
+                        📍 Nearest Stations to You
+                    </h3>
+                    <div className="nearest-stations-grid">
+                        {nearestStations.map((station) => {
+                            const status = stationStatus[station.station_id];
+                            const bikesAvailable = status?.num_bikes_available || 0;
+                            const docksAvailable = status?.num_docks_available || 0;
+
+                            let availabilityClass = 'empty';
+                            if (bikesAvailable > 5) availabilityClass = 'good';
+                            else if (bikesAvailable >= 1) availabilityClass = 'low';
+
+                            return (
+                                <div key={station.station_id} className="nearest-station-card">
+                                    <div className="nearest-station-header">
+                                        <h4 className="nearest-station-name">{station.name}</h4>
+                                        <span className="nearest-distance">
+                                            {station.distance.toFixed(2)} mi
+                                        </span>
+                                    </div>
+                                    <div className="nearest-station-stats">
+                                        <div className="stat-item">
+                                            <span className="stat-label">Bikes:</span>
+                                            <span className={`stat-value ${availabilityClass}`}>
+                                                {bikesAvailable}
+                                            </span>
+                                        </div>
+                                        <div className="stat-item">
+                                            <span className="stat-label">Docks:</span>
+                                            <span className="stat-value">
+                                                {docksAvailable}
+                                            </span>
+                                        </div>
+                                        <div className="stat-item">
+                                            <span className={`status-badge ${status?.is_renting && status?.is_returning ? 'active' : 'inactive'}`}>
+                                                {status?.is_renting && status?.is_returning ? 'Active' : 'Inactive'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* Location Error Message */}
+            {locationError && (
+                <div className="location-error">
+                    ⚠ {locationError}
+                </div>
+            )}
         </div>
     );
 };

@@ -4,12 +4,14 @@ A full-stack web application for visualizing Bluebikes stations with real-time a
 
 ## Features
 
-- **Interactive Map**: View all ~450 Bluebikes stations on an interactive Leaflet map
+- **Interactive Map**: View all ~590 Bluebikes stations on an interactive Leaflet map with color-coded availability
 - **Real-time Data**: Live bike and dock availability from Bluebikes GBFS API
 - **ML Predictions**: XGBoost-powered demand forecasting for each station
+- **AI Rebalancing**: Intelligent bike redistribution recommendations using ML predictions
 - **List View**: Searchable and sortable table of all stations
 - **Detailed View**: Comprehensive analytics for individual stations
 - **Premium UI**: Modern dark theme with glassmorphism and smooth animations
+- **Deployed Model Support**: Call external ML APIs (AWS SageMaker, Azure ML, etc.)
 
 ## Tech Stack
 
@@ -55,7 +57,31 @@ cd ../frontend
 npm install
 ```
 
-## Running the Application
+## Quick Start
+
+The easiest way to run the application is using the provided scripts:
+
+```bash
+# Start all services and open browser
+./start.sh
+
+# Stop all services
+./stop.sh
+```
+
+That's it! The `start.sh` script will:
+- Start the backend server (port 5001)
+- Start the ML prediction service (port 5002)
+- Start the React frontend (port 3000)
+- Automatically open your browser to http://localhost:3000
+
+Logs are saved to the `logs/` directory for debugging.
+
+---
+
+## Running the Application (Manual)
+
+If you prefer to run services manually in separate terminals:
 
 You need to run **3 services** in separate terminals:
 
@@ -63,10 +89,10 @@ You need to run **3 services** in separate terminals:
 
 ```bash
 cd backend
-npm start
+node server.js
 ```
 
-The API server will run on `http://localhost:5000`
+The API server will run on `http://localhost:5001`
 
 ### Terminal 2: Python ML Service
 
@@ -75,7 +101,7 @@ cd backend
 python ml-service.py
 ```
 
-The ML service will run on `http://localhost:5001`
+The ML service will run on `http://localhost:5002`
 
 ### Terminal 3: React Frontend
 
@@ -104,6 +130,118 @@ The React app will open at `http://localhost:3000`
    - Real-time availability
    - ML demand prediction
    - Visual availability bars
+
+4. **Rebalancing View**:
+   - Click "Rebalancing" in navigation to access bike rebalancing recommendations
+   - AI-powered system identifies stations requiring rebalancing
+   - Shows optimal bike transfer routes between stations
+   - Includes distance, quantity, and priority information
+
+## Rebalancing Algorithm
+
+The rebalancing feature uses a **surplus-based algorithm** that combines real-time availability data with ML demand predictions to generate intelligent bike redistribution recommendations.
+
+### How It Works
+
+#### 1. **Identify Recipients (Stations Needing Bikes)**
+
+The algorithm identifies stations that will likely run out of bikes soon:
+
+```
+Deficit = Predicted Demand - Current Available Bikes
+```
+
+A station becomes a **recipient** if:
+- `Deficit ≥ 3 bikes` (configurable threshold)
+- It has available docks to receive bikes
+- Current bikes are insufficient to meet predicted hourly demand
+
+**Example**: 
+- Station has 2 bikes available
+- ML predicts 8 bikes will be needed in the next hour
+- Deficit = 8 - 2 = 6 bikes → **Needs rebalancing**
+
+#### 2. **Identify Donors (Stations With Surplus Bikes)**
+
+The algorithm finds stations with excess bikes that can spare them:
+
+```
+Surplus = Current Available Bikes - (Predicted Demand + Safety Buffer)
+```
+
+A station becomes a **donor** if:
+- `Surplus ≥ 8 bikes` (configurable threshold)
+- It has more bikes than predicted demand + buffer
+- Bikes can be safely removed without hurting availability
+
+**Example**:
+- Station has 25 bikes available
+- ML predicts 5 bikes will be needed in the next hour
+- Safety buffer = 5 bikes
+- Surplus = 25 - (5 + 5) = 15 bikes → **Can donate bikes**
+
+#### 3. **Match Recipients with Nearby Donors**
+
+For each recipient station:
+1. **Find nearby donors** within 1 km radius (configurable)
+2. **Calculate distance** using Haversine formula
+3. **Sort by proximity** (closer donors preferred)
+4. **Determine transfer quantity**:
+   ```
+   Bikes to Move = min(Deficit, Donor Surplus, Available Docks)
+   ```
+5. **Generate recommendation** with route details
+
+#### 4. **Prioritization**
+
+Recommendations are sorted by urgency:
+- Higher deficit = Higher priority
+- Closer matches = Better efficiency
+- Larger transfers = More impact
+
+### Configuration Parameters
+
+You can tune the algorithm in `frontend/src/components/RebalancingView.jsx`:
+
+```javascript
+const deficitThreshold = 3;   // Min bikes needed to flag recipient
+const donorMinSurplus = 8;    // Min surplus to qualify as donor
+const safetyBuffer = 5;       // Buffer kept at donor stations
+const maxDistance = 1.0;      // Max distance for matches (km)
+```
+
+### Example Scenario
+
+**Recipient Station** (Downtown Crossing):
+- Current bikes: 1
+- Predicted demand: 7 bikes/hour
+- Deficit: 6 bikes ⚠️
+
+**Donor Station** (Park Street - 0.3km away):
+- Current bikes: 22
+- Predicted demand: 3 bikes/hour
+- Surplus: 14 bikes ✅
+
+**Recommendation**:
+> Move **6 bikes** from Park St → Downtown Crossing  
+> Distance: 0.3 km | Priority: High
+
+### ML Integration
+
+The rebalancing algorithm relies on **accurate demand predictions** from your ML model:
+
+- **With Real Model**: Uses your trained XGBoost model for precise hourly demand forecasts
+- **With Mock Data**: Uses simplified time-based heuristics (for testing/demo)
+
+For best results, deploy your trained model following the [Deployed Model Guide](deployed_model_guide.md).
+
+### Benefits
+
+✅ **Proactive**: Prevents stockouts before they occur  
+✅ **Efficient**: Matches based on proximity and capacity  
+✅ **Data-Driven**: Uses ML predictions instead of static rules  
+✅ **Scalable**: Analyzes all 590+ stations in real-time  
+✅ **Actionable**: Provides specific transfer quantities and routes
 
 ## API Endpoints
 
@@ -175,12 +313,24 @@ bluebikes-ui/
 Edit `backend/.env`:
 
 ```env
+# Bluebikes GBFS API
 GBFS_BASE_URL=https://gbfs.lyft.com/gbfs/1.1/bos/en
-MODEL_PATH=./models/best_model.pkl
-PORT=5000
-ML_SERVICE_PORT=5001
+
+# Backend Server
+PORT=5001
 NODE_ENV=development
+
+# Local ML Service (default)
+ML_SERVICE_PORT=5002
+MODEL_PATH=./models/best_model.pkl
+
+# External Deployed ML API (optional)
+USE_EXTERNAL_ML_API=false
+# EXTERNAL_ML_API_URL=https://your-ml-api.example.com
+# ML_API_KEY=your-api-key-here
 ```
+
+**Using a Deployed Model?** See the [Deployed Model Guide](deployed_model_guide.md) for instructions on connecting to AWS SageMaker, Azure ML, or other hosted ML services.
 
 ## Development
 
@@ -234,13 +384,16 @@ npm start  # Auto-reloads on file changes
 
 ## Future Enhancements
 
+- [x] AI-powered bike rebalancing recommendations
+- [x] External ML API support for deployed models
 - [ ] Historical trend charts
-- [ ] 24-hour demand forecasting
+- [ ] 24-hour demand forecasting with time series
 - [ ] Weather integration with live data
 - [ ] User location detection
 - [ ] Route planning between stations
 - [ ] Mobile responsiveness improvements
 - [ ] Dark/Light theme toggle
+- [ ] Export rebalancing routes to CSV/JSON
 
 ## License
 
