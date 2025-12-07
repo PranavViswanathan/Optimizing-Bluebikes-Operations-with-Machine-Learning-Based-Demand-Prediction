@@ -61,6 +61,7 @@ logs/
 
 # Cache
 .cache/
+node_modules/.cache/
 .npm/
 .eslintcache
 
