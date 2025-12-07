@@ -14,7 +14,10 @@ const USE_EXTERNAL_ML_API = process.env.USE_EXTERNAL_ML_API === 'true';
 const EXTERNAL_ML_API_URL = process.env.EXTERNAL_ML_API_URL;
 const ML_SERVICE_URL = USE_EXTERNAL_ML_API && EXTERNAL_ML_API_URL 
   ? EXTERNAL_ML_API_URL 
-  : `http://localhost:${process.env.ML_SERVICE_PORT || 5001}`;
+  : `http://localhost:${process.env.ML_SERVICE_PORT || 5002}`;
+
+// Historical Data Service Configuration
+const HISTORICAL_SERVICE_URL = `http://localhost:${process.env.HISTORICAL_DATA_SERVICE_PORT || 5003}`;
 
 // Initialize cache with 60-second TTL for real-time data
 const cache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
@@ -177,6 +180,47 @@ app.post('/api/predict', async (req, res) => {
   }
 });
 
+// ========== HISTORICAL DATA ENDPOINT ==========
+
+/**
+ * GET /api/historical/:stationId/:timeRange
+ * Proxy requests to historical data service
+ * timeRange: hourly | daily | weekly
+ */
+app.get('/api/historical/:stationId/:timeRange', async (req, res) => {
+  try {
+    const { stationId, timeRange } = req.params;
+    
+    // Validate time range
+    if (!['hourly', 'daily', 'weekly'].includes(timeRange)) {
+      return res.status(400).json({ error: 'Invalid time range. Use: hourly, daily, or weekly' });
+    }
+    
+    // Forward request to historical data service
+    const response = await axios.get(
+      `${HISTORICAL_SERVICE_URL}/api/historical/${stationId}/${timeRange}`,
+      { timeout: 30000 } // 30 second timeout for data processing
+    );
+    
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error calling historical data service:', error.message);
+    
+    // If historical service is unavailable, return a graceful error
+    if (error.code === 'ECONNREFUSED') {
+      return res.status(503).json({ 
+        error: 'Historical data service is currently unavailable',
+        data: []
+      });
+    }
+    
+    res.status(500).json({ 
+      error: 'Failed to get historical data',
+      message: error.message 
+    });
+  }
+});
+
 // ========== HEALTH CHECK ==========
 
 app.get('/health', (req, res) => {
@@ -193,10 +237,12 @@ app.listen(PORT, () => {
   console.log(`📍 GBFS API: ${GBFS_BASE_URL}`);
   console.log(`🤖 ML Service: ${ML_SERVICE_URL}`);
   console.log(`   ML Mode: ${USE_EXTERNAL_ML_API ? '☁️  External API' : '🏠 Local Service'}`);
+  console.log(`📊 Historical Data Service: ${HISTORICAL_SERVICE_URL}`);
   console.log(`\nAvailable endpoints:`);
   console.log(`  GET  /api/stations`);
   console.log(`  GET  /api/stations/status`);
   console.log(`  GET  /api/stations/:id/status`);
   console.log(`  POST /api/predict`);
+  console.log(`  GET  /api/historical/:stationId/:timeRange`);
   console.log(`  GET  /health`);
 });

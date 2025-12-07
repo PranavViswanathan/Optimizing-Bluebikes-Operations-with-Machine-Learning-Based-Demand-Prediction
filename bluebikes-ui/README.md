@@ -11,6 +11,8 @@ A full-stack web application for visualizing Bluebikes stations with real-time a
 - **List View**: Searchable and sortable table of all stations
 - **Detailed View**: Comprehensive analytics for individual stations
 - **Premium UI**: Modern dark theme with glassmorphism and smooth animations
+- **Historical Trends**: Visualize past utilization patterns (7 days, 30 days, 12 weeks)
+- **Route Planning**: Find nearest drop-off stations with turn-by-turn directions
 - **Deployed Model Support**: Call external ML APIs (AWS SageMaker, Azure ML, etc.)
 
 ## Tech Stack
@@ -260,6 +262,14 @@ For best results, deploy your trained model following the [Deployed Model Guide]
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/predict` | POST | Generate demand prediction |
+| `/predict` | POST | Generate demand prediction |
+| `/health` | GET | Health check |
+
+### Historical Data Service (Port 5003)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/historical/:id/:range` | GET | Historical data (hourly, daily, weekly) |
 | `/health` | GET | Health check |
 
 ## ML Model Integration
@@ -322,7 +332,13 @@ NODE_ENV=development
 
 # Local ML Service (default)
 ML_SERVICE_PORT=5002
+# Local ML Service (default)
+ML_SERVICE_PORT=5002
 MODEL_PATH=./models/best_model.pkl
+
+# Historical Data Service
+HISTORICAL_DATA_SERVICE_PORT=5003
+HISTORICAL_DATA_PATH=../../data_pipeline/data/raw/bluebikes
 
 # External Deployed ML API (optional)
 USE_EXTERNAL_ML_API=false
@@ -386,11 +402,10 @@ npm start  # Auto-reloads on file changes
 
 - [x] AI-powered bike rebalancing recommendations
 - [x] External ML API support for deployed models
-- [ ] Historical trend charts
+- [x] Historical trend charts
+- [x] Route planning between stations
 - [ ] 24-hour demand forecasting with time series
 - [ ] Weather integration with live data
-- [ ] User location detection
-- [ ] Route planning between stations
 - [ ] Mobile responsiveness improvements
 - [ ] Dark/Light theme toggle
 - [ ] Export rebalancing routes to CSV/JSON

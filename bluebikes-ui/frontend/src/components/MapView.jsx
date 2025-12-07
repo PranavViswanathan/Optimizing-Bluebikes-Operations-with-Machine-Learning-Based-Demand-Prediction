@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { useStations } from '../context/StationContext';
 import StationPopup from './StationPopup';
+import RoutePlanner from './RoutePlanner';
 import 'leaflet/dist/leaflet.css';
 
 // Fix Leaflet default marker icon issue in React
@@ -10,8 +11,13 @@ delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
     iconUrl: require('leaflet/dist/images/marker-icon.png'),
-    shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
+    shadowUrl: require('leaflet/dist/images/marker-shadow.png')
 });
+
+// Expose Leaflet to window for CDN plugins
+if (typeof window !== 'undefined') {
+    window.L = L;
+}
 
 // Custom marker icons based on availability
 const createCustomIcon = (availability) => {
@@ -295,6 +301,8 @@ const MapView = () => {
                         </Popup>
                     </Marker>
                 )}
+                {/* Route Planner */}
+                <RoutePlanner userLocation={userLocation} stations={stations} />
             </MapContainer>
 
             {/* Nearest Stations Section */}

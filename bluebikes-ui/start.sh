@@ -43,6 +43,18 @@ echo " ML Service started (PID: $ML_PID)"
 # Wait for ML service to initialize
 sleep 2
 
+# Start Python Historical Data Service
+echo "Starting Historical Data Service (port 5003)..."
+cd backend
+python historical-data-service.py > ../logs/historical-service.log 2>&1 &
+HIST_PID=$!
+echo $HIST_PID > ../logs/historical-service.pid
+cd ..
+echo " Historical Service started (PID: $HIST_PID)"
+
+# Wait for Historical service to initialize
+sleep 2
+
 # Start React Frontend
 echo "Starting React Frontend (port 3000)..."
 cd frontend
@@ -56,9 +68,10 @@ echo ""
 echo "All services started successfully!"
 echo ""
 echo "Service Status:"
-echo "   Backend:  http://localhost:5001  (PID: $BACKEND_PID)"
-echo "   ML API:   http://localhost:5002  (PID: $ML_PID)"
-echo "   Frontend: http://localhost:3000  (PID: $FRONTEND_PID)"
+echo "   Backend:    http://localhost:5001  (PID: $BACKEND_PID)"
+echo "   ML API:     http://localhost:5002  (PID: $ML_PID)"
+echo "   Historical: http://localhost:5003  (PID: $HIST_PID)"
+echo "   Frontend:   http://localhost:3000  (PID: $FRONTEND_PID)"
 echo ""
 echo "Logs are available in the logs/ directory"
 echo "To stop all services, run: ./stop.sh"
