@@ -47,3 +47,16 @@ venv/
 
 mlruns/
 .env
+
+# Node / React frontend
+node_modules/
+bluebikes-ui/frontend/node_modules/
+bluebikes-ui/**/node_modules/
+
+# Build caches
+**/.cache/
+**/cache/
+
+# Build artifacts
+build/
+dist/
