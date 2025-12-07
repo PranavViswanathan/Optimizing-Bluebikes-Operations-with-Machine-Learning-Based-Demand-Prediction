@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "created": "2025-12-05T14:49:41.637382",
-  "last_updated": "2025-12-06T05:10:03.575404",
+  "last_updated": "2025-12-06T23:05:45.438971",
   "bluebikes": {
     "processed_zips": [
       "202401-bluebikes-tripdata.zip",
@@ -25,7 +25,7 @@
       "202509-bluebikes-tripdata.zip",
       "202510-bluebikes-tripdata.zip"
     ],
-    "last_collection": "2025-12-06T04:57:13.569364",
+    "last_collection": "2025-12-06T23:05:40.231922",
     "last_preprocessing": "2025-12-06T05:10:03.573970"
   },
   "NOAA_weather": {
@@ -35,6 +35,6 @@
   },
   "boston_clg": {
     "last_collection": null,
-    "last_preprocessing": "2025-12-05T14:49:42.822181"
+    "last_preprocessing": "2025-12-06T23:05:45.438957"
   }
 }
