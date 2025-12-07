@@ -4,12 +4,12 @@ A full-stack web application for visualizing Bluebikes stations with real-time a
 
 ## Features
 
-- 🗺️ **Interactive Map**: View all ~450 Bluebikes stations on an interactive Leaflet map
-- 🚴 **Real-time Data**: Live bike and dock availability from Bluebikes GBFS API
-- 🤖 **ML Predictions**: XGBoost-powered demand forecasting for each station
-- 📊 **List View**: Searchable and sortable table of all stations
-- 📍 **Detailed View**: Comprehensive analytics for individual stations
-- 🎨 **Premium UI**: Modern dark theme with glassmorphism and smooth animations
+- **Interactive Map**: View all ~450 Bluebikes stations on an interactive Leaflet map
+- **Real-time Data**: Live bike and dock availability from Bluebikes GBFS API
+- **ML Predictions**: XGBoost-powered demand forecasting for each station
+- **List View**: Searchable and sortable table of all stations
+- **Detailed View**: Comprehensive analytics for individual stations
+- **Premium UI**: Modern dark theme with glassmorphism and smooth animations
 
 ## Tech Stack
 
