@@ -62,6 +62,7 @@ const MapUpdater = ({ stations }) => {
 const MapView = () => {
     const { stations, stationStatus, fetchStationStatus, fetchAllStationStatus, loading, error } = useStations();
     const [hoveredStation, setHoveredStation] = useState(null);
+    const [filter, setFilter] = useState('all'); // 'all', 'available', 'low', 'empty'
 
     // Fetch all station statuses on mount
     useEffect(() => {
@@ -69,6 +70,31 @@ const MapView = () => {
             fetchAllStationStatus();
         }
     }, [stations]);
+
+    // Filter stations based on selected filter
+    const getFilteredStations = () => {
+        if (filter === 'all') return stations;
+
+        return stations.filter(station => {
+            const status = stationStatus[station.station_id];
+            if (!status) return false;
+
+            const bikesAvailable = status.num_bikes_available || 0;
+
+            switch (filter) {
+                case 'available':
+                    return bikesAvailable > 5;
+                case 'low':
+                    return bikesAvailable >= 1 && bikesAvailable <= 5;
+                case 'empty':
+                    return bikesAvailable === 0;
+                default:
+                    return true;
+            }
+        });
+    };
+
+    const filteredStations = getFilteredStations();
 
     if (loading) {
         return (
@@ -107,26 +133,40 @@ const MapView = () => {
         <div className="map-view">
             <div className="map-info">
                 <div className="info-card">
-                    <span className="info-label">Total Stations:</span>
-                    <span className="info-value">{stations.length}</span>
+                    <span className="info-label">
+                        {filter === 'all' ? 'Total Stations:' : 'Filtered Stations:'}
+                    </span>
+                    <span className="info-value">{filteredStations.length}</span>
                 </div>
                 <div className="legend">
-                    <span className="legend-item">
+                    <button
+                        className={`legend-item filter-btn ${filter === 'all' ? 'active' : ''}`}
+                        onClick={() => setFilter('all')}
+                    >
+                        <span className="legend-dot all-dot"></span>
+                        All ({stations.length})
+                    </button>
+                    <button
+                        className={`legend-item filter-btn ${filter === 'available' ? 'active' : ''}`}
+                        onClick={() => setFilter('available')}
+                    >
                         <span className="legend-dot" style={{ backgroundColor: '#10b981' }}></span>
                         Available (5+)
-                    </span>
-                    <span className="legend-item">
+                    </button>
+                    <button
+                        className={`legend-item filter-btn ${filter === 'low' ? 'active' : ''}`}
+                        onClick={() => setFilter('low')}
+                    >
                         <span className="legend-dot" style={{ backgroundColor: '#f59e0b' }}></span>
                         Low (1-5)
-                    </span>
-                    <span className="legend-item">
+                    </button>
+                    <button
+                        className={`legend-item filter-btn ${filter === 'empty' ? 'active' : ''}`}
+                        onClick={() => setFilter('empty')}
+                    >
                         <span className="legend-dot" style={{ backgroundColor: '#ef4444' }}></span>
-                        Empty
-                    </span>
-                    <span className="legend-item">
-                        <span className="legend-dot" style={{ backgroundColor: '#808080' }}></span>
-                        Unknown
-                    </span>
+                        Empty (0)
+                    </button>
                 </div>
             </div>
 
@@ -143,7 +183,7 @@ const MapView = () => {
 
                 <MapUpdater stations={stations} />
 
-                {stations.map((station) => {
+                {filteredStations.map((station) => {
                     const status = stationStatus[station.station_id];
                     const bikesAvailable = status?.num_bikes_available;
 

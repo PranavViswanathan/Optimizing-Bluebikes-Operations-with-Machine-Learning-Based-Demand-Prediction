@@ -97,10 +97,10 @@ const StationList = () => {
                             </th>
                             <th>ID</th>
                             <th onClick={() => handleSort('bikes')} className="sortable">
-                                🚴 Bikes {sortConfig.key === 'bikes' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                Bikes {sortConfig.key === 'bikes' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                             </th>
                             <th onClick={() => handleSort('docks')} className="sortable">
-                                🅿️ Docks {sortConfig.key === 'docks' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+                                Docks {sortConfig.key === 'docks' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
                             </th>
                             <th onClick={() => handleSort('capacity')} className="sortable">
                                 Capacity {sortConfig.key === 'capacity' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
