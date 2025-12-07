@@ -120,7 +120,7 @@ const MapView = () => {
                 )
             }))
             .sort((a, b) => a.distance - b.distance)
-            .slice(0, 5); // Get top 5 nearest
+            .slice(0, 8); // Get top 5 nearest
     };
 
     const nearestStations = getNearestStations();

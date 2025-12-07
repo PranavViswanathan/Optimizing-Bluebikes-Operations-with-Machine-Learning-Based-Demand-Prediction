@@ -205,7 +205,7 @@ const RebalancingView = () => {
 
                             <div className="rec-content">
                                 <div className="station-info recipient">
-                                    <h4>📍 Destination (Needs Bikes)</h4>
+                                    <h4>📍 Destination (Low inventory)</h4>
                                     <h3>{rec.recipient.name}</h3>
                                     <div className="station-stats">
                                         <div className="stat">
@@ -235,7 +235,7 @@ const RebalancingView = () => {
                                 </div>
 
                                 <div className="station-info donor">
-                                    <h4>🚴 Source (Has Excess)</h4>
+                                    <h4>🚴 Source (Surplus Inventory)</h4>
                                     <h3>{rec.donor.name}</h3>
                                     <div className="station-stats">
                                         <div className="stat">
