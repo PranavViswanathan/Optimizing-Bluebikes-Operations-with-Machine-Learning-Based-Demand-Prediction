@@ -182,7 +182,7 @@ body::after {
     transparent 0%, 
     rgba(14, 165, 233, 0.05) 50%, 
     transparent 100%);
-  animation: shimmer 3s ease-in-out infinite;
+  animation: shimmer 5s ease-in-out infinite;
   pointer-events: none;
 }
 
