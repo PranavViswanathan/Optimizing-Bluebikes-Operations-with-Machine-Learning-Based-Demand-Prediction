@@ -596,6 +596,63 @@ def push_model_to_github(**context):
     log.info("Model and metadata successfully uploaded to GitHub Release.")
     return {'uploaded': True, 'tag': tag}
 
+
+def push_model_to_gcs(**context):
+    """Upload the current production model + metadata to a GCS bucket."""
+    import os
+    from google.cloud import storage
+
+    ti = context['task_instance']
+    model_promoted = ti.xcom_pull(
+        task_ids='promote_mitigated_model',
+        key='model_promoted'
+    )
+
+    if not model_promoted:
+        log.info("Model was not promoted to production; skipping GCS upload.")
+        return {'uploaded': False, 'reason': 'Model not promoted'}
+
+    model_path = "/opt/airflow/models/production/current_model.pkl"
+    metadata_path = "/opt/airflow/models/production/current_metadata.json"
+
+    if not os.path.exists(model_path) or not os.path.exists(metadata_path):
+        raise FileNotFoundError(
+            f"Production model or metadata not found: {model_path}, {metadata_path}"
+        )
+
+    bucket_name = os.environ.get("GCS_MODEL_BUCKET")
+    prefix = os.environ.get("GCS_MODEL_PREFIX", "models/production")
+
+    if not bucket_name:
+        raise RuntimeError("GCS_MODEL_BUCKET environment variable is not set")
+
+    # Create client using the service account key pointed to by GOOGLE_APPLICATION_CREDENTIALS
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+
+    # Use timestamp or production version as part of the path if you like
+    production_version = ti.xcom_pull(
+        task_ids='promote_mitigated_model',
+        key='production_version'
+    ) or "unknown_version"
+
+    model_blob = bucket.blob(f"{prefix}/{production_version}/current_model.pkl")
+    metadata_blob = bucket.blob(f"{prefix}/{production_version}/current_metadata.json")
+
+    log.info(f"Uploading model to gs://{bucket_name}/{model_blob.name}")
+    model_blob.upload_from_filename(model_path)
+
+    log.info(f"Uploading metadata to gs://{bucket_name}/{metadata_blob.name}")
+    metadata_blob.upload_from_filename(metadata_path)
+
+    log.info("Model and metadata successfully uploaded to GCS.")
+    return {
+        'uploaded': True,
+        'bucket': bucket_name,
+        'model_blob': model_blob.name,
+        'metadata_blob': metadata_blob.name
+    }
+
 def deploy_mitigated_model(**context):
     """Deploy bias-mitigated model"""
     import json
