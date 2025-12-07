@@ -5,6 +5,7 @@ import MapView from './components/MapView';
 import StationList from './components/StationList';
 import StationDetail from './components/StationDetail';
 import RebalancingView from './components/RebalancingView';
+import RebalanceLogo from './components/RebalanceLogo';
 import './styles/App.css';
 
 function App() {
@@ -12,17 +13,30 @@ function App() {
         <StationProvider>
             <Router>
                 <div className="app">
+
                     <header className="app-header">
                         <div className="header-content">
-                            <h1 className="app-title">
-                                <span className="bike-icon">🚴</span>
-                                Bluebikes Station Map
-                            </h1>
-                            <nav className="nav-links">
+
+                            {/* LEFT SIDE — TITLE */}
+                            <div className="left-title">
+                                <h1 className="app-title">
+                                    <span className="bike-icon">🚴</span>
+                                    Bluebikes Station Map
+                                </h1>
+                            </div>
+
+                            {/* CENTER — LOGO */}
+                            <div className="center-logo">
+                                <RebalanceLogo size={95} />
+                            </div>
+
+                            {/* RIGHT SIDE — NAVIGATION */}
+                            <nav className="nav-links right-nav">
                                 <Link to="/" className="nav-link">Map View</Link>
                                 <Link to="/stations" className="nav-link">List View</Link>
                                 <Link to="/rebalancing" className="nav-link">Rebalancing</Link>
                             </nav>
+
                         </div>
                     </header>
 
@@ -42,9 +56,10 @@ function App() {
                             Built for MLOps Final Project
                         </p>
                     </footer>
+
                 </div>
-            </Router >
-        </StationProvider >
+            </Router>
+        </StationProvider>
     );
 }
 
