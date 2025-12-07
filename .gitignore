@@ -1,3 +1,49 @@
+env/
+.env
+notebooks/test.py
+
+# Data files
+*.csv
+*.pkl
+*.pickle
+*.parquet
+*.xlsx
+*.xls
+*.json
+!bluebikes-ui/**/*.json
+*.tsv
+*.tfevents
+
+# Data directories
+data/processed/
+data/raw/
+data/interim/
+DatasetGeneration/bluebikes/*.csv
+DatasetGeneration/*.csv
+data_pipeline/logs/
+*.log
+bluebikes_proj
+
+# Keep directory structure with .gitkeep
+!data/.gitkeep
+# !data/processed/.gitkeep
+# !data/raw/.gitkeep
+
+# Mac files
+__MACOSX/
+.DS_Store
+**/ .DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+!bluebikes-ui/**/.env*
 
 mlruns/
 .env
