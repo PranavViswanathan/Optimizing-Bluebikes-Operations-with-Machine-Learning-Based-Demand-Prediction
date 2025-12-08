@@ -5,12 +5,6 @@
   box-sizing: border-box;
 }
 
-.logo-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 12px;
-}
-
 :root {
   /* Bluebikes Brand Colors with Modern Twist */
   --primary: #0ea5e9;
@@ -62,6 +56,8 @@
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ========== BASE BODY & BACKGROUND ========== */
+
 body {
   font-family: var(--font-family);
   background: #0f172a;
@@ -91,7 +87,7 @@ body::before {
   z-index: -2;
 }
 
-/* Floating particles effect - SUPER ENHANCED */
+/* Floating particles effect */
 body::after {
   content: '';
   position: fixed;
@@ -141,11 +137,21 @@ body::after {
 }
 
 /* ========== APP LAYOUT ========== */
+
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
+
+/* Small reusable logo container (not header logo) */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* ========== HEADER & NAVIGATION ========== */
 
 .app-header {
   background: var(--glass-bg);
@@ -191,22 +197,23 @@ body::after {
   50% { transform: translateX(100%); }
 }
 
+/* grid layout for title / logo / nav */
 .header-content {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
 }
 
 .left-title {
-    justify-self: start;
+  justify-self: start;
 }
 
 .center-logo {
-    justify-self: center;
+  justify-self: center;
 }
 
 .right-nav {
-    justify-self: end;
+  justify-self: end;
 }
 
 .app-title {
@@ -292,6 +299,7 @@ body::after {
   box-shadow: 0 8px 24px rgba(14, 165, 233, 0.3);
 }
 
+/* Main content shell */
 .app-main {
   flex: 1;
   padding: var(--spacing-xl);
@@ -313,6 +321,7 @@ body::after {
   }
 }
 
+/* Footer */
 .app-footer {
   background: var(--bg-secondary);
   padding: var(--spacing-lg);
@@ -322,7 +331,8 @@ body::after {
   border-top: 1px solid var(--glass-border);
 }
 
-/* ========== LOADING & ERRORS ========== */
+/* ========== LOADING & ERROR STATES ========== */
+
 .loading-container,
 .error-container {
   display: flex;
@@ -377,6 +387,7 @@ body::after {
 }
 
 /* ========== MAP VIEW ========== */
+
 .map-view {
   animation: fadeIn 0.5s ease-in;
 }
@@ -505,6 +516,7 @@ body::after {
 }
 
 /* ========== STATION POPUP ========== */
+
 .station-popup {
   min-width: 250px;
   padding: var(--spacing-sm);
@@ -591,7 +603,8 @@ body::after {
   box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
 }
 
-/* ========== STATION LIST ========== */
+/* ========== STATION LIST VIEW ========== */
+
 .station-list-view {
   animation: fadeIn 0.5s ease-in;
 }
@@ -775,7 +788,8 @@ body::after {
   color: var(--text-muted);
 }
 
-/* ========== STATION DETAIL ========== */
+/* ========== STATION DETAIL VIEW ========== */
+
 .station-detail-view {
   animation: fadeIn 0.5s ease-in;
 }
@@ -1029,61 +1043,6 @@ body::after {
   font-size: 0.875rem;
 }
 
-/* ========== RESPONSIVE ========== */
-@media (max-width: 768px) {
-  .app-header {
-    padding: var(--spacing-md);
-  }
-  
-  .header-content {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .app-title {
-    font-size: 1.5rem;
-  }
-  
-  .app-main {
-    padding: var(--spacing-md);
-  }
-  
-  .search-input {
-    min-width: 100%;
-  }
-  
-  .detail-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .map-info {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  
-  .legend {
-    width: 100%;
-  }
-}
-
-/* ========== SCROLLBAR STYLING ========== */
-::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-full);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
-}
 /* ========== HISTORICAL CHART COMPONENT ========== */
 
 /* Historical trends card in station detail */
@@ -1458,8 +1417,67 @@ body::after {
   padding: 4px !important;
 }
 
-.leaflet-bar a, .leaflet-bar a:hover {
+.leaflet-bar a,
+.leaflet-bar a:hover {
   background-color: var(--bg-secondary) !important;
   color: var(--text-primary) !important;
   border-bottom: 1px solid var(--glass-border) !important;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: var(--spacing-md);
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .app-title {
+    font-size: 1.5rem;
+  }
+  
+  .app-main {
+    padding: var(--spacing-md);
+  }
+  
+  .search-input {
+    min-width: 100%;
+  }
+  
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .map-info {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .legend {
+    width: 100%;
+  }
+}
+
+/* ========== SCROLLBAR STYLING ========== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
 }
