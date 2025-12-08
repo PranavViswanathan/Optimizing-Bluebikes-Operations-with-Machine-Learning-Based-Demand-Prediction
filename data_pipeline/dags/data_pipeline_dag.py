@@ -6,6 +6,7 @@ Updated Data Pipeline DAG with incremental collection and smart preprocessing.
 from airflow import DAG
 from airflow.operators.python import PythonOperator, BranchPythonOperator
 from airflow.operators.empty import EmptyOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from datetime import datetime, timedelta
 import sys
 import os
@@ -274,6 +275,30 @@ def final_status_check(**context):
     return all_ready
 
 
+def should_run_drift_monitoring(**context):
+    """
+    Decide whether to trigger drift monitoring based on whether
+    new BlueBikes data was added in this run.
+    """
+    ti = context["task_instance"]
+    result = ti.xcom_pull(
+        task_ids="collect_bluebikes",
+        key="collection_result"
+    ) or {}
+
+    rows_added = result.get("rows_added", 0)
+    zips_processed = result.get("zips_processed", 0)
+
+    # If nothing new, skip drift
+    if (rows_added or 0) > 0 or (zips_processed or 0) > 0:
+        print(f"New data detected: rows_added={rows_added}, zips_processed={zips_processed}")
+        return "trigger_drift_monitoring"
+    else:
+        print("No new BlueBikes data; skipping drift monitoring.")
+        return "skip_drift_monitoring"
+
+
+
 # DAG Definition
 default_args = {
     'owner': 'airflow',
@@ -341,6 +366,24 @@ with DAG(
         python_callable=final_status_check,
     )
     
+    branch_drift = BranchPythonOperator(
+        task_id="branch_drift_monitoring",
+        python_callable=should_run_drift_monitoring,
+    )
+
+    # If data changed: trigger the drift monitoring DAG
+    trigger_drift = TriggerDagRunOperator(
+        task_id="trigger_drift_monitoring",
+        trigger_dag_id="drift_monitoring_dag",  # change if your drift DAG has a different dag_id
+        reset_dag_run=True,
+        wait_for_completion=False,
+    )
+
+    # If no data change: do nothing (no-op)
+    skip_drift = EmptyOperator(
+        task_id="skip_drift_monitoring"
+    )
+
     # Dependencies
     check_status >> [collect_bluebikes, collect_noaa, collect_boston]
     
@@ -349,6 +392,9 @@ with DAG(
     collect_boston >> preprocess_boston_task
     
     [preprocess_bb, preprocess_noaa_task, preprocess_boston_task] >> final_check
+
+    final_check >> branch_drift
+    branch_drift >> [trigger_drift, skip_drift]
 
 
 # from airflow import DAG
