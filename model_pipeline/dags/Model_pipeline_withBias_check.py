@@ -815,6 +815,13 @@ with dag:
         provide_context=True
     )
 
+    push_to_gcs = PythonOperator(
+    task_id='push_model_to_gcs',
+    python_callable=push_model_to_gcs,
+    provide_context=True,
+    dag=dag,
+)
+    
     generate_baseline = PythonOperator(
         task_id='generate_monitoring_baseline',
         python_callable=generate_monitoring_baseline,
@@ -840,5 +847,5 @@ with dag:
         trigger_rule='one_failed'
     )
     
-    start >> run_pipeline >> validate >> promote >> deploy >> [push_to_github, generate_baseline] >> cleanup >> end
+    start >> run_pipeline >> validate >> promote >> deploy >> [push_to_github, push_to_gcs, generate_baseline] >> cleanup >> end
     [run_pipeline, validate, promote, deploy] >> failure_cleanup

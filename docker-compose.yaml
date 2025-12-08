@@ -20,6 +20,9 @@ x-airflow-common:
     NOAA_API_KEY: ${NOAA_API_KEY}
     GITHUB_TOKEN: ${GITHUB_TOKEN}
     GITHUB_REPO: ${GITHUB_REPO}
+    GOOGLE_APPLICATION_CREDENTIALS: /keys/gcs_service_account.json
+    GCS_MODEL_BUCKET: ${GCS_MODEL_BUCKET}
+    GCS_MODEL_PREFIX: ${GCS_MODEL_PREFIX:-models/production}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/dags:/opt/airflow/dags/data_pipeline
     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/dags:/opt/airflow/dags/model_pipeline
@@ -34,7 +37,7 @@ x-airflow-common:
 
     # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/dags:/opt/airflow/dags/model_pipeline
     # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/mlruns:/opt/airflow/mlruns/model_pipeline
-
+    - ./keys/gcs_service_account.json:/keys/gcs_service_account.json:ro
 
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on:

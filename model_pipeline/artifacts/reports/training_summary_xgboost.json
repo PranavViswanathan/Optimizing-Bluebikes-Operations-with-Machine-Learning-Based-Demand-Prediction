@@ -1,6 +1,6 @@
 {
   "model_type": "XGBoost",
-  "timestamp": "2025-12-06T23:20:09.717297",
+  "timestamp": "2025-12-08T00:11:03.104328",
   "best_iteration": 307,
   "metrics": {
     "train_r2": 0.9972342848777771,
