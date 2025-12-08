@@ -9,12 +9,9 @@ const PORT = process.env.PORT || 5000;
 const GBFS_BASE_URL = process.env.GBFS_BASE_URL || 'https://gbfs.lyft.com/gbfs/1.1/bos/en';
 
 // ML Service Configuration
-// Set USE_EXTERNAL_ML_API=true to use a deployed model API
-const USE_EXTERNAL_ML_API = process.env.USE_EXTERNAL_ML_API === 'true';
-const EXTERNAL_ML_API_URL = process.env.EXTERNAL_ML_API_URL;
-const ML_SERVICE_URL = USE_EXTERNAL_ML_API && EXTERNAL_ML_API_URL 
-  ? EXTERNAL_ML_API_URL 
-  : `http://localhost:${process.env.ML_SERVICE_PORT || 5002}`;
+// Always point to local ML service for feature engineering
+// The local service will handle forwarding to external model if needed
+const ML_SERVICE_URL = `http://localhost:${process.env.ML_SERVICE_PORT || 5002}`;
 
 // Historical Data Service Configuration
 const HISTORICAL_SERVICE_URL = `http://localhost:${process.env.HISTORICAL_DATA_SERVICE_PORT || 5003}`;
@@ -131,11 +128,8 @@ app.get('/api/stations/:id/status', async (req, res) => {
 
 // ========== ML PREDICTION ENDPOINT ==========
 
-/**
- * POST /api/predict
- * Request ML prediction for bike demand
- * Body: { station_id, datetime, temperature, precipitation }
- */
+// Request ML prediction for bike demand
+// Body: { station_id, datetime, temperature, precipitation }
 app.post('/api/predict', async (req, res) => {
   try {
     const { station_id, datetime, temperature, precipitation } = req.body;
@@ -152,7 +146,11 @@ app.post('/api/predict', async (req, res) => {
       precipitation: precipitation || 0
     };
 
-    const response = await axios.post(`${ML_SERVICE_URL}/predict`, mlRequestPayload, {
+    const targetUrl = `${ML_SERVICE_URL}/predict`;
+    console.log(`[Predict] Sending request to: ${targetUrl}`);
+    console.log(`[Predict] Payload:`, JSON.stringify(mlRequestPayload));
+
+    const response = await axios.post(targetUrl, mlRequestPayload, {
       timeout: 10000, // 10 second timeout for external APIs
       headers: {
         'Content-Type': 'application/json',
@@ -161,12 +159,20 @@ app.post('/api/predict', async (req, res) => {
       }
     });
 
+    console.log(`[Predict] Success. Response headers:`, response.headers);
     res.json(response.data);
   } catch (error) {
-    console.error('Error calling ML service:', error.message);
-    
+    console.error('[Predict] Error calling ML service:');
+    console.error(`  - Message: ${error.message}`);
+    if (error.response) {
+       console.error(`  - Status: ${error.response.status}`);
+       console.error(`  - Data:`, JSON.stringify(error.response.data));
+    } else if (error.request) {
+       console.error(`  - No response received. Request details available.`);
+    }
+
     // If ML service is unavailable, return a graceful error
-    if (error.code === 'ECONNREFUSED') {
+    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
       return res.status(503).json({ 
         error: 'ML prediction service is currently unavailable',
         predicted_demand: null
@@ -175,7 +181,8 @@ app.post('/api/predict', async (req, res) => {
     
     res.status(500).json({ 
       error: 'Failed to get prediction',
-      message: error.message 
+      message: error.message,
+      details: error.response?.data
     });
   }
 });
@@ -236,7 +243,6 @@ app.listen(PORT, () => {
   console.log(`Bluebikes Backend Server running on port ${PORT}`);
   console.log(`GBFS API: ${GBFS_BASE_URL}`);
   console.log(`ML Service: ${ML_SERVICE_URL}`);
-  console.log(`   ML Mode: ${USE_EXTERNAL_ML_API ? 'External API' : 'Local Service'}`);
   console.log(`Historical Data Service: ${HISTORICAL_SERVICE_URL}`);
   console.log(`\nAvailable endpoints:`);
   console.log(`  GET  /api/stations`);
