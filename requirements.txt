@@ -53,3 +53,4 @@ mlflow
 shap
 typing
 evidently==0.6.7
+google-cloud-storage
