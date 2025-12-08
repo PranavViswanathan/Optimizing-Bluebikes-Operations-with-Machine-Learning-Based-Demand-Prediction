@@ -25,12 +25,12 @@ def load_model():
     try:
         if os.path.exists(MODEL_PATH):
             model = joblib.load(MODEL_PATH)
-            print(f"✅ Model loaded successfully from {MODEL_PATH}")
+            print(f"Model loaded successfully from {MODEL_PATH}")
         else:
-            print(f"⚠️  Model file not found at {MODEL_PATH}")
+            print(f"Model file not found at {MODEL_PATH}")
             print("    Predictions will return mock data until model is available")
     except Exception as e:
-        print(f"❌ Error loading model: {str(e)}")
+        print(f"Error loading model: {str(e)}")
         print("    Predictions will return mock data")
 
 def engineer_features(station_id, dt, temperature=15, precipitation=0):
@@ -243,13 +243,13 @@ def health():
     })
 
 if __name__ == '__main__':
-    print("🤖 Starting ML Prediction Service...")
-    print(f"📂 Model path: {MODEL_PATH}")
+    print("Starting ML Prediction Service...")
+    print(f"Model path: {MODEL_PATH}")
     
     # Try to load model
     load_model()
     
-    print(f"🚀 ML Service running on port {PORT}")
+    print(f"ML Service running on port {PORT}")
     print(f"\nAvailable endpoints:")
     print(f"  POST /predict")
     print(f"  GET  /health")
