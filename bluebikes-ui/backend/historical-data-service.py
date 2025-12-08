@@ -35,7 +35,7 @@ def load_trip_data():
     
     try:
         data_dir = Path(DATA_PATH)
-        parquet_files = list(data_dir.glob('trips_*.parquet'))
+        parquet_files = sorted(data_dir.glob('trips_*.parquet'))
         
         if not parquet_files:
             logger.error(f"No parquet files found in {data_dir}")
