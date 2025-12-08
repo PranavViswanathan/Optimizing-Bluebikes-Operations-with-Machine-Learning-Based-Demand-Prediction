@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore")
 features_path = "D:\\MLOps_Coursework\\ML-OPs\\data_pipeline\\data\\processed\\bluebikes\\features_full.pkl"
 df = pd.read_pickle(features_path)
 
-print(f"✅ Loaded features: {df.shape[0]} rows, {df.shape[1]} columns")
+print(f" Loaded features: {df.shape[0]} rows, {df.shape[1]} columns")
 
 # Drop rows with invalid targets
 df = df[df["ride_count"] > 0].copy()
@@ -34,7 +34,7 @@ feature_cols = [col for col in df.columns if col not in [target_col] + exclude_c
 X = df[feature_cols].select_dtypes(include=[np.number]).fillna(0)
 y = df[target_col]
 
-print(f"✅ Using {len(feature_cols)} features for training")
+print(f" Using {len(feature_cols)} features for training")
 
 # ----------------------------
 # 🔹 Train/Test Split
@@ -75,7 +75,7 @@ rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 mae = mean_absolute_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
 
-print("\n📊 Model Performance Metrics")
+print("\n Model Performance Metrics")
 print(f"RMSE: {rmse:.3f}")
 print(f"MAE : {mae:.3f}")
 print(f"R²  : {r2:.3f}")
@@ -110,5 +110,5 @@ model_path_pkl = "D:\\MLOps_Coursework\\ML-OPs\\model_pipeline\\models\\xgb_blue
 model.save_model(model_path_json)
 joblib.dump(model, model_path_pkl)
 
-print(f"\n✅ Model saved to: {model_path_json}")
-print(f"✅ Backup (joblib) saved to: {model_path_pkl}")
+print(f"\n Model saved to: {model_path_json}")
+print(f" Backup (joblib) saved to: {model_path_pkl}")
