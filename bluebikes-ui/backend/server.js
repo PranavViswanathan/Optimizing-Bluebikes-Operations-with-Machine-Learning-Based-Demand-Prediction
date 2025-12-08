@@ -233,11 +233,11 @@ app.get('/health', (req, res) => {
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`🚀 Bluebikes Backend Server running on port ${PORT}`);
-  console.log(`📍 GBFS API: ${GBFS_BASE_URL}`);
-  console.log(`🤖 ML Service: ${ML_SERVICE_URL}`);
-  console.log(`   ML Mode: ${USE_EXTERNAL_ML_API ? '☁️  External API' : '🏠 Local Service'}`);
-  console.log(`📊 Historical Data Service: ${HISTORICAL_SERVICE_URL}`);
+  console.log(`Bluebikes Backend Server running on port ${PORT}`);
+  console.log(`GBFS API: ${GBFS_BASE_URL}`);
+  console.log(`ML Service: ${ML_SERVICE_URL}`);
+  console.log(`   ML Mode: ${USE_EXTERNAL_ML_API ? 'External API' : 'Local Service'}`);
+  console.log(`Historical Data Service: ${HISTORICAL_SERVICE_URL}`);
   console.log(`\nAvailable endpoints:`);
   console.log(`  GET  /api/stations`);
   console.log(`  GET  /api/stations/status`);
