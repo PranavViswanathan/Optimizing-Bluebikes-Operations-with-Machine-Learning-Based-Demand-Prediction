@@ -2,7 +2,7 @@
 XGBoost Model Training Module for BlueBikes Demand Prediction
 This module contains the XGBoost training function with MLflow tracking
 """
-
+from __future__ import annotations
 import xgboost as xgb
 import numpy as np
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
@@ -12,7 +12,7 @@ import json
 from datetime import datetime
 
 
-def train_xgboost(X_train, y_train, X_test, y_test, mlflow, config=None):
+def train_xgboost(X_train, y_train, X_val, y_val, X_test, y_test, mlflow, config=None):
     """
     Train XGBoost model with MLflow tracking
     
@@ -70,13 +70,13 @@ def train_xgboost(X_train, y_train, X_test, y_test, mlflow, config=None):
         model = xgb.XGBRegressor(**params)
         
         # Setup evaluation set for early stopping
-        eval_set = [(X_train, y_train), (X_test, y_test)]
+        eval_set = [(X_train, y_train), (X_val, y_val)]
         
         # Train model
         model.fit(
             X_train, y_train,
             eval_set=eval_set,
-            verbose=True
+            verbose=False
         )
         
         # Log training metrics
@@ -88,10 +88,11 @@ def train_xgboost(X_train, y_train, X_test, y_test, mlflow, config=None):
         
         # Make predictions
         y_pred_train = model.predict(X_train)
+        y_pred_val = model.predict(X_val)
         y_pred_test = model.predict(X_test)
         
         # Calculate metrics
-        metrics = calculate_metrics(y_train, y_pred_train, y_test, y_pred_test)
+        metrics = calculate_metrics(y_train, y_pred_train, y_test, y_pred_test, y_val, y_pred_val)
         
         # Log metrics to MLflow
         for metric_name, metric_value in metrics.items():
@@ -104,14 +105,12 @@ def train_xgboost(X_train, y_train, X_test, y_test, mlflow, config=None):
         log_feature_importance(model, X_train.columns if hasattr(X_train, 'columns') else None, mlflow)
         
         # Create and log visualization plots
-        create_and_log_plots(y_train, y_pred_train, y_test, y_pred_test, mlflow)
+        create_and_log_plots(y_train, y_pred_train, y_test, y_pred_test, y_val, y_pred_val, mlflow)
         
         # Log the model
         mlflow.xgboost.log_model(
-            model,
-            artifact_path="model",
-            input_example=X_train[:5] if hasattr(X_train, '__getitem__') else None,
-            model_format="json"
+            model, 
+            "model"
         )
         
         # Save model summary
@@ -120,7 +119,7 @@ def train_xgboost(X_train, y_train, X_test, y_test, mlflow, config=None):
         return model, metrics
 
 
-def calculate_metrics(y_train, y_pred_train, y_test, y_pred_test):
+def calculate_metrics(y_train, y_pred_train, y_test, y_pred_test, y_val, y_pred_val):
     """Calculate comprehensive evaluation metrics"""
     
     metrics = {
@@ -130,6 +129,11 @@ def calculate_metrics(y_train, y_pred_train, y_test, y_pred_test):
         'train_mae': mean_absolute_error(y_train, y_pred_train),
         'train_mape': np.mean(np.abs((y_train - y_pred_train) / (y_train + 1))) * 100,
         
+        #Validation metrics
+        'val_r2': r2_score(y_val, y_pred_val),
+        'val_rmse': np.sqrt(mean_squared_error(y_val, y_pred_val)), 
+        'val_mae': mean_absolute_error(y_val, y_pred_val),
+        'val_mape': np.mean(np.abs((y_val - y_pred_val) / (y_val + 1))) * 100,
         # Test metrics
         'test_r2': r2_score(y_test, y_pred_test),
         'test_rmse': np.sqrt(mean_squared_error(y_test, y_pred_test)),
@@ -157,6 +161,11 @@ def print_performance_summary(metrics):
     print(f"  RMSE: {metrics['train_rmse']:.2f} rides")
     print(f"  MAE: {metrics['train_mae']:.2f} rides")
     print(f"  MAPE: {metrics['train_mape']:.2f}%")
+    print(f"\nValidation Set:")
+    print(f"  R² Score: {metrics['val_r2']:.4f}")
+    print(f"  RMSE: {metrics['val_rmse']:.2f} rides")
+    print(f"  MAE: {metrics['val_mae']:.2f} rides")
+    print(f"  MAPE: {metrics['val_mape']:.2f}%")
     print(f"\nTest Set:")
     print(f"  R² Score: {metrics['test_r2']:.4f}")
     print(f"  RMSE: {metrics['test_rmse']:.2f} rides")
@@ -198,7 +207,7 @@ def log_feature_importance(model, feature_names, mlflow):
         print(f"Warning: Could not log feature importance: {e}")
 
 
-def create_and_log_plots(y_train, y_pred_train, y_test, y_pred_test, mlflow):
+def create_and_log_plots(y_train, y_pred_train, y_test, y_pred_test, y_val, y_pred_val, mlflow):
     """Create visualization plots and log them as artifacts"""
     
     try:
@@ -222,8 +231,18 @@ def create_and_log_plots(y_train, y_pred_train, y_test, y_pred_test, mlflow):
         ax.set_ylabel('Predicted Rides')
         ax.set_title('Test Set: Actual vs Predicted')
         ax.grid(True, alpha=0.3)
-        
-        # 3. Training Residuals
+
+        # 3. Validation: Actual vs Predicted
+        ax = axes[0, 1]
+        ax.scatter(y_val, y_pred_val, alpha=0.5, s=10)
+        ax.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2)
+        ax.set_xlabel('Actual Rides')
+        ax.set_ylabel('Predicted Rides')
+        ax.set_title('Test Set: Actual vs Predicted')
+        ax.grid(True, alpha=0.3)
+
+
+        # 4. Training Residuals
         ax = axes[1, 0]
         train_residuals = y_train - y_pred_train
         ax.scatter(y_pred_train, train_residuals, alpha=0.5, s=10)
@@ -233,7 +252,17 @@ def create_and_log_plots(y_train, y_pred_train, y_test, y_pred_test, mlflow):
         ax.set_title('Training Set: Residual Plot')
         ax.grid(True, alpha=0.3)
         
-        # 4. Test Residuals
+        # 6. validation Residuals
+        ax = axes[1, 1]
+        val_residuals = y_val - y_pred_val
+        ax.scatter(y_pred_val, val_residuals, alpha=0.5, s=10)
+        ax.axhline(y=0, color='r', linestyle='--')
+        ax.set_xlabel('Predicted Rides')
+        ax.set_ylabel('Residuals')
+        ax.set_title('Validation Set: Residual Plot')
+        ax.grid(True, alpha=0.3)
+
+        # 5. Test Residuals
         ax = axes[1, 1]
         test_residuals = y_test - y_pred_test
         ax.scatter(y_pred_test, test_residuals, alpha=0.5, s=10)
@@ -276,56 +305,77 @@ def save_model_summary(model, metrics, mlflow):
     mlflow.log_artifact("xgboost_model_summary.json")
 
 
-# Optional: Hyperparameter tuning function
-def tune_xgboost(X_train, y_train, X_test, y_test, mlflow, param_grid=None):
+# Hyperparameter tuning function
+def tune_xgboost(X_train, y_train, X_val, y_val, X_test, y_test, mlflow, param_grid=None, max_combinations=8):
     """
-    Perform hyperparameter tuning for XGBoost
-    
+    Perform lightweight hyperparameter tuning for XGBoost using the validation set.
+
     Args:
-        X_train, y_train, X_test, y_test: Training and test data
+        X_train, y_train: Training data
+        X_val, y_val: Validation data (used for model selection)
+        X_test, y_test: Test data (held out, only for final evaluation)
         mlflow: MLflow module
         param_grid: Dict of parameters to tune
-    
+        max_combinations: Maximum number of parameter combinations to try
+
     Returns:
-        best_model, best_params, best_metrics
+        best_model, best_metrics
     """
-    
+    import random
+    from itertools import product
+
+    # Much smaller grid
     if param_grid is None:
         param_grid = {
-            'max_depth': [6, 8, 10],
-            'learning_rate': [0.01, 0.05, 0.1],
-            'subsample': [0.7, 0.8, 0.9],
-            'colsample_bytree': [0.7, 0.8, 0.9]
+            "max_depth": [6, 8],
+            "learning_rate": [0.05],
+            "subsample": [0.8],
+            "colsample_bytree": [0.8],
         }
-    
-    best_mae = float('inf')
+
+    # All combinations
+    all_combos = [
+        dict(zip(param_grid.keys(), v))
+        for v in product(*param_grid.values())
+    ]
+
+    # Randomly sample at most max_combinations combinations
+    if len(all_combos) > max_combinations:
+        all_combos = random.sample(all_combos, max_combinations)
+
+    print(f"Testing {len(all_combos)} XGBoost parameter combinations...")
+
+    best_val_mae = float("inf")
     best_model = None
     best_params = None
     best_metrics = None
-    
-    # Create all parameter combinations
-    from itertools import product
-    param_combinations = [dict(zip(param_grid.keys(), v)) 
-                         for v in product(*param_grid.values())]
-    
-    print(f"Testing {len(param_combinations)} parameter combinations...")
-    
-    for params in param_combinations:
-        # Train with current parameters
+
+    for params in all_combos:
+        # IMPORTANT: use smaller n_estimators during tuning
+        print(f"\n Combination: {params}")
+        tuning_config = {
+            "n_estimators": 300,          # smaller than 1000
+            "early_stopping_rounds": 30,  # faster stopping
+        }
+        tuning_config.update(params)
+
         model, metrics = train_xgboost(
-            X_train, y_train, X_test, y_test, 
-            mlflow, config=params
+            X_train, y_train,
+            X_val,   y_val,
+            X_test,  y_test,
+            mlflow,
+            config=tuning_config,
         )
-        
-        # Check if this is the best model
-        if metrics['test_mae'] < best_mae:
-            best_mae = metrics['test_mae']
+
+        val_mae = metrics["val_mae"]
+        if val_mae < best_val_mae:
+            best_val_mae = val_mae
             best_model = model
-            best_params = params
+            best_params = tuning_config
             best_metrics = metrics
-    
-    print(f"\nBest parameters found:")
-    print(f"  Parameters: {best_params}")
-    print(f"  Test MAE: {best_mae:.2f}")
-    
-    return best_model, best_params, best_metrics
+
+    print("\nBest XGBoost parameters found:")
+    print(f"  Params: {best_params}")
+    print(f"  Val MAE: {best_val_mae:.2f}")
+
+    return best_model, best_metrics

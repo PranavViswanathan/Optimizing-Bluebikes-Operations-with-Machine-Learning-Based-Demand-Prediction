@@ -4,20 +4,17 @@ import numpy as np
 from sklearn.model_selection import train_test_split, KFold
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 import lightgbm as lgb
-import xgboost as xgb
+import xgboost as xgbß
 import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
 import warnings
 import logging
 from datetime import datetime
-import wandb
 import argparse
 import sys
 
 warnings.filterwarnings('ignore')
-plt.style.use('seaborn-v0_8-darkgrid')
-sns.set_palette("husl")
 
 logging.basicConfig(
     level=logging.INFO,
@@ -31,9 +28,13 @@ logger = logging.getLogger(__name__)
 
 def load_and_prepare_data():
     logger.info("Loading data files.")
+    # bluebike_data = pd.read_pickle('/opt/airflow/working_data/processed/bluebikes/after_duplicates.pkl')
+    # weather_data = pd.read_pickle('/opt/airflow/working_data/processed/NOAA_weather/after_duplicates.pkl')
+    # college_data = pd.read_pickle('/opt/airflow/working_data/processed/boston_clg/after_duplicates.pkl')
     bluebike_data = pd.read_pickle('D:\\MLOps_Coursework\\ML-OPs\\data_pipeline\\data\\processed\\bluebikes\\after_duplicates.pkl')
     weather_data = pd.read_pickle('D:\\MLOps_Coursework\\ML-OPs\\data_pipeline\\data\\processed\\noaa_weather\\after_duplicates.pkl')
     college_data = pd.read_pickle('D:\\MLOps_Coursework\\ML-OPs\\data_pipeline\\data\\processed\\boston_clg\\after_duplicates.pkl')
+    
     
     logger.info(f"Data loaded: {len(bluebike_data):,} rides")
     
@@ -161,8 +162,20 @@ def load_and_prepare_data():
         'duration_mean', 'duration_std', 'duration_median',
         'distance_mean', 'distance_std', 'distance_median', 'member_ratio'
     ]
+    x_cols = ['date',
+        'hour', 'day_of_week', 'month', 'year', 'day',
+        'hour_sin', 'hour_cos', 'dow_sin', 'dow_cos', 'month_sin', 'month_cos',
+        'is_morning_rush', 'is_evening_rush', 'is_night', 'is_midday', 'is_weekend',
+        'weekend_night', 'weekday_morning_rush', 'weekday_evening_rush',
+        'TMAX', 'TMIN', 'PRCP', 'temp_range', 'temp_avg',
+        'is_rainy', 'is_heavy_rain', 'is_cold', 'is_hot',
+        'rides_last_hour', 'rides_same_hour_yesterday', 'rides_same_hour_last_week',
+        'rides_rolling_3h', 'rides_rolling_24h',
+        'duration_mean', 'duration_std', 'duration_median',
+        'distance_mean', 'distance_std', 'distance_median', 'member_ratio'
+    ]
     
-    X = model_data[feature_columns]
+    X = model_data[x_cols]
     y = model_data['ride_count']
     
     return X, y, feature_columns
