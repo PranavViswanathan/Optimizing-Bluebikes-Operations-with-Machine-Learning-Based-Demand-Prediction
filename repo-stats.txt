@@ -1,0 +1,23 @@
+               =========                  gyuszix ~ git version 2.52.0
+            ===============               ----------------------------
+           =================              Project: Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction (9 branches, 4 tags)
+          ===  ==============             HEAD: 245ac5fa (main, origin/main)
+          ===================             Version: model-v1-20251208
+                   ==========             Created: 2 months ago
+   ========================== =======     Languages:                             
+ ============================ ========               ● Python (56.2 %) ● Jupyter Notebooks (23.3 %)
+============================= =========              ● CSS (9.2 %) ● JSX (9.1 %)
+============================ ==========              ● Shell (1.0 %) ● JavaScript (0.9 %)
+========================== ============              ● Other (0.2 %) 
+============ ==========================   Authors: Nikhil Prakash
+========== ============================            Pranav Viswanathan
+========= =============================            Gyula Planky
+ ======== ============================             Ananya Hegde
+  ======= ==========================               Harsh Shah
+          ==========                      URL: https://github.com/PranavViswanathan/Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction.git
+          ===================             Commits: 421
+          ==============  ===             Churn (1): model_pipeline/xgb.py 1
+           =================              Lines of code: 20026
+            ===============               Size: 47.99 MiB (5566 files)
+               =========                  
+                                                                  
