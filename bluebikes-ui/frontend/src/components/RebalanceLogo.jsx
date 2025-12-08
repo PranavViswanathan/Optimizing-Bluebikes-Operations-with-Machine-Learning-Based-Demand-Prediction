@@ -90,7 +90,6 @@ const RebalanceLogo = ({ size = 240 }) => {
         <line x1="100" y1="100" x2="120" y2="100" />
       </g>
 
-      {/* Label text */}
       <text
         x="120"
         y="222"
