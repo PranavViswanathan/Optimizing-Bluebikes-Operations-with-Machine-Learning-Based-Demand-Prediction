@@ -15,7 +15,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Configuration
-PORT = int(os.getenv('HISTORICAL_DATA_SERVICE_PORT', 5003))
+PORT = int(os.getenv('PORT', os.getenv('HISTORICAL_DATA_SERVICE_PORT', 5003)))
 DATA_PATH = os.getenv('HISTORICAL_DATA_PATH', '../../data_pipeline/data/raw/bluebikes')
 
 # Set up logging
