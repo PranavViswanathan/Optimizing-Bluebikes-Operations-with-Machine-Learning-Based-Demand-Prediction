@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const StationContext = createContext();
 
-const API_BASE_URL = 'http://localhost:5001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bluebikes-backend-202855070348.us-central1.run.app/api';
 
 export const useStations = () => {
     const context = useContext(StationContext);

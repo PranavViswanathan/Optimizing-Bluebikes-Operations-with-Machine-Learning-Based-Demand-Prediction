@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bluebikes-backend-202855070348.us-central1.run.app/api';
 
 const AdminDashboard = () => {
     const navigate = useNavigate();

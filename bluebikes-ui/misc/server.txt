@@ -136,10 +136,6 @@ app.get('/api/stations/:id/status', async (req, res) => {
  * Request ML prediction for bike demand
  * Body: { station_id, datetime, temperature, precipitation }
  */
-// Replace your existing /api/predict endpoint in server.js with this:
-
-// In server.js, replace the /api/predict endpoint with this updated version:
-
 app.post('/api/predict', async (req, res) => {
   try {
     const { station_id, datetime, temperature, precipitation } = req.body;
@@ -148,109 +144,41 @@ app.post('/api/predict', async (req, res) => {
       return res.status(400).json({ error: 'station_id is required' });
     }
 
-    // If using external ML API (Cloud Run)
-    if (USE_EXTERNAL_ML_API && EXTERNAL_ML_API_URL) {
-      // Generate 48 features for Cloud Run
-      const features = generateFeaturesForCloudRun(station_id, datetime, temperature, precipitation);
-      
-      try {
-        const response = await axios.post(
-          `${EXTERNAL_ML_API_URL}/predict`,
-          { features: features },
-          { 
-            timeout: 10000,
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
-        
-        // Format for frontend
-        const formattedResponse = {
-          station_id: station_id,
-          datetime: datetime || new Date().toISOString(),
-          predicted_demand: Math.max(0, Math.round(response.data.prediction)),
-          model_version: response.data.model_version || 'cloud_run',
-          confidence: 'high'
-        };
-        
-        return res.json(formattedResponse);
-      } catch (cloudRunError) {
-        console.error('Cloud Run error:', cloudRunError.message);
-        // Fall through to mock prediction
+    // Forward request to ML service (local or external)
+    const mlRequestPayload = {
+      station_id,
+      datetime: datetime || new Date().toISOString(),
+      temperature: temperature || 15,
+      precipitation: precipitation || 0
+    };
+
+    const response = await axios.post(`${ML_SERVICE_URL}/predict`, mlRequestPayload, {
+      timeout: 10000, // 10 second timeout for external APIs
+      headers: {
+        'Content-Type': 'application/json',
+        // Add authorization header if using external API with auth
+        ...(process.env.ML_API_KEY && { 'Authorization': `Bearer ${process.env.ML_API_KEY}` })
       }
+    });
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error calling ML service:', error.message);
+    
+    // If ML service is unavailable, return a graceful error
+    if (error.code === 'ECONNREFUSED') {
+      return res.status(503).json({ 
+        error: 'ML prediction service is currently unavailable',
+        predicted_demand: null
+      });
     }
     
-    // Fallback mock prediction
-    const mockDemand = getMockPrediction(station_id, datetime);
-    res.json({
-      station_id: station_id,
-      datetime: datetime || new Date().toISOString(),
-      predicted_demand: mockDemand,
-      model_version: 'mock',
-      confidence: 'low'
+    res.status(500).json({ 
+      error: 'Failed to get prediction',
+      message: error.message 
     });
-    
-  } catch (error) {
-    console.error('Prediction error:', error);
-    res.status(500).json({ error: 'Prediction failed' });
   }
 });
-
-// Add these helper functions to your server.js:
-
-function generateFeaturesForCloudRun(stationId, datetime, temperature = 15, precipitation = 0) {
-  const dt = datetime ? new Date(datetime) : new Date();
-  
-  const hour = dt.getHours();
-  const dayOfWeek = dt.getDay();
-  const month = dt.getMonth() + 1;
-  const year = dt.getFullYear();
-  const day = dt.getDate();
-  
-  // Generate all 48 features
-  return [
-    hour, dayOfWeek, month, year, day,
-    Math.sin(2 * Math.PI * hour / 24),
-    Math.cos(2 * Math.PI * hour / 24),
-    Math.sin(2 * Math.PI * dayOfWeek / 7),
-    Math.cos(2 * Math.PI * dayOfWeek / 7),
-    Math.sin(2 * Math.PI * month / 12),
-    Math.cos(2 * Math.PI * month / 12),
-    hour >= 7 && hour <= 9 ? 1 : 0, // morning rush
-    hour >= 17 && hour <= 19 ? 1 : 0, // evening rush
-    hour >= 22 || hour <= 5 ? 1 : 0, // night
-    hour >= 11 && hour <= 14 ? 1 : 0, // midday
-    dayOfWeek === 0 || dayOfWeek === 6 ? 1 : 0, // weekend
-    0, 0, 0, // interaction features
-    temperature + 2, temperature - 2, precipitation, 4, temperature,
-    precipitation > 0.1 ? 1 : 0, 
-    precipitation > 0.5 ? 1 : 0,
-    temperature < 5 ? 1 : 0,
-    temperature > 25 ? 1 : 0,
-    100, 95, 98, 280, 2200, // historical (mock)
-    12.5, 3.2, 11.0, 1.8, 0.9, 1.5, 0.7, // statistical (mock)
-    0, 0, 0, 0, 0, 0, 0, 0 // padding
-  ];
-}
-
-function getMockPrediction(stationId, datetime) {
-  const dt = datetime ? new Date(datetime) : new Date();
-  const hour = dt.getHours();
-  const dayOfWeek = dt.getDay();
-  
-  // More realistic mock predictions for rebalancing
-  const stationHash = parseInt(stationId) || stationId.charCodeAt(0);
-  const stationFactor = (stationHash % 10) / 10;
-  
-  if (dayOfWeek > 0 && dayOfWeek < 6) { // Weekday
-    if (hour >= 7 && hour <= 9) return Math.round(20 + stationFactor * 30); // 20-50
-    if (hour >= 17 && hour <= 19) return Math.round(25 + stationFactor * 35); // 25-60
-    if (hour >= 11 && hour <= 14) return Math.round(15 + stationFactor * 20); // 15-35
-    return Math.round(5 + stationFactor * 15); // 5-20
-  } else { // Weekend
-    if (hour >= 10 && hour <= 16) return Math.round(18 + stationFactor * 25); // 18-43
-    return Math.round(5 + stationFactor * 10); // 5-15
-  }
-}
 
 // ========== HISTORICAL DATA ENDPOINT ==========
 

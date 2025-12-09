@@ -204,6 +204,32 @@ const RebalancingView = () => {
                             </div>
 
                             <div className="rec-content">
+                                <div className="station-info donor">
+                                    <h4>🚴 Source (Surplus Inventory)</h4>
+                                    <h3>{rec.donor.name}</h3>
+                                    <div className="station-stats">
+                                        <div className="stat">
+                                            <span className="label">Available Bikes:</span>
+                                            <span className="value success">{rec.donorBikes}</span>
+                                        </div>
+                                        <div className="stat">
+                                            <span className="label">After Transfer:</span>
+                                            <span className="value">{rec.donorBikes - rec.bikesNeeded}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="rec-action">
+                                    <div className="arrow-container">
+                                        <div className="bikes-to-move">
+                                            Move {rec.bikesNeeded} bikes →
+                                        </div>
+                                        <div className="distance-info">
+                                            {rec.distance.toFixed(2)} mi
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div className="station-info recipient">
                                     <h4>📍 Destination (Low inventory)</h4>
                                     <h3>{rec.recipient.name}</h3>
@@ -223,31 +249,6 @@ const RebalancingView = () => {
                                     </div>
                                 </div>
 
-                                <div className="rec-action">
-                                    <div className="arrow-container">
-                                        <div className="bikes-to-move">
-                                            Move {rec.bikesNeeded} bikes →
-                                        </div>
-                                        <div className="distance-info">
-                                            {rec.distance.toFixed(2)} mi
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="station-info donor">
-                                    <h4>🚴 Source (Surplus Inventory)</h4>
-                                    <h3>{rec.donor.name}</h3>
-                                    <div className="station-stats">
-                                        <div className="stat">
-                                            <span className="label">Available Bikes:</span>
-                                            <span className="value success">{rec.donorBikes}</span>
-                                        </div>
-                                        <div className="stat">
-                                            <span className="label">After Transfer:</span>
-                                            <span className="value">{rec.donorBikes - rec.bikesNeeded}</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     ))}
