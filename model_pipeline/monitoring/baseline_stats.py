@@ -2,11 +2,9 @@
 Baseline Statistics Generator for BlueBikes Model Monitoring
 Creates and manages reference data baselines for Evidently AI drift detection.
 
-Captures:
-- Reference data (training/test data) for comparison
-- Feature statistics for quick checks
-- Model performance baseline
-- Prediction distributions
+KEY CHANGE: Uses TRAINING data as baseline (not test data)
+- Baseline = what the model learned from
+- Current = new production data to compare against baseline
 """
 
 import json
@@ -26,6 +24,7 @@ from monitoring_config import (
     BASELINES_DIR,
     PRODUCTION_MODEL_PATH,
     PRODUCTION_METADATA_PATH,
+    DATA_SPLITS,
 )
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -36,11 +35,8 @@ class BaselineGenerator:
     """
     Generates and manages baseline data for Evidently AI monitoring.
     
-    Stores:
-    - Reference DataFrame (sampled from training data)
-    - Feature statistics summary
-    - Model performance metrics
-    - Prediction distribution baseline
+    IMPORTANT: Baseline is generated from TRAINING data, not test data.
+    This represents the distribution the model was trained on.
     """
     
     def __init__(self, config: Optional[MonitoringConfig] = None):
@@ -61,26 +57,24 @@ class BaselineGenerator:
         feature_columns: Optional[List[str]] = None
     ) -> Dict:
         """
-        Generate complete baseline from training data and model.
+        Generate baseline from TRAINING data.
         
         Args:
-            X_train: Training features
+            X_train: Training features - THIS IS THE REFERENCE
             y_train: Training target
-            X_test: Test features  
-            y_test: Test target
+            X_test: Test features (for metrics only)
+            y_test: Test target (for metrics only)
             model: Trained model object
             model_metrics: Performance metrics from training
             model_version: Version number for this baseline
-            model_name: Name of the model (xgboost, lightgbm, etc.)
-            sample_size: Number of samples to store as reference (for memory efficiency)
-            feature_columns: List of feature columns the model expects (optional)
-            
-        Returns:
-            Dictionary containing baseline data and statistics
+            model_name: Name of the model
+            sample_size: Number of samples to store as reference
+            feature_columns: List of feature columns the model expects
         """
         logger.info("="*60)
-        logger.info("GENERATING BASELINE FOR EVIDENTLY AI")
+        logger.info("GENERATING BASELINE FROM TRAINING DATA")
         logger.info("="*60)
+        logger.info("Baseline = Training distribution (what model learned from)")
         
         # Drop date column for model operations
         X_train_clean = X_train.drop('date', axis=1, errors='ignore')
@@ -88,21 +82,24 @@ class BaselineGenerator:
         
         # If feature_columns provided, ensure correct column order
         if feature_columns:
-            # Filter to only columns that exist
             available_cols = [c for c in feature_columns if c in X_train_clean.columns]
             X_train_clean = X_train_clean[available_cols]
             X_test_clean = X_test_clean[available_cols]
             logger.info(f"Using {len(available_cols)} features from feature_columns")
         
-        # Sample reference data (use test set as reference for drift detection)
-        # This is what we compare production data against
-        if len(X_test) > sample_size:
-            sample_idx = np.random.choice(len(X_test), sample_size, replace=False)
-            reference_data = X_test_clean.iloc[sample_idx].copy()
-            reference_target = y_test.iloc[sample_idx].copy()
+        # =====================================================
+        # KEY: Sample from TRAINING data as reference
+        # This is what "normal" looks like for the model
+        # =====================================================
+        if len(X_train_clean) > sample_size:
+            sample_idx = np.random.choice(len(X_train_clean), sample_size, replace=False)
+            reference_data = X_train_clean.iloc[sample_idx].copy()
+            reference_target = y_train.iloc[sample_idx].copy()
         else:
-            reference_data = X_test_clean.copy()
-            reference_target = y_test.copy()
+            reference_data = X_train_clean.copy()
+            reference_target = y_train.copy()
+        
+        logger.info(f"Reference data sampled from TRAINING set: {len(reference_data)} samples")
         
         # Add predictions to reference data
         reference_preds = model.predict(reference_data)
@@ -110,7 +107,7 @@ class BaselineGenerator:
         reference_data['prediction'] = reference_preds
         reference_data[self.config.features.target_column] = reference_target.values
         
-        # Generate predictions on full test set for statistics
+        # Generate predictions on test set for baseline metrics
         y_pred_test = model.predict(X_test_clean)
         
         baseline = {
@@ -118,15 +115,22 @@ class BaselineGenerator:
                 "version": model_version,
                 "model_name": model_name,
                 "created_at": datetime.now().isoformat(),
+                "baseline_source": "training_data",  # Explicitly note source
                 "train_samples": len(X_train),
                 "test_samples": len(X_test),
                 "reference_samples": len(reference_data),
                 "n_features": X_train_clean.shape[1],
                 "feature_names": list(X_train_clean.columns),
+                "data_splits": {
+                    "train_start": self.config.data_splits.train_start,
+                    "train_end": self.config.data_splits.train_end,
+                    "test_start": self.config.data_splits.test_start,
+                    "test_end": self.config.data_splits.test_end,
+                }
             },
             "reference_data": reference_data,  # DataFrame for Evidently
-            "feature_stats": self._compute_feature_stats(X_train_clean),
-            "target_stats": self._compute_target_stats(y_train),
+            "feature_stats": self._compute_feature_stats(X_train_clean),  # From training!
+            "target_stats": self._compute_target_stats(y_train),  # From training!
             "prediction_stats": self._compute_prediction_stats(y_pred_test),
             "performance_baseline": self._normalize_metrics(model_metrics),
         }
@@ -134,9 +138,9 @@ class BaselineGenerator:
         self.baseline = baseline
         
         logger.info(f"Baseline generated for model v{model_version}")
+        logger.info(f"  Source: Training data ({self.config.data_splits.train_start} to {self.config.data_splits.train_end})")
         logger.info(f"  Reference samples: {len(reference_data)}")
         logger.info(f"  Features tracked: {len(baseline['feature_stats'])}")
-        logger.info(f"  Test R²: {model_metrics.get('test_r2', 'N/A')}")
         
         return baseline
     
@@ -154,7 +158,6 @@ class BaselineGenerator:
                 continue
             
             if col in self.config.features.categorical_features:
-                # Categorical statistics
                 value_counts = col_data.value_counts(normalize=True)
                 stats[col] = {
                     "type": "categorical",
@@ -163,7 +166,6 @@ class BaselineGenerator:
                     "n_samples": len(col_data),
                 }
             else:
-                # Numerical statistics
                 stats[col] = {
                     "type": "numerical",
                     "mean": float(col_data.mean()),
@@ -228,7 +230,7 @@ class BaselineGenerator:
         path: Optional[Path] = None, 
         version: Optional[int] = None
     ) -> Path:
-        """Save baseline to pickle file (includes DataFrame)."""
+        """Save baseline to pickle file."""
         if not self.baseline:
             raise ValueError("No baseline generated. Run generate_baseline() first.")
         
@@ -237,7 +239,6 @@ class BaselineGenerator:
         
         path.parent.mkdir(parents=True, exist_ok=True)
         
-        # Save as pickle (to preserve DataFrame)
         with open(path, 'wb') as f:
             pickle.dump(self.baseline, f)
         
@@ -246,7 +247,7 @@ class BaselineGenerator:
         with open(current_path, 'wb') as f:
             pickle.dump(self.baseline, f)
         
-        # Save metadata as JSON for easy inspection
+        # Save metadata as JSON for inspection
         metadata_path = path.parent / f"baseline_v{version}_metadata.json"
         metadata = {k: v for k, v in self.baseline.items() if k != 'reference_data'}
         with open(metadata_path, 'w') as f:
@@ -270,6 +271,7 @@ class BaselineGenerator:
             baseline = pickle.load(f)
         
         logger.info(f"Loaded baseline v{baseline['metadata']['version']} from {path}")
+        logger.info(f"  Source: {baseline['metadata'].get('baseline_source', 'unknown')}")
         logger.info(f"  Reference samples: {len(baseline.get('reference_data', []))}")
         
         return baseline
@@ -287,7 +289,6 @@ class BaselineManager:
         
         for path in self.baselines_dir.glob("baseline_v*.pkl"):
             try:
-                # Load just metadata to avoid loading full DataFrame
                 metadata_path = path.parent / f"{path.stem}_metadata.json"
                 if metadata_path.exists():
                     with open(metadata_path, 'r') as f:
@@ -296,11 +297,11 @@ class BaselineManager:
                         "version": data["metadata"]["version"],
                         "created_at": data["metadata"]["created_at"],
                         "model_name": data["metadata"].get("model_name", "unknown"),
+                        "baseline_source": data["metadata"].get("baseline_source", "unknown"),
                         "reference_samples": data["metadata"].get("reference_samples", 0),
                         "path": str(path),
                     })
                 else:
-                    # Fallback: load pickle
                     with open(path, 'rb') as f:
                         data = pickle.load(f)
                     baselines.append({
@@ -335,7 +336,6 @@ class BaselineManager:
                 path = Path(baseline["path"])
                 path.unlink()
                 
-                # Also remove metadata JSON
                 metadata_path = path.parent / f"{path.stem}_metadata.json"
                 if metadata_path.exists():
                     metadata_path.unlink()
@@ -350,19 +350,15 @@ def generate_baseline_from_training(
     metadata_path: Optional[str] = None,
 ) -> Path:
     """
-    Generate baseline from existing production model and training data.
-    
-    Called after model training/deployment to create monitoring baseline.
-    Uses IntegratedBlueBikesTrainer to ensure feature consistency with trained model.
+    Generate baseline from production model using TRAINING data as reference.
     """
     import sys
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline')
     
     logger.info("="*60)
-    logger.info("GENERATING BASELINE FROM PRODUCTION MODEL")
+    logger.info("GENERATING BASELINE FROM TRAINING DATA")
     logger.info("="*60)
     
-    # Use defaults if not provided
     if model_path is None:
         model_path = str(PRODUCTION_MODEL_PATH)
     if metadata_path is None:
@@ -380,73 +376,57 @@ def generate_baseline_from_training(
     
     # Get expected features from model
     try:
-        # XGBoost
         if hasattr(model, 'get_booster'):
             expected_features = model.get_booster().feature_names
-        # LightGBM
         elif hasattr(model, 'feature_name_'):
             expected_features = model.feature_name_
-        # Sklearn models
         elif hasattr(model, 'feature_names_in_'):
             expected_features = list(model.feature_names_in_)
         else:
             expected_features = None
-            logger.warning("Could not extract feature names from model")
     except Exception as e:
         expected_features = None
         logger.warning(f"Error extracting feature names: {e}")
     
+    # Load data and split according to config
+    from feature_generation import load_and_prepare_data
+    
+    X, y, feature_columns = load_and_prepare_data()
+    X["date"] = pd.to_datetime(X["date"])
+    
+    config = get_config()
+    
+    # Split data according to config dates
+    train_mask = (X["date"] >= config.data_splits.get_train_start()) & \
+                 (X["date"] <= config.data_splits.get_train_end())
+    test_mask = (X["date"] >= config.data_splits.get_test_start()) & \
+                (X["date"] <= config.data_splits.get_test_end())
+    
+    X_train = X.loc[train_mask].copy()
+    y_train = y.loc[train_mask].copy()
+    X_test = X.loc[test_mask].copy()
+    y_test = y.loc[test_mask].copy()
+    
+    logger.info(f"Training data: {len(X_train)} samples ({config.data_splits.train_start} to {config.data_splits.train_end})")
+    logger.info(f"Test data: {len(X_test)} samples ({config.data_splits.test_start} to {config.data_splits.test_end})")
+    
+    # Handle feature alignment
     if expected_features:
-        logger.info(f"Model expects {len(expected_features)} features")
-        logger.info(f"Features: {expected_features[:5]}... (showing first 5)")
-    
-    # Load data using IntegratedBlueBikesTrainer to ensure feature consistency
-    # This includes all bias mitigation features
-    from integrated_training_pipeline import IntegratedBlueBikesTrainer
-    
-    logger.info("Loading data via IntegratedBlueBikesTrainer for feature consistency...")
-    trainer = IntegratedBlueBikesTrainer(experiment_name='baseline_generation_temp')
-    
-    # load_and_prepare_data returns 6 values: X_train, X_test, X_val, y_train, y_test, y_val
-    X_train, X_test, X_val, y_train, y_test, y_val = trainer.load_and_prepare_data()
-    
-    logger.info(f"Loaded data - Train: {len(X_train)}, Val: {len(X_val)}, Test: {len(X_test)}")
-    logger.info(f"Features: {X_train.shape[1]} columns")
-    
-    # If we have expected features, filter and reorder columns to match model
-    if expected_features:
-        # Check for missing features
-        available_features = [f for f in expected_features if f in X_train.columns]
-        missing_features = [f for f in expected_features if f not in X_train.columns]
+        for df in [X_train, X_test]:
+            for feat in expected_features:
+                if feat not in df.columns:
+                    df[feat] = 0
         
-        if missing_features:
-            logger.warning(f"Missing {len(missing_features)} features: {missing_features}")
-            # Add missing features with default values to all splits
-            for feat in missing_features:
-                X_train[feat] = 0
-                X_test[feat] = 0
-                X_val[feat] = 0
-                logger.info(f"  Added missing feature '{feat}' with default value 0")
-        
-        # Reorder columns to match model's expected order (keep date if present)
-        cols_to_keep = [c for c in expected_features if c in X_train.columns]
-        if 'date' in X_train.columns and 'date' not in cols_to_keep:
-            cols_to_keep = ['date'] + cols_to_keep
-        
+        cols_to_keep = ['date'] + [c for c in expected_features if c in X_train.columns]
         X_train = X_train[cols_to_keep]
         X_test = X_test[cols_to_keep]
-        X_val = X_val[cols_to_keep]
-        logger.info(f"Filtered to {len(cols_to_keep)} columns to match model")
-    
-    logger.info(f"Training samples: {len(X_train)}")
-    logger.info(f"Test samples: {len(X_test)}")
     
     # Get version and metrics
     version = metadata.get("version", 1)
     model_name = metadata.get("model_type", "unknown")
     metrics = metadata.get("metrics", {})
     
-    # Generate baseline
+    # Generate baseline from TRAINING data
     generator = BaselineGenerator()
     baseline = generator.generate_baseline(
         X_train=X_train,
@@ -461,104 +441,24 @@ def generate_baseline_from_training(
         feature_columns=expected_features
     )
     
-    # Save baseline
     path = generator.save_baseline(version=version)
     
     logger.info("="*60)
     logger.info("BASELINE GENERATION COMPLETE")
     logger.info("="*60)
+    logger.info(f"Baseline source: Training data")
+    logger.info(f"Saved to: {path}")
     
     return path
 
-
-def generate_baseline_after_training(
-    trainer,  # IntegratedBlueBikesTrainer instance
-    X_train: pd.DataFrame,
-    y_train: pd.Series,
-    X_test: pd.DataFrame,
-    y_test: pd.Series,
-    metrics: Dict[str, float],
-    version: int,
-    feature_columns: Optional[List[str]] = None
-) -> Path:
-    """
-    Generate baseline immediately after training completes.
-    
-    This is the PREFERRED method as it uses the exact same data and features
-    that were used during training, avoiding any feature mismatch issues.
-    
-    Called from integrated_training_pipeline.py after model is trained.
-    
-    Args:
-        trainer: IntegratedBlueBikesTrainer instance with trained model
-        X_train: Training features (exactly as used in training)
-        y_train: Training target
-        X_test: Test features (exactly as used in training)
-        y_test: Test target
-        metrics: Performance metrics from training
-        version: Model version number
-        feature_columns: List of feature columns used by model
-        
-    Returns:
-        Path to saved baseline file
-    """
-    logger.info("="*60)
-    logger.info("GENERATING BASELINE FROM TRAINING RUN")
-    logger.info("="*60)
-    logger.info("Using exact training data - guaranteed feature consistency")
-    
-    model = trainer.mitigated_model if trainer.mitigated_model else trainer.best_model
-    model_name = trainer.best_model_name
-    
-    # Get feature columns from model if not provided
-    if feature_columns is None:
-        try:
-            if hasattr(model, 'get_booster'):
-                feature_columns = model.get_booster().feature_names
-            elif hasattr(model, 'feature_name_'):
-                feature_columns = model.feature_name_
-            elif hasattr(model, 'feature_names_in_'):
-                feature_columns = list(model.feature_names_in_)
-        except Exception as e:
-            logger.warning(f"Could not extract feature names: {e}")
-    
-    if feature_columns:
-        logger.info(f"Model uses {len(feature_columns)} features")
-    
-    generator = BaselineGenerator()
-    baseline = generator.generate_baseline(
-        X_train=X_train,
-        y_train=y_train,
-        X_test=X_test,
-        y_test=y_test,
-        model=model,
-        model_metrics=metrics,
-        model_version=version,
-        model_name=model_name,
-        feature_columns=feature_columns
-    )
-    
-    path = generator.save_baseline(version=version)
-    
-    logger.info("="*60)
-    logger.info("BASELINE GENERATION COMPLETE")
-    logger.info("="*60)
-    
-    return path
-
-
-# =============================================================================
-# CLI / TESTING
-# =============================================================================
 
 if __name__ == "__main__":
     import argparse
     
     parser = argparse.ArgumentParser(description="Baseline Statistics Generator")
-    parser.add_argument("--generate", action="store_true", help="Generate baseline from production model")
+    parser.add_argument("--generate", action="store_true", help="Generate baseline")
     parser.add_argument("--list", action="store_true", help="List available baselines")
     parser.add_argument("--show", type=int, help="Show details for baseline version N")
-    parser.add_argument("--cleanup", type=int, default=None, help="Keep only N most recent baselines")
     
     args = parser.parse_args()
     
@@ -574,74 +474,18 @@ if __name__ == "__main__":
             for b in baselines:
                 print(f"\n  v{b['version']}")
                 print(f"    Model: {b['model_name']}")
+                print(f"    Source: {b.get('baseline_source', 'unknown')}")
                 print(f"    Created: {b['created_at']}")
                 print(f"    Samples: {b.get('reference_samples', 'N/A')}")
-                print(f"    Path: {b['path']}")
         else:
             print("  No baselines found")
-            print(f"  Looking in: {BASELINES_DIR}")
-    
-    elif args.show:
-        try:
-            path = get_baseline_path(args.show)
-            baseline = BaselineGenerator.load_baseline(path)
-            
-            print(f"\n" + "="*60)
-            print(f"BASELINE v{args.show} DETAILS")
-            print("="*60)
-            
-            meta = baseline['metadata']
-            print(f"\nMetadata:")
-            print(f"  Model: {meta['model_name']}")
-            print(f"  Created: {meta['created_at']}")
-            print(f"  Train samples: {meta['train_samples']}")
-            print(f"  Reference samples: {meta['reference_samples']}")
-            print(f"  Features: {meta['n_features']}")
-            
-            print(f"\nFeature Names:")
-            for i, feat in enumerate(meta['feature_names']):
-                print(f"  {i+1}. {feat}")
-            
-            print(f"\nPerformance Baseline:")
-            for k, v in baseline['performance_baseline'].items():
-                if isinstance(v, float):
-                    print(f"  {k}: {v:.4f}")
-                else:
-                    print(f"  {k}: {v}")
-            
-            print(f"\nPrediction Stats:")
-            pred = baseline['prediction_stats']
-            print(f"  Mean: {pred['mean']:.2f}")
-            print(f"  Std: {pred['std']:.2f}")
-            print(f"  Range: [{pred['min']:.2f}, {pred['max']:.2f}]")
-            
-            print(f"\nTarget Stats:")
-            target = baseline['target_stats']
-            print(f"  Mean: {target['mean']:.2f}")
-            print(f"  Std: {target['std']:.2f}")
-            print(f"  Range: [{target['min']:.2f}, {target['max']:.2f}]")
-            
-            print(f"\nReference Data Shape: {baseline['reference_data'].shape}")
-            
-        except FileNotFoundError:
-            print(f"Baseline v{args.show} not found")
-    
-    elif args.cleanup:
-        manager = BaselineManager()
-        print(f"Cleaning up baselines, keeping {args.cleanup} most recent...")
-        manager.cleanup_old_baselines(keep_count=args.cleanup)
-        print("Cleanup complete.")
     
     elif args.generate:
         try:
             path = generate_baseline_from_training()
             print(f"\n✓ Baseline generated: {path}")
-        except FileNotFoundError as e:
-            print(f"\n✗ Error: {e}")
-            print("  Make sure production model exists at:")
-            print(f"    {PRODUCTION_MODEL_PATH}")
         except Exception as e:
-            print(f"\n✗ Error generating baseline: {e}")
+            print(f"\n✗ Error: {e}")
             import traceback
             traceback.print_exc()
     

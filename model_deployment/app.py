@@ -12,6 +12,7 @@ import logging
 from datetime import datetime
 from google.cloud import storage
 import traceback
+from monitoring_routes import register_monitoring_routes
 
 # Configure logging
 logging.basicConfig(
@@ -352,6 +353,9 @@ def metrics():
             pass
     
     return jsonify(metrics_data), 200
+
+
+register_monitoring_routes(app)
 
 @app.errorhandler(404)
 def not_found(error):

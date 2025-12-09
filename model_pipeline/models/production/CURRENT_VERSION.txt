@@ -1,7 +1,7 @@
 Version: 1
 Model: xgboost
-Deployed: 2025-12-08
+Deployed: 2025-12-09
 Bias Mitigated: Yes
-Mitigated R²: 0.9297
-Mitigated MAE: 100.38
-Bias Issues Reduced: 0
+Mitigated R²: 0.9352
+Mitigated MAE: 80.18
+Bias Issues Reduced: -1

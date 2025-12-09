@@ -61,7 +61,7 @@ class IntegratedBlueBikesTrainer:
         print(f"Tracking URI: {mlflow.get_tracking_uri()}")
         
     def load_and_prepare_data(self):
-        """Reuse existing data loading logic."""
+        """Load and split data with proper validation set."""
         print("\n" + "="*80)
         print(" STEP 1: LOADING AND PREPARING DATA ".center(80))
         print("="*80)
@@ -69,33 +69,31 @@ class IntegratedBlueBikesTrainer:
         X, y, feature_columns = load_and_prepare_data()
         X["date"] = pd.to_datetime(X["date"])
 
-        train_start = pd.Timestamp("2024-06-01")
-        train_end   = pd.Timestamp("2025-06-30")
-        test_start  = pd.Timestamp("2025-07-01")
-        test_end = pd.Timestamp("2025-07-31")
+        # Date boundaries
+        train_start = pd.Timestamp("2024-01-01")
+        val_start   = pd.Timestamp("2025-08-01")   # Validation: Aug-Sep 2025
+        train_end   = pd.Timestamp("2025-09-30")   # Training ends here (includes val)
+        test_start  = pd.Timestamp("2025-10-01")
+        test_end    = pd.Timestamp("2025-11-30")
 
-        train_mask_full = (X["date"] >= train_start) & (X["date"] <= train_end)
+        # Create masks - validation carved from end of training period
+        train_mask = (X["date"] >= train_start) & (X["date"] < val_start)
+        val_mask   = (X["date"] >= val_start) & (X["date"] <= train_end)
         test_mask  = (X["date"] >= test_start) & (X["date"] <= test_end)
 
-        X_train_full = X.loc[train_mask_full].copy()
-        y_train_full = y.loc[train_mask_full].copy()
-        X_test = X.loc[test_mask].copy()
-        y_test = y.loc[test_mask].copy()
-
-        val_start = pd.Timestamp("2025-05-01")
-        val_mask = X_train_full['date'] >= val_start
-        tr_mask = X_train_full['date'] < val_start
-
-        X_train = X_train_full.loc[tr_mask]
-        y_train = y_train_full.loc[tr_mask]
-        X_val   = X_train_full.loc[val_mask]
-        y_val   = y_train_full.loc[val_mask]
+        X_train = X.loc[train_mask].copy()
+        y_train = y.loc[train_mask].copy()
+        X_val   = X.loc[val_mask].copy()
+        y_val   = y.loc[val_mask].copy()
+        X_test  = X.loc[test_mask].copy()
+        y_test  = y.loc[test_mask].copy()
         
         print(f"Dataset shape: {X.shape}")
-        print(f"Training samples: {len(X_train):,}")
-        print(f"Validation samples: {len(X_val):,}")
-        print(f"Test samples: {len(X_test):,}")
-        print(f"Features: {X_train.shape[1]}")
+        print(f"\nData Split:")
+        print(f"  Training:   {train_start.date()} to {(val_start - pd.Timedelta(days=1)).date()} ({len(X_train):,} samples)")
+        print(f"  Validation: {val_start.date()} to {train_end.date()} ({len(X_val):,} samples)")
+        print(f"  Test:       {test_start.date()} to {test_end.date()} ({len(X_test):,} samples)")
+        print(f"  Features: {X_train.shape[1]}")
         
         return X_train, X_test, X_val, y_train, y_test, y_val
     
@@ -269,66 +267,133 @@ class IntegratedBlueBikesTrainer:
     
     def apply_optimized_bias_mitigation(self, X_train, y_train, X_val, y_val, X_test, y_test):
         """
-        Apply bias mitigation strategy - Feature Engineering Only
+        Apply bias mitigation with PROPER quantile handling.
+        
+        CRITICAL: Quantiles calculated from TRAINING data only to prevent data leakage.
         """
         print("\n" + "="*80)
         print(" STEP 5: APPLYING BIAS MITIGATION ".center(80))
         print("="*80)
         
-        def add_optimized_features(X):
-            """Add bias-aware features."""
-            X = X.copy()
-            
-            # Temporal bias features
-            X['is_hour_8'] = (X['hour'] == 8).astype(int)
-            X['is_hour_17_18'] = X['hour'].isin([17, 18]).astype(int)
-            
-            X['rush_intensity'] = 0.0
-            X.loc[X['hour'] == 8, 'rush_intensity'] = 1.0
-            X.loc[X['hour'].isin([17, 18]), 'rush_intensity'] = 1.0
-            X.loc[X['hour'].isin([7, 9]), 'rush_intensity'] = 0.5
-            X.loc[X['hour'].isin([16, 19]), 'rush_intensity'] = 0.5
-            
-            # Interaction bias features
-            X['weekday_morning_rush'] = (1 - X['is_weekend']) * X['is_morning_rush']
-            X['weekday_evening_rush'] = (1 - X['is_weekend']) * X['is_evening_rush']
-            
-            # Demand level features
-            if 'rides_last_hour' in X.columns:
-                X['high_demand_flag'] = (X['rides_last_hour'] > X['rides_last_hour'].quantile(0.75)).astype(int)
-                X['low_demand_flag'] = (X['rides_last_hour'] < X['rides_last_hour'].quantile(0.25)).astype(int)
-                
-                if 'rides_rolling_3h' in X.columns:
-                    X['demand_volatility'] = np.abs(X['rides_last_hour'] - X['rides_rolling_3h'])
-                else:
-                    X['demand_volatility'] = 0
-            else:
-                X['high_demand_flag'] = 0
-                X['low_demand_flag'] = 0
-                X['demand_volatility'] = 0
-            
-            # Composite features
-            X['problem_period'] = (
-                X['is_hour_8'] + X['is_hour_17_18'] +
-                X['weekday_morning_rush'] + X['weekday_evening_rush']
-            ).clip(0, 1)
-            
-            hour_groups = pd.cut(X['hour'], bins=[0, 6, 10, 14, 18, 24], 
-                                labels=[0, 1, 2, 3, 4], include_lowest=True)
-            X['hour_group'] = pd.to_numeric(hour_groups, errors='coerce').fillna(0).astype(int)
-            
-            return X
+        # =========================================================
+        # CALCULATE QUANTILES FROM TRAINING DATA ONLY
+        # =========================================================
+        self.train_quantiles = {}
         
-        X_train = add_optimized_features(X_train)
-        X_val = add_optimized_features(X_val)
-        X_test = add_optimized_features(X_test)
+        if 'rides_last_hour' in X_train.columns:
+            self.train_quantiles['rides_last_hour_q75'] = float(X_train['rides_last_hour'].quantile(0.75))
+            self.train_quantiles['rides_last_hour_q25'] = float(X_train['rides_last_hour'].quantile(0.25))
+            self.train_quantiles['rides_last_hour_median'] = float(X_train['rides_last_hour'].median())
         
-        print(f"Added 10 bias-aware features to training data")
-        print(f"Training set: {len(X_train):,} samples, {X_train.shape[1]} features")
+        print("Training quantiles (used for all splits):")
+        for k, v in self.train_quantiles.items():
+            print(f"  {k}: {v:.2f}")
+        
+        # =========================================================
+        # APPLY FEATURES USING TRAINING QUANTILES
+        # =========================================================
+        X_train = self._add_bias_features(X_train, self.train_quantiles, is_training=True)
+        X_val = self._add_bias_features(X_val, self.train_quantiles, is_training=False)
+        X_test = self._add_bias_features(X_test, self.train_quantiles, is_training=False)
+        
+        print(f"\nAdded bias-aware features:")
+        print(f"  Training:   {len(X_train):,} samples, {X_train.shape[1]} features")
+        print(f"  Validation: {len(X_val):,} samples, {X_val.shape[1]} features")
+        print(f"  Test:       {len(X_test):,} samples, {X_test.shape[1]} features")
+        
+        # Save quantiles for monitoring baseline
+        self._save_quantiles_for_monitoring()
         
         sample_weights = None
         
         return X_train, X_val, X_test, y_train, y_val, y_test, sample_weights
+
+    def _add_bias_features(self, X, quantiles, is_training=False):
+        """
+        Add bias-aware features using pre-calculated quantiles.
+        
+        Args:
+            X: DataFrame to add features to
+            quantiles: Dict of quantile values from training data
+            is_training: Whether this is training data (for logging)
+        """
+        X = X.copy()
+        
+        # ---------------------------------------------------------
+        # TEMPORAL FEATURES (no leakage - based on hour values)
+        # ---------------------------------------------------------
+        X['is_hour_8'] = (X['hour'] == 8).astype(int)
+        X['is_hour_17_18'] = X['hour'].isin([17, 18]).astype(int)
+        
+        X['rush_intensity'] = 0.0
+        X.loc[X['hour'] == 8, 'rush_intensity'] = 1.0
+        X.loc[X['hour'].isin([17, 18]), 'rush_intensity'] = 1.0
+        X.loc[X['hour'].isin([7, 9]), 'rush_intensity'] = 0.5
+        X.loc[X['hour'].isin([16, 19]), 'rush_intensity'] = 0.5
+        
+        # ---------------------------------------------------------
+        # INTERACTION FEATURES (no leakage)
+        # ---------------------------------------------------------
+        # Only add if not already present (from feature_generation.py)
+        if 'weekday_morning_rush' not in X.columns:
+            X['weekday_morning_rush'] = (1 - X['is_weekend']) * X['is_morning_rush']
+        if 'weekday_evening_rush' not in X.columns:
+            X['weekday_evening_rush'] = (1 - X['is_weekend']) * X['is_evening_rush']
+        
+        # ---------------------------------------------------------
+        # DEMAND FEATURES (using TRAINING quantiles - no leakage)
+        # ---------------------------------------------------------
+        if 'rides_last_hour' in X.columns and quantiles:
+            q75 = quantiles.get('rides_last_hour_q75', 50)
+            q25 = quantiles.get('rides_last_hour_q25', 10)
+            
+            X['high_demand_flag'] = (X['rides_last_hour'] > q75).astype(int)
+            X['low_demand_flag'] = (X['rides_last_hour'] < q25).astype(int)
+            
+            if 'rides_rolling_3h' in X.columns:
+                X['demand_volatility'] = np.abs(X['rides_last_hour'] - X['rides_rolling_3h'])
+            else:
+                X['demand_volatility'] = 0.0
+        else:
+            X['high_demand_flag'] = 0
+            X['low_demand_flag'] = 0
+            X['demand_volatility'] = 0.0
+        
+        # ---------------------------------------------------------
+        # COMPOSITE FEATURES
+        # ---------------------------------------------------------
+        X['problem_period'] = (
+            X['is_hour_8'] + X['is_hour_17_18'] +
+            X['weekday_morning_rush'] + X['weekday_evening_rush']
+        ).clip(0, 1)
+        
+        # Hour grouping (deterministic, no leakage)
+        hour_groups = pd.cut(
+            X['hour'], 
+            bins=[-0.1, 6, 10, 14, 18, 24],  # -0.1 to include 0
+            labels=[0, 1, 2, 3, 4], 
+            include_lowest=True
+        )
+        X['hour_group'] = pd.to_numeric(hour_groups, errors='coerce').fillna(0).astype(int)
+        
+        return X
+    
+
+    def _save_quantiles_for_monitoring(self):
+        """Save training quantiles for use in drift monitoring baseline."""
+        import json
+        from pathlib import Path
+        
+        quantiles_path = Path("/opt/airflow/models/production/training_quantiles.json")
+        quantiles_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        try:
+            with open(quantiles_path, 'w') as f:
+                json.dump(self.train_quantiles, f, indent=2)
+            print(f"Training quantiles saved to: {quantiles_path}")
+        except Exception as e:
+            print(f"Warning: Could not save quantiles: {e}")
+
     
     def retrain_best_model(self, X_train, y_train, X_val, y_val, X_test, y_test, 
                           sample_weights=None):

@@ -1,40 +1,19 @@
 {
   "retraining_runs": [
     {
-      "timestamp": "2025-12-05T22:23:57.032018",
+      "timestamp": "2025-12-09T08:55:54.960373",
       "trigger": "drift_detected",
       "drift_status": "CRITICAL",
-      "n_drifted_features": 22,
-      "airflow_run_id": "manual__2025-12-05T22:18:31.891772+00:00"
+      "n_drifted_features": 25,
+      "airflow_run_id": "manual__2025-12-09T08:54:57.227172+00:00"
     },
     {
-      "timestamp": "2025-12-06T16:33:30.369300",
+      "timestamp": "2025-12-09T09:23:59.376349",
       "trigger": "drift_detected",
       "drift_status": "CRITICAL",
-      "n_drifted_features": 22,
-      "airflow_run_id": "scheduled__2025-12-05T06:00:00+00:00"
-    },
-    {
-      "timestamp": "2025-12-06T23:17:54.567720",
-      "trigger": "drift_detected",
-      "drift_status": "CRITICAL",
-      "n_drifted_features": 22,
-      "airflow_run_id": "scheduled__2025-12-05T06:00:00+00:00"
-    },
-    {
-      "timestamp": "2025-12-08T19:49:17.784450",
-      "trigger": "drift_detected",
-      "drift_status": "CRITICAL",
-      "n_drifted_features": 22,
-      "airflow_run_id": "scheduled__2025-12-07T06:00:00+00:00"
-    },
-    {
-      "timestamp": "2025-12-08T22:31:39.197498",
-      "trigger": "drift_detected",
-      "drift_status": "CRITICAL",
-      "n_drifted_features": 28,
-      "airflow_run_id": "manual__2025-12-08T22:29:24.607503+00:00"
+      "n_drifted_features": 25,
+      "airflow_run_id": "manual__2025-12-09T09:22:51.485502+00:00"
     }
   ],
-  "last_retraining": "2025-12-08T22:31:39.197479"
+  "last_retraining": "2025-12-09T09:23:59.376333"
 }
