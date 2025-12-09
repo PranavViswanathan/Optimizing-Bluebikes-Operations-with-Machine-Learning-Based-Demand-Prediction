@@ -9,12 +9,9 @@ const PORT = process.env.PORT || 5000;
 const GBFS_BASE_URL = process.env.GBFS_BASE_URL || 'https://gbfs.lyft.com/gbfs/1.1/bos/en';
 
 // ML Service Configuration
-// Set USE_EXTERNAL_ML_API=true to use a deployed model API
-const USE_EXTERNAL_ML_API = process.env.USE_EXTERNAL_ML_API === 'true';
-const EXTERNAL_ML_API_URL = process.env.EXTERNAL_ML_API_URL;
-const ML_SERVICE_URL = USE_EXTERNAL_ML_API && EXTERNAL_ML_API_URL 
-  ? EXTERNAL_ML_API_URL 
-  : `http://localhost:${process.env.ML_SERVICE_PORT || 5002}`;
+// Always point to local ML service for feature engineering
+// The local service will handle forwarding to external model if needed
+const ML_SERVICE_URL = `http://localhost:${process.env.ML_SERVICE_PORT || 5002}`;
 
 // Historical Data Service Configuration
 const HISTORICAL_SERVICE_URL = `http://localhost:${process.env.HISTORICAL_DATA_SERVICE_PORT || 5003}`;
@@ -308,7 +305,6 @@ app.listen(PORT, () => {
   console.log(`Bluebikes Backend Server running on port ${PORT}`);
   console.log(`GBFS API: ${GBFS_BASE_URL}`);
   console.log(`ML Service: ${ML_SERVICE_URL}`);
-  console.log(`   ML Mode: ${USE_EXTERNAL_ML_API ? 'External API' : 'Local Service'}`);
   console.log(`Historical Data Service: ${HISTORICAL_SERVICE_URL}`);
   console.log(`\nAvailable endpoints:`);
   console.log(`  GET  /api/stations`);
