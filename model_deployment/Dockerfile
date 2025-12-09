@@ -20,6 +20,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY app.py .
+COPY monitoring_routes.py .
 
 # Create non-root user for security
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
@@ -29,7 +30,7 @@ USER appuser
 ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 ENV GCS_BUCKET=mlruns234
-ENV MODEL_PATH=best-models/production/current_model.pkl
+ENV MODEL_PATH=models/production/current_model.pkl
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
