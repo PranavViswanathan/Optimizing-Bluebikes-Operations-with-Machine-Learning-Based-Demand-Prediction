@@ -124,5 +124,5 @@ Key features:
 ```
 
 ## Status
-This repository is in the **Model Development phase**.  
+This repository is in the **Model Deployment phase**.  
 Code, data pipelines, and models will be added in upcoming sprints.
