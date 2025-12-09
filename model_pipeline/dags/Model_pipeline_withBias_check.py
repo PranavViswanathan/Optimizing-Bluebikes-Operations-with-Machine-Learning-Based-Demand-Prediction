@@ -614,6 +614,7 @@ def push_model_to_gcs(**context):
 
     model_path = "/opt/airflow/models/production/current_model.pkl"
     metadata_path = "/opt/airflow/models/production/current_metadata.json"
+    version_path = "/opt/airflow/models/production/CURRENT_VERSION.txt"
 
     if not os.path.exists(model_path) or not os.path.exists(metadata_path):
         raise FileNotFoundError(
@@ -636,8 +637,8 @@ def push_model_to_gcs(**context):
         key='production_version'
     ) or "unknown_version"
 
-    model_blob = bucket.blob(f"{prefix}/{production_version}/current_model.pkl")
-    metadata_blob = bucket.blob(f"{prefix}/{production_version}/current_metadata.json")
+    model_blob = bucket.blob(f"{prefix}/current_model.pkl")
+    metadata_blob = bucket.blob(f"{prefix}/current_metadata.json")
 
     log.info(f"Uploading model to gs://{bucket_name}/{model_blob.name}")
     model_blob.upload_from_filename(model_path)
@@ -652,6 +653,33 @@ def push_model_to_gcs(**context):
         'model_blob': model_blob.name,
         'metadata_blob': metadata_blob.name
     }
+
+def trigger_cloud_run_reload(**context):
+    """Call Cloud Run /reload endpoint after model is pushed to GCS."""
+    import requests
+    import logging
+
+    log = logging.getLogger("pipeline")
+    ti = context['task_instance']
+
+    # Check if model was actually uploaded to GCS
+    upload_result = ti.xcom_pull(task_ids='push_model_to_gcs')
+    if not upload_result or not upload_result.get('uploaded'):
+        log.info(f"Skipping Cloud Run reload: upload_result={upload_result}")
+        return {"reloaded": False, "reason": "Model not uploaded to GCS"}
+
+    reload_url = "https://bluebikes-prediction-202855070348.us-central1.run.app/reload"
+    log.info(f"Triggering model reload via Cloud Run endpoint: {reload_url}")
+
+    try:
+        resp = requests.post(reload_url, timeout=30)
+        resp.raise_for_status()
+        log.info(f"Cloud Run reload response: {resp.status_code} {resp.text}")
+        return {"reloaded": True, "status_code": resp.status_code, "body": resp.text}
+    except Exception as e:
+        log.error(f"Failed to trigger Cloud Run reload: {e}")
+        # Don't fail the whole training DAG because of a reload issue
+        return {"reloaded": False, "error": str(e)}
 
 def deploy_mitigated_model(**context):
     """Deploy bias-mitigated model"""
@@ -828,6 +856,13 @@ with dag:
         provide_context=True,
     )
 
+    notify_cloud_run_reload = PythonOperator(
+    task_id="notify_cloud_run_reload",
+    python_callable=trigger_cloud_run_reload,
+    provide_context=True,
+    dag=dag,
+)
+
     cleanup = PythonOperator(
         task_id='cleanup',
         python_callable=cleanup_temp_files,
@@ -848,4 +883,5 @@ with dag:
     )
     
     start >> run_pipeline >> validate >> promote >> deploy >> [push_to_github, push_to_gcs, generate_baseline] >> cleanup >> end
+    push_to_gcs >> notify_cloud_run_reload >> cleanup
     [run_pipeline, validate, promote, deploy] >> failure_cleanup

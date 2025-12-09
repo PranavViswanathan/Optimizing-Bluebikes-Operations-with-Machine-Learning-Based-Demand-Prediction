@@ -20,7 +20,21 @@
       "drift_status": "CRITICAL",
       "n_drifted_features": 22,
       "airflow_run_id": "scheduled__2025-12-05T06:00:00+00:00"
+    },
+    {
+      "timestamp": "2025-12-08T19:49:17.784450",
+      "trigger": "drift_detected",
+      "drift_status": "CRITICAL",
+      "n_drifted_features": 22,
+      "airflow_run_id": "scheduled__2025-12-07T06:00:00+00:00"
+    },
+    {
+      "timestamp": "2025-12-08T22:31:39.197498",
+      "trigger": "drift_detected",
+      "drift_status": "CRITICAL",
+      "n_drifted_features": 28,
+      "airflow_run_id": "manual__2025-12-08T22:29:24.607503+00:00"
     }
   ],
-  "last_retraining": "2025-12-06T23:17:54.567687"
+  "last_retraining": "2025-12-08T22:31:39.197479"
 }

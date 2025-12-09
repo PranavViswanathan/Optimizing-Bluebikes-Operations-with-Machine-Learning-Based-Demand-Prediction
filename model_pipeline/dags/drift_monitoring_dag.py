@@ -585,7 +585,7 @@ with DAG(
     dag_id='drift_monitoring_dag',
     default_args=default_args,
     description='Daily drift monitoring with Evidently AI',
-    schedule_interval='0 6 * * *',  # Daily at 6 AM
+    schedule_interval=None,  # Daily at 6 AM
     catchup=False,
     max_active_runs=1,
     tags=['monitoring', 'drift-detection', 'evidently', 'bluebikes'],

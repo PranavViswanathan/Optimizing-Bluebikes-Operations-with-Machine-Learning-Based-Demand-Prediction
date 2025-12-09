@@ -12,10 +12,10 @@ import pandas as pd
 class DataConfig:
     """Data loading and splitting configuration"""
     train_start: str = "2024-01-01"
-    train_end: str = "2025-06-30"
-    test_start: str = "2025-07-01"
-    test_end: str = "2025-07-31"
-    val_start: str = "2025-05-01"
+    train_end: str = "2025-08-31"
+    test_start: str = "2025-10-01"
+    test_end: str = "2025-10-31"
+    val_start: str = "2025-09-01"
 
 
 @dataclass
