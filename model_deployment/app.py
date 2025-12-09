@@ -5,6 +5,7 @@ Loads models from GCS and serves predictions via REST API
 """
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # ADD THIS
 import joblib
 import numpy as np
 import os
@@ -23,6 +24,19 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
+# Enable CORS for all routes
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "http://34.110.183.151",
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "*"  # Allow all origins for development
+        ],
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Auth-Token"]
+    }
+})
 # Configuration from environment variables
 GCS_BUCKET = os.environ.get('GCS_BUCKET', 'mlruns234')
 MODEL_PATH = os.environ.get('MODEL_PATH', 'models/production/current_model.pkl')
