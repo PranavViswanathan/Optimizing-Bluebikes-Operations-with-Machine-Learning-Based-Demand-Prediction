@@ -1,8 +1,14 @@
 """
 Drift Monitoring DAG for BlueBikes Model Pipeline
-Runs daily to detect data drift, prediction drift, and trigger retraining if needed.
 
-Uses Evidently AI for drift detection as per deployment guidelines.
+Updated to match new data splits:
+- Training: Jan 2024 - Sep 2025 (baseline reference)
+- Test: Oct 2025 - Nov 2025
+- Production: Dec 2025+ (data for drift monitoring)
+
+For demo purposes (before Dec 2025 data exists):
+- Can compare Test data against Training baseline
+- Can inject artificial drift to demonstrate detection
 """
 
 from datetime import datetime, timedelta
@@ -15,19 +21,16 @@ import os
 import json
 import logging
 import pandas as pd
+import numpy as np
 
 logging.basicConfig(level=logging.INFO, format='[MONITORING] %(message)s')
 log = logging.getLogger("drift_monitoring")
 
-# Import Discord notifier from your existing code
 from scripts.data_pipeline.discord_notifier import send_discord_alert, send_dag_success_alert
 
-# =============================================================================
-# DEFAULT ARGS
-# =============================================================================
 
 default_args = {
-    'owner': 'Nikhil',
+    'owner': 'airflow',
     'depends_on_past': False,
     'start_date': datetime(2025, 1, 1),
     'email_on_failure': False,
@@ -36,19 +39,9 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-# =============================================================================
-# TASK FUNCTIONS
-# =============================================================================
 
 def check_prerequisites(**context):
-    """
-    Check if all prerequisites for monitoring exist:
-    - Baseline data
-    - Production model
-    - Recent data to analyze
-    """
-    # sys.path.insert(0, '/opt/airflow/model_pipeline/monitoring')
-    # sys.path.insert(0, '/opt/airflow/scripts/model_pipeline')
+    """Check if all prerequisites for monitoring exist."""
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline/monitoring')
     
     from monitoring_config import (
@@ -64,7 +57,6 @@ def check_prerequisites(**context):
     
     issues = []
     
-    # Check baseline
     baseline_path = get_baseline_path()
     if baseline_path.exists():
         log.info(f"✓ Baseline found: {baseline_path}")
@@ -72,96 +64,43 @@ def check_prerequisites(**context):
         issues.append(f"Baseline not found at {baseline_path}")
         log.warning(f"✗ Baseline missing: {baseline_path}")
     
-    # Check production model
     if PRODUCTION_MODEL_PATH.exists():
         log.info(f"✓ Production model found: {PRODUCTION_MODEL_PATH}")
     else:
         issues.append(f"Production model not found at {PRODUCTION_MODEL_PATH}")
         log.warning(f"✗ Model missing: {PRODUCTION_MODEL_PATH}")
     
-    # Check metadata
     if PRODUCTION_METADATA_PATH.exists():
         log.info(f"✓ Model metadata found: {PRODUCTION_METADATA_PATH}")
         with open(PRODUCTION_METADATA_PATH, 'r') as f:
             metadata = json.load(f)
         log.info(f"  Model version: {metadata.get('version', 'N/A')}")
-        log.info(f"  Model type: {metadata.get('model_type', 'N/A')}")
     else:
         issues.append(f"Model metadata not found at {PRODUCTION_METADATA_PATH}")
-        log.warning(f"✗ Metadata missing: {PRODUCTION_METADATA_PATH}")
     
-    # Check processed data
     if PROCESSED_DATA_PATH.exists():
         log.info(f"✓ Processed data found: {PROCESSED_DATA_PATH}")
     else:
         issues.append(f"Processed data not found at {PROCESSED_DATA_PATH}")
-        log.warning(f"✗ Data missing: {PROCESSED_DATA_PATH}")
     
-    # Push results to XCom
     context['task_instance'].xcom_push(key='prerequisites_ok', value=len(issues) == 0)
     context['task_instance'].xcom_push(key='issues', value=issues)
     
     if issues:
         log.error(f"Prerequisites check failed with {len(issues)} issue(s)")
-        for issue in issues:
-            log.error(f"  - {issue}")
         raise ValueError(f"Prerequisites not met: {issues}")
     
-    log.info("All prerequisites satisfied!")
     return True
-
-
-def inject_artificial_drift(X: pd.DataFrame, drift_type: str = "all") -> pd.DataFrame:
-    """
-    Inject artificial drift into data for testing Evidently AI detection.
-    
-    Args:
-        X: Original DataFrame
-        drift_type: Type of drift to inject
-            - "temperature": Shift temperature distribution
-            - "demand": Change demand patterns  
-            - "temporal": Shift hour/day distributions
-            - "all": Apply all drift types
-    """
-    X_drifted = X.copy()
-    
-    if drift_type in ["temperature", "all"]:
-        # Simulate warmer weather (climate shift)
-        if 'temp_avg' in X_drifted.columns:
-            X_drifted['temp_avg'] = X_drifted['temp_avg'] + 8  # Add 8 degrees
-            print("Injected temperature drift: +8 degrees")
-    
-    if drift_type in ["demand", "all"]:
-        # Simulate increased demand (popularity growth)
-        if 'rides_last_hour' in X_drifted.columns:
-            X_drifted['rides_last_hour'] = X_drifted['rides_last_hour'] * 1.5  # 50% increase
-            print("Injected demand drift: +50%")
-        if 'rides_rolling_3h' in X_drifted.columns:
-            X_drifted['rides_rolling_3h'] = X_drifted['rides_rolling_3h'] * 1.5
-    
-    if drift_type in ["temporal", "all"]:
-        # Simulate shift in usage patterns (more weekend usage)
-        if 'is_weekend' in X_drifted.columns:
-            # Randomly flip some weekday to weekend
-            flip_mask = (X_drifted['is_weekend'] == 0) & (np.random.random(len(X_drifted)) < 0.3)
-            X_drifted.loc[flip_mask, 'is_weekend'] = 1
-            print("Injected temporal drift: shifted weekend patterns")
-    
-    if drift_type in ["hour", "all"]:
-        # Simulate shift in peak hours
-        if 'hour' in X_drifted.columns:
-            X_drifted['hour'] = (X_drifted['hour'] + 2) % 24  # Shift all hours by 2
-            print("Injected hour drift: shifted by +2 hours")
-    
-    return X_drifted
-
-
 
 
 def load_current_data(**context):
     """
-    Load the most recent data for drift analysis.
-    Optionally inject artificial drift for testing.
+    Load current data for drift analysis.
+    
+    Logic:
+    1. If genuinely new data exists (after test period) → use that
+    2. If demo mode → use test data as "production" simulation
+    3. If inject_drift=True → artificially modify data for demo
     """
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline')
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline/monitoring')
@@ -169,86 +108,141 @@ def load_current_data(**context):
     import pandas as pd
     import numpy as np
     from feature_generation import load_and_prepare_data
-    from monitoring_config import get_config
+    from monitoring_config import get_config, DATA_SPLITS
     
     log.info("="*60)
-    log.info("LOADING CURRENT DATA FOR ANALYSIS")
+    log.info("LOADING DATA FOR DRIFT ANALYSIS")
     log.info("="*60)
     
     config = get_config()
     
-    # Load and prepare data
+    # Load all data
     X, y, feature_columns = load_and_prepare_data()
     X["date"] = pd.to_datetime(X["date"])
     
     log.info(f"Total data points: {len(X)}")
     log.info(f"Date range in data: {X['date'].min()} to {X['date'].max()}")
     
-    # Use last 7 days of AVAILABLE data
+    # Get date boundaries from config
+    test_end = config.data_splits.get_test_end()
+    production_start = config.data_splits.get_production_start()
+    test_start = config.data_splits.get_test_start()
+    
+    log.info(f"\nData Split Configuration:")
+    log.info(f"  Training: {config.data_splits.train_start} to {config.data_splits.train_end}")
+    log.info(f"  Test: {config.data_splits.test_start} to {config.data_splits.test_end}")
+    log.info(f"  Production starts: {config.data_splits.production_start}")
+    
+    # Check if we have genuine production data (after test period)
     max_date = X["date"].max()
-    analysis_window = config.schedule.analysis_window_hours
-    cutoff_date = max_date - pd.Timedelta(hours=analysis_window * 7)
+    has_production_data = max_date > test_end
     
-    log.info(f"Using data from {cutoff_date} to {max_date}")
+    # Check DAG conf for demo/injection settings
+    dag_conf = context.get('dag_run').conf or {}
+    demo_mode = dag_conf.get('demo_mode', False)
+    inject_drift = dag_conf.get('inject_drift', False)
+    drift_type = dag_conf.get('drift_type', 'all')
     
-    recent_mask = (X["date"] >= cutoff_date) & (X["date"] <= max_date)
-    X_recent = X.loc[recent_mask].copy()
-    y_recent = y.loc[recent_mask].copy()
+    if has_production_data and not demo_mode:
+        # =====================================================
+        # REAL PRODUCTION MODE: Use data after test period
+        # =====================================================
+        log.info("\n>>> PRODUCTION MODE: Using real post-test data")
+        
+        # Get the latest month of production data
+        production_mask = X["date"] > test_end
+        X_production = X.loc[production_mask].copy()
+        
+        if len(X_production) == 0:
+            log.warning("No production data found, falling back to demo mode")
+            demo_mode = True
+        else:
+            # Use latest month
+            latest_month = X_production["date"].max().to_period('M')
+            X_production["month_period"] = X_production["date"].dt.to_period('M')
+            current_mask = X_production["month_period"] == latest_month
+            
+            X_current = X_production.loc[current_mask].drop(columns=["month_period"]).copy()
+            y_current = y.loc[X_current.index].copy()
+            
+            log.info(f"Production data month: {latest_month}")
+            log.info(f"Samples: {len(X_current)}")
     
-    log.info(f"Recent data points: {len(X_recent)}")
+    if not has_production_data or demo_mode:
+        # =====================================================
+        # DEMO MODE: Use test data as simulated "production"
+        # =====================================================
+        log.info("\n>>> DEMO MODE: Using test data as simulated production")
+        log.info("(No real production data available yet)")
+        
+        test_mask = (X["date"] >= test_start) & (X["date"] <= test_end)
+        X_current = X.loc[test_mask].copy()
+        y_current = y.loc[test_mask].copy()
+        
+        log.info(f"Using test period: {test_start.date()} to {test_end.date()}")
+        log.info(f"Samples: {len(X_current)}")
     
-    # =========================================================
-    # DRIFT INJECTION FOR TESTING (set via DAG conf or env var)
-    # =========================================================
-    inject_drift = context['dag_run'].conf.get('inject_drift', False)
-    drift_type = context['dag_run'].conf.get('drift_type', 'all')
-    
+    # =====================================================
+    # DRIFT INJECTION (for demonstration)
+    # =====================================================
     if inject_drift:
-        log.info("="*60)
+        log.info("\n" + "="*60)
         log.info(f"INJECTING ARTIFICIAL DRIFT: {drift_type}")
         log.info("="*60)
         
         if drift_type in ["temperature", "all"]:
-            if 'temp_avg' in X_recent.columns:
-                X_recent['temp_avg'] = X_recent['temp_avg'] + 8
-                log.info("  ✓ Temperature drift: +8 degrees")
+            if 'temp_avg' in X_current.columns:
+                original_mean = X_current['temp_avg'].mean()
+                X_current['temp_avg'] = X_current['temp_avg'] + 10
+                log.info(f"  ✓ Temperature drift: +10°C (mean: {original_mean:.1f} → {X_current['temp_avg'].mean():.1f})")
         
         if drift_type in ["demand", "all"]:
-            if 'rides_last_hour' in X_recent.columns:
-                X_recent['rides_last_hour'] = X_recent['rides_last_hour'] * 1.5
-                log.info("  ✓ Demand drift: +50%")
-            if 'rides_rolling_3h' in X_recent.columns:
-                X_recent['rides_rolling_3h'] = X_recent['rides_rolling_3h'] * 1.5
+            if 'rides_last_hour' in X_current.columns:
+                X_current['rides_last_hour'] = X_current['rides_last_hour'] * 1.8
+                log.info("  ✓ Demand drift: +80%")
+            if 'rides_rolling_3h' in X_current.columns:
+                X_current['rides_rolling_3h'] = X_current['rides_rolling_3h'] * 1.8
         
         if drift_type in ["temporal", "all"]:
-            if 'is_weekend' in X_recent.columns:
-                flip_mask = (X_recent['is_weekend'] == 0) & (np.random.random(len(X_recent)) < 0.3)
-                X_recent.loc[flip_mask, 'is_weekend'] = 1
+            if 'is_weekend' in X_current.columns:
+                flip_mask = (X_current['is_weekend'] == 0) & (np.random.random(len(X_current)) < 0.4)
+                X_current.loc[flip_mask, 'is_weekend'] = 1
                 log.info("  ✓ Temporal drift: weekend pattern shift")
         
         if drift_type in ["hour", "all"]:
-            if 'hour' in X_recent.columns:
-                X_recent['hour'] = (X_recent['hour'] + 2) % 24
-                log.info("  ✓ Hour drift: +2 hour shift")
+            if 'hour' in X_current.columns:
+                X_current['hour'] = (X_current['hour'] + 3) % 24
+                # Also update cyclical features
+                X_current['hour_sin'] = np.sin(2 * np.pi * X_current['hour'] / 24)
+                X_current['hour_cos'] = np.cos(2 * np.pi * X_current['hour'] / 24)
+                log.info("  ✓ Hour drift: +3 hour shift")
         
         log.info("Drift injection complete!")
     
+    # Validate we have enough data
+    min_samples = 100
+    if len(X_current) < min_samples:
+        log.warning(f"Only {len(X_current)} samples (minimum recommended: {min_samples})")
+    
     # Save to temp file
     temp_path = '/tmp/current_data_for_monitoring.pkl'
-    X_recent.to_pickle(temp_path)
+    X_current.to_pickle(temp_path)
     
+    # Push metadata to XCom
     context['task_instance'].xcom_push(key='current_data_path', value=temp_path)
-    context['task_instance'].xcom_push(key='n_samples', value=len(X_recent))
+    context['task_instance'].xcom_push(key='n_samples', value=len(X_current))
+    context['task_instance'].xcom_push(key='demo_mode', value=demo_mode or not has_production_data)
     context['task_instance'].xcom_push(key='drift_injected', value=inject_drift)
+    context['task_instance'].xcom_push(key='date_range', value=f"{X_current['date'].min()} to {X_current['date'].max()}")
     
-    return len(X_recent)
+    log.info(f"\nData prepared: {len(X_current)} samples")
+    log.info(f"Saved to: {temp_path}")
+    
+    return len(X_current)
 
 
 def run_drift_detection(**context):
-    """
-    Run Evidently AI drift detection on current data.
-    """
-    # sys.path.insert(0, '/opt/airflow/model_pipeline/monitoring')
+    """Run Evidently AI drift detection."""
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline')
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline/monitoring')
 
@@ -260,25 +254,42 @@ def run_drift_detection(**context):
     log.info("RUNNING EVIDENTLY AI DRIFT DETECTION")
     log.info("="*60)
     
-    # Load current data from temp file
     ti = context['task_instance']
     current_data_path = ti.xcom_pull(task_ids='load_current_data', key='current_data_path')
+    demo_mode = ti.xcom_pull(task_ids='load_current_data', key='demo_mode')
+    drift_injected = ti.xcom_pull(task_ids='load_current_data', key='drift_injected')
+    date_range = ti.xcom_pull(task_ids='load_current_data', key='date_range')
     
     current_data = pd.read_pickle(current_data_path)
     log.info(f"Loaded {len(current_data)} samples for analysis")
+    log.info(f"Date range: {date_range}")
+    log.info(f"Demo mode: {demo_mode}")
+    log.info(f"Drift injected: {drift_injected}")
     
-    # Initialize detector and run analysis
+    # Initialize detector - loads baseline (training data reference)
     detector = EvidentlyDriftDetector()
-    detector.load_reference_data()  # Loads from default baseline path
+    detector.load_reference_data()  # Loads training data baseline
     detector.load_model()
+    
+    # Log what we're comparing
+    if hasattr(detector, 'reference_data') and detector.reference_data is not None:
+        log.info(f"Reference (baseline): {len(detector.reference_data)} samples from training data")
     
     # Run full monitoring suite
     report = detector.run_full_monitoring(
         current_data=current_data,
-        current_actuals=None,  # Ground truth not available yet
+        current_actuals=None,
         generate_html=True,
         save_reports=True
     )
+    
+    # Add context to report
+    report['context'] = {
+        'demo_mode': demo_mode,
+        'drift_injected': drift_injected,
+        'current_data_range': date_range,
+        'baseline_source': 'training_data'
+    }
     
     # Push results to XCom
     ti.xcom_push(key='drift_report', value={
@@ -290,22 +301,28 @@ def run_drift_detection(**context):
         'drift_share': report.get('data_drift', {}).get('drift_share', 0),
         'prediction_drift_detected': report.get('prediction_drift', {}).get('drift_detected', False),
         'html_report_path': report.get('data_drift', {}).get('html_report_path', ''),
+        'demo_mode': demo_mode,
+        'drift_injected': drift_injected,
     })
     
     log.info("="*60)
     log.info("DRIFT DETECTION COMPLETE")
     log.info("="*60)
     log.info(f"Overall Status: {report.get('overall_status')}")
+    log.info(f"Data Drift Detected: {report.get('data_drift', {}).get('dataset_drift', False)}")
+    log.info(f"Features Drifted: {report.get('data_drift', {}).get('n_drifted_features', 0)}")
     log.info(f"Recommended Action: {report.get('recommended_action')}")
+    
+    if demo_mode:
+        log.info("\n⚠️  DEMO MODE: Results based on test data vs training baseline")
+    if drift_injected:
+        log.info("⚠️  DRIFT INJECTED: Artificial drift was added for demonstration")
     
     return report.get('overall_status')
 
 
 def evaluate_drift_action(**context):
-    """
-    Decide what action to take based on drift detection results.
-    Returns the task_id to branch to.
-    """
+    """Decide what action to take based on drift detection results."""
     ti = context['task_instance']
     drift_report = ti.xcom_pull(task_ids='run_drift_detection', key='drift_report')
     
@@ -315,16 +332,29 @@ def evaluate_drift_action(**context):
     
     overall_status = drift_report.get('overall_status', 'UNKNOWN')
     recommended_action = drift_report.get('recommended_action', 'none')
+    demo_mode = drift_report.get('demo_mode', False)
+    drift_injected = drift_report.get('drift_injected', False)
     
     log.info(f"Status: {overall_status}")
     log.info(f"Recommended: {recommended_action}")
+    log.info(f"Demo Mode: {demo_mode}")
     
     if drift_report.get('alerts'):
         log.info("Alerts:")
         for alert in drift_report['alerts']:
             log.info(f"  ⚠ {alert}")
     
-    # Determine branch
+    # In demo mode with injected drift, still trigger alerts but maybe skip retraining
+    if demo_mode and drift_injected:
+        log.info("\n⚠️  Demo mode with injected drift - will send alerts but skip actual retraining")
+        if overall_status == 'CRITICAL':
+            return 'send_critical_alert'
+        elif overall_status == 'WARNING':
+            return 'send_warning_alert'
+        else:
+            return 'log_healthy_status'
+    
+    # Normal operation
     if overall_status == 'CRITICAL' or recommended_action == 'retrain':
         log.info("→ Branching to: send_critical_alert + trigger_retraining")
         return 'send_critical_alert'
@@ -337,9 +367,7 @@ def evaluate_drift_action(**context):
 
 
 def send_critical_alert(**context):
-    """
-    Send critical alert via Discord when major drift detected.
-    """
+    """Send critical alert via Discord."""
     import requests
     
     ti = context['task_instance']
@@ -351,41 +379,27 @@ def send_critical_alert(**context):
         log.warning("DISCORD_WEBHOOK_URL not set, skipping alert")
         return
     
-    # Build alert message
     alerts = drift_report.get('alerts', [])
     n_drifted = drift_report.get('n_drifted_features', 0)
     drift_share = drift_report.get('drift_share', 0)
+    demo_mode = drift_report.get('demo_mode', False)
+    
+    title = "🚨 CRITICAL: Model Drift Detected"
+    if demo_mode:
+        title += " (DEMO)"
     
     message = {
         "embeds": [{
-            "title": "🚨 CRITICAL: Model Drift Detected",
+            "title": title,
             "description": "Significant drift detected in BlueBikes demand prediction model.",
-            "color": 15158332,  # Red
+            "color": 15158332,
             "fields": [
-                {
-                    "name": "Status",
-                    "value": drift_report.get('overall_status', 'CRITICAL'),
-                    "inline": True
-                },
-                {
-                    "name": "Drifted Features",
-                    "value": f"{n_drifted} ({drift_share:.1%})",
-                    "inline": True
-                },
-                {
-                    "name": "Action",
-                    "value": "Automatic retraining triggered",
-                    "inline": True
-                },
-                {
-                    "name": "Alerts",
-                    "value": "\n".join(alerts[:5]) if alerts else "No specific alerts",
-                    "inline": False
-                }
+                {"name": "Status", "value": drift_report.get('overall_status', 'CRITICAL'), "inline": True},
+                {"name": "Drifted Features", "value": f"{n_drifted} ({drift_share:.1%})", "inline": True},
+                {"name": "Action", "value": "Retraining triggered" if not demo_mode else "Demo - no retraining", "inline": True},
+                {"name": "Alerts", "value": "\n".join(alerts[:5]) if alerts else "See report", "inline": False}
             ],
-            "footer": {
-                "text": f"Airflow DAG: drift_monitoring | {context['ds']}"
-            },
+            "footer": {"text": f"Drift Monitoring | {context['ds']}"},
             "timestamp": datetime.utcnow().isoformat()
         }]
     }
@@ -399,9 +413,7 @@ def send_critical_alert(**context):
 
 
 def send_warning_alert(**context):
-    """
-    Send warning alert via Discord when minor drift detected.
-    """
+    """Send warning alert via Discord."""
     import requests
     
     ti = context['task_instance']
@@ -414,33 +426,22 @@ def send_warning_alert(**context):
         return
     
     n_drifted = drift_report.get('n_drifted_features', 0)
-    alerts = drift_report.get('alerts', [])
+    demo_mode = drift_report.get('demo_mode', False)
+    
+    title = "⚠️ WARNING: Minor Drift Detected"
+    if demo_mode:
+        title += " (DEMO)"
     
     message = {
         "embeds": [{
-            "title": "⚠️ WARNING: Minor Drift Detected",
+            "title": title,
             "description": "Some drift detected in BlueBikes model. Monitoring closely.",
-            "color": 16776960,  # Yellow
+            "color": 16776960,
             "fields": [
-                {
-                    "name": "Drifted Features",
-                    "value": str(n_drifted),
-                    "inline": True
-                },
-                {
-                    "name": "Action",
-                    "value": "Continued monitoring",
-                    "inline": True
-                },
-                {
-                    "name": "Details",
-                    "value": "\n".join(alerts[:3]) if alerts else "Minor distribution shifts",
-                    "inline": False
-                }
+                {"name": "Drifted Features", "value": str(n_drifted), "inline": True},
+                {"name": "Action", "value": "Continued monitoring", "inline": True},
             ],
-            "footer": {
-                "text": f"Airflow DAG: drift_monitoring | {context['ds']}"
-            }
+            "footer": {"text": f"Drift Monitoring | {context['ds']}"}
         }]
     }
     
@@ -453,9 +454,7 @@ def send_warning_alert(**context):
 
 
 def log_healthy_status(**context):
-    """
-    Log healthy status when no significant drift detected.
-    """
+    """Log healthy status when no significant drift detected."""
     ti = context['task_instance']
     drift_report = ti.xcom_pull(task_ids='run_drift_detection', key='drift_report')
     
@@ -465,21 +464,28 @@ def log_healthy_status(**context):
     log.info("No significant drift detected.")
     log.info(f"Data drift: {drift_report.get('data_drift_detected', False)}")
     log.info(f"Prediction drift: {drift_report.get('prediction_drift_detected', False)}")
-    log.info("No action required.")
+    
+    if drift_report.get('demo_mode'):
+        log.info("(Demo mode - comparing test data vs training baseline)")
     
     return "healthy"
 
 
 def check_retraining_cooldown(**context):
-    """
-    Check if we're within the retraining cooldown period.
-    Prevents too frequent retraining.
-    """
-    # sys.path.insert(0, '/opt/airflow/model_pipeline/monitoring')
+    """Check if we're within the retraining cooldown period."""
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline/monitoring')
 
     from monitoring_config import get_config, LOGS_DIR
     from datetime import datetime, timedelta
+    
+    # Check if this is demo mode - skip retraining in demo
+    ti = context['task_instance']
+    drift_report = ti.xcom_pull(task_ids='run_drift_detection', key='drift_report')
+    
+    if drift_report.get('demo_mode') and drift_report.get('drift_injected'):
+        log.info("Demo mode with injected drift - skipping actual retraining")
+        context['task_instance'].xcom_push(key='skip_retraining', value=True)
+        return False
     
     config = get_config()
     cooldown_hours = config.retraining.retraining_cooldown_hours
@@ -494,18 +500,15 @@ def check_retraining_cooldown(**context):
     with open(log_path, 'r') as f:
         history = json.load(f)
     
-    # Check cooldown
     last_retrain = history.get('last_retraining')
     if last_retrain:
         last_time = datetime.fromisoformat(last_retrain)
         cooldown_end = last_time + timedelta(hours=cooldown_hours)
         
         if datetime.now() < cooldown_end:
-            log.warning(f"Within cooldown period. Next retraining allowed after {cooldown_end}")
-            context['task_instance'].xcom_push(key='cooldown_active', value=True)
+            log.warning(f"Within cooldown period. Next retraining after {cooldown_end}")
             return False
     
-    # Check weekly limit
     week_ago = datetime.now() - timedelta(days=7)
     recent_retrains = [
         r for r in history.get('retraining_runs', [])
@@ -513,33 +516,33 @@ def check_retraining_cooldown(**context):
     ]
     
     if len(recent_retrains) >= max_per_week:
-        log.warning(f"Weekly limit reached ({max_per_week} retrains). Skipping.")
-        context['task_instance'].xcom_push(key='weekly_limit_reached', value=True)
+        log.warning(f"Weekly limit reached ({max_per_week} retrains)")
         return False
     
-    log.info("Retraining cooldown check passed")
     return True
 
 
 def log_retraining_triggered(**context):
-    """
-    Log that retraining was triggered.
-    """
+    """Log that retraining was triggered."""
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline/monitoring')
     
     from monitoring_config import LOGS_DIR
     
+    ti = context['task_instance']
+    
+    # Check if we should skip
+    if ti.xcom_pull(task_ids='check_retraining_cooldown', key='skip_retraining'):
+        log.info("Skipping retraining log (demo mode)")
+        return
+    
     log_path = LOGS_DIR / "retraining_history.json"
     
-    # Load or create history
     if log_path.exists():
         with open(log_path, 'r') as f:
             history = json.load(f)
     else:
         history = {'retraining_runs': []}
     
-    # Add new entry
-    ti = context['task_instance']
     drift_report = ti.xcom_pull(task_ids='run_drift_detection', key='drift_report')
     
     history['last_retraining'] = datetime.now().isoformat()
@@ -551,31 +554,110 @@ def log_retraining_triggered(**context):
         'airflow_run_id': context['run_id'],
     })
     
-    # Keep only last 50 entries
     history['retraining_runs'] = history['retraining_runs'][-50:]
     
     with open(log_path, 'w') as f:
         json.dump(history, f, indent=2)
     
-    log.info(f"Retraining triggered and logged to {log_path}")
+    log.info(f"Retraining triggered and logged")
 
 
 def cleanup_temp_files(**context):
-    """
-    Clean up temporary files created during monitoring.
-    """
+    """Clean up temporary files."""
     import os
-    import glob
     
-    temp_files = [
-        '/tmp/current_data_for_monitoring.pkl',
-    ]
+    temp_files = ['/tmp/current_data_for_monitoring.pkl']
     
     for f in temp_files:
         if os.path.exists(f):
             os.remove(f)
-            log.info(f"Removed temp file: {f}")
+            log.info(f"Removed: {f}")
 
+
+def upload_drift_reports_to_gcs(**context):
+    """
+    Upload drift monitoring reports (HTML and JSON) to GCS bucket.
+    This preserves monitoring history for auditing and analysis.
+    """
+    import os
+    from google.cloud import storage
+    from datetime import datetime
+    
+    ti = context['task_instance']
+    drift_report = ti.xcom_pull(task_ids='run_drift_detection', key='drift_report') or {}
+    
+    bucket_name = os.environ.get("GCS_MODEL_BUCKET")
+    prefix = os.environ.get("GCS_MONITORING_PREFIX", "monitoring/drift_reports")
+    
+    if not bucket_name:
+        log.warning("GCS_MODEL_BUCKET not set, skipping upload")
+        return {'uploaded': False, 'reason': 'GCS_MODEL_BUCKET not set'}
+    
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
+    
+    report_date = context['ds_nodash']
+    uploaded_files = []
+    
+    # Define report directories (from monitoring_config.py)
+    html_reports_dir = "/opt/airflow/scripts/model_pipeline/monitoring/reports/html"
+    json_reports_dir = "/opt/airflow/scripts/model_pipeline/monitoring/reports/json"
+    
+    # Upload HTML reports
+    if os.path.exists(html_reports_dir):
+        for filename in os.listdir(html_reports_dir):
+            if filename.endswith('.html') and report_date in filename:
+                local_path = os.path.join(html_reports_dir, filename)
+                blob_path = f"{prefix}/html/{filename}"
+                
+                blob = bucket.blob(blob_path)
+                blob.upload_from_filename(local_path)
+                uploaded_files.append(blob_path)
+                log.info(f"Uploaded HTML report: {blob_path}")
+    
+    # Upload JSON reports
+    if os.path.exists(json_reports_dir):
+        for filename in os.listdir(json_reports_dir):
+            if filename.endswith('.json') and report_date in filename:
+                local_path = os.path.join(json_reports_dir, filename)
+                blob_path = f"{prefix}/json/{filename}"
+                
+                blob = bucket.blob(blob_path)
+                blob.upload_from_filename(local_path)
+                uploaded_files.append(blob_path)
+                log.info(f"Uploaded JSON report: {blob_path}")
+    
+    # Also upload a summary with metadata
+    summary = {
+        'report_date': report_date,
+        'execution_date': context['ds'],
+        'run_id': context['run_id'],
+        'overall_status': drift_report.get('overall_status', 'UNKNOWN'),
+        'data_drift_detected': drift_report.get('data_drift_detected', False),
+        'n_drifted_features': drift_report.get('n_drifted_features', 0),
+        'drift_share': drift_report.get('drift_share', 0),
+        'recommended_action': drift_report.get('recommended_action', 'none'),
+        'alerts': drift_report.get('alerts', []),
+        'timestamp': datetime.utcnow().isoformat(),
+    }
+    
+    summary_blob_path = f"{prefix}/summaries/drift_summary_{report_date}.json"
+    summary_blob = bucket.blob(summary_blob_path)
+    summary_blob.upload_from_string(
+        json.dumps(summary, indent=2),
+        content_type='application/json'
+    )
+    uploaded_files.append(summary_blob_path)
+    log.info(f"Uploaded summary: {summary_blob_path}")
+    
+    log.info(f"Total files uploaded to GCS: {len(uploaded_files)}")
+    
+    return {
+        'uploaded': True,
+        'bucket': bucket_name,
+        'files_count': len(uploaded_files),
+        'files': uploaded_files,
+    }
 
 # =============================================================================
 # DAG DEFINITION
@@ -584,39 +666,36 @@ def cleanup_temp_files(**context):
 with DAG(
     dag_id='drift_monitoring_dag',
     default_args=default_args,
-    description='Daily drift monitoring with Evidently AI',
-    schedule_interval=None,  # Daily at 6 AM
+    description='Drift monitoring with Evidently AI - compares production data vs training baseline',
+    schedule_interval=None,  # Triggered by data pipeline or manually
     catchup=False,
     max_active_runs=1,
     tags=['monitoring', 'drift-detection', 'evidently', 'bluebikes'],
     on_failure_callback=send_discord_alert,
 ) as dag:
     
-    # Task 1: Check prerequisites
+    # Task definitions
     check_prereqs = PythonOperator(
         task_id='check_prerequisites',
         python_callable=check_prerequisites,
     )
     
-    # Task 2: Load current data
     load_data = PythonOperator(
         task_id='load_current_data',
         python_callable=load_current_data,
     )
     
-    # Task 3: Run drift detection
     detect_drift = PythonOperator(
         task_id='run_drift_detection',
         python_callable=run_drift_detection,
     )
     
-    # Task 4: Evaluate and branch
     evaluate_action = BranchPythonOperator(
         task_id='evaluate_drift_action',
         python_callable=evaluate_drift_action,
     )
     
-    # Branch A: Critical - Send alert and trigger retraining
+    # Branch A: Critical
     critical_alert = PythonOperator(
         task_id='send_critical_alert',
         python_callable=send_critical_alert,
@@ -634,59 +713,55 @@ with DAG(
     
     trigger_retrain = TriggerDagRunOperator(
         task_id='trigger_retraining',
-        trigger_dag_id='bluebikes_integrated_bias_training',  # Your training DAG
+        trigger_dag_id='bluebikes_integrated_bias_training',
         wait_for_completion=False,
         conf={'triggered_by': 'drift_monitoring', 'reason': 'drift_detected'},
     )
     
-    # Branch B: Warning - Just alert
+    # Branch B: Warning
     warning_alert = PythonOperator(
         task_id='send_warning_alert',
         python_callable=send_warning_alert,
     )
     
-    # Branch C: Healthy - Just log
+    # Branch C: Healthy
     log_healthy = PythonOperator(
         task_id='log_healthy_status',
         python_callable=log_healthy_status,
     )
     
-    # Final: Cleanup
+    # Cleanup and upload
     cleanup = PythonOperator(
         task_id='cleanup',
         python_callable=cleanup_temp_files,
         trigger_rule='none_failed_min_one_success',
     )
     
-    # End markers for each branch
-    end_critical = EmptyOperator(
-        task_id='end_critical_path',
-        trigger_rule='none_failed_min_one_success',
-    )
+    upload_reports = PythonOperator(
+    task_id='upload_drift_reports_to_gcs',
+    python_callable=upload_drift_reports_to_gcs,
+    trigger_rule='none_failed_min_one_success',  # Run even if some branches skipped
+)
     
-    end_warning = EmptyOperator(
-        task_id='end_warning_path',
-    )
-    
-    end_healthy = EmptyOperator(
-        task_id='end_healthy_path',
-    )
-    
-    # =============================================================================
-    # TASK DEPENDENCIES
-    # =============================================================================
+    # End markers
+    end_critical = EmptyOperator(task_id='end_critical_path', trigger_rule='none_failed_min_one_success')
+    end_warning = EmptyOperator(task_id='end_warning_path')
+    end_healthy = EmptyOperator(task_id='end_healthy_path')
     
     # Main flow
     check_prereqs >> load_data >> detect_drift >> evaluate_action
-    
+
     # Branch A: Critical path
     evaluate_action >> critical_alert >> check_cooldown >> log_retrain >> trigger_retrain >> end_critical
-    
+
     # Branch B: Warning path
     evaluate_action >> warning_alert >> end_warning
-    
+
     # Branch C: Healthy path
     evaluate_action >> log_healthy >> end_healthy
-    
-    # Cleanup after all branches
-    [end_critical, end_warning, end_healthy] >> cleanup
+
+    # Upload reports after drift detection (regardless of which branch)
+    detect_drift >> upload_reports
+
+    # Cleanup after all branches AND upload
+    [end_critical, end_warning, end_healthy, upload_reports] >> cleanup

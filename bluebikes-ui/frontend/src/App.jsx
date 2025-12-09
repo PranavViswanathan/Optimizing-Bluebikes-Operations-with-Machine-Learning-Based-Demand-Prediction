@@ -8,6 +8,7 @@ import RebalancingView from './components/RebalancingView';
 import RebalanceLogo from './components/RebalanceLogo';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
+import MonitoringDashboard from './components/MonitoringDashboard';
 import './styles/App.css';
 
 const ProtectedRoute = ({ children }) => {
@@ -42,6 +43,7 @@ function App() {
                                 <Link to="/" className="nav-link">Map View</Link>
                                 <Link to="/stations" className="nav-link">List View</Link>
                                 <Link to="/rebalancing" className="nav-link">Rebalancing</Link>
+                                <Link to="/monitoring" className="nav-link">Monitoring</Link>
                             </nav>
 
                         </div>
@@ -53,6 +55,7 @@ function App() {
                             <Route path="/stations" element={<StationList />} />
                             <Route path="/stations/:stationId" element={<StationDetail />} />
                             <Route path="/rebalancing" element={<RebalancingView />} />
+                            <Route path="/monitoring" element={<MonitoringDashboard />} />
                             <Route path="/admin" element={<AdminLogin />} />
                             <Route path="/admin/dashboard" element={
                                 <ProtectedRoute>
