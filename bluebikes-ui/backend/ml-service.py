@@ -15,7 +15,7 @@ CORS(app)
 
 # Configuration
 MODEL_PATH = os.getenv('MODEL_PATH', './models/best_model.pkl')
-PORT = int(os.getenv('PORT', os.getenv('ML_SERVICE_PORT', 5001)))
+PORT = int(os.getenv('ML_SERVICE_PORT', 5001))
 EXTERNAL_ML_URL = os.getenv('EXTERNAL_ML_API_URL', 'https://bluebikes-prediction-202855070348.us-central1.run.app/predict')
 USE_EXTERNAL_API = os.getenv('USE_EXTERNAL_ML_API', 'true').lower() != 'false'
 

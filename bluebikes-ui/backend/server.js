@@ -11,12 +11,10 @@ const GBFS_BASE_URL = process.env.GBFS_BASE_URL || 'https://gbfs.lyft.com/gbfs/1
 // ML Service Configuration
 // Always point to local ML service for feature engineering
 // The local service will handle forwarding to external model if needed
-// ML Service Configuration
-// Points to local ML service by default, or external URL if provided
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || `http://localhost:${process.env.ML_SERVICE_PORT || 5002}`;
+const ML_SERVICE_URL = `http://localhost:${process.env.ML_SERVICE_PORT || 5002}`;
 
 // Historical Data Service Configuration
-const HISTORICAL_SERVICE_URL = process.env.HISTORICAL_SERVICE_URL || `http://localhost:${process.env.HISTORICAL_DATA_SERVICE_PORT || 5003}`;
+const HISTORICAL_SERVICE_URL = `http://localhost:${process.env.HISTORICAL_DATA_SERVICE_PORT || 5003}`;
 
 // Initialize cache with 60-second TTL for real-time data
 const cache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
