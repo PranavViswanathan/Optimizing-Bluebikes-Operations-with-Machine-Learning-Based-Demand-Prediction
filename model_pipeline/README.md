@@ -1,5 +1,6 @@
 # MODEL DEVELOPMENT
 
+![alt text](<model_pipeline_dag.jpg>)
 ## Overview
 
 Pipeline for automated training of machine learning models every week to predict how many bike rides happen at every station every hour per day. It makes sure the predictions are fair (unbiased), picks the best model, and automatically updates the production system - all without human intervention.
@@ -20,18 +21,63 @@ Pipeline for automated training of machine learning models every week to predict
 ## Architecture 
 ```
 model_pipeline/
-├── mlflow/ 
-│   ├── data_splits/
-│   ├── data_splits_mitigated/    
-│   ├── mlruns/               
-│   ├── train_xgb.py
-│   ├── train_lgb.py
-│   ├── train_randomforest.py
-│   ├── model_training_module.py
-│   ├── pipeline_orchestration.py
-│   ├── bias_mitigration_module.py
+├── artifacts
+│   ├── models
+│   ├── plots
+│   │   ├── bias_analysis
+│   │   │   └── bias_analysis_baseline.png
+│   │   ├── feature_importance
+│   │   │   ├── feature_importance_lightgbm.png
+│   │   │   └── feature_importance_randomforest.png
+│   │   ├── sensitivity_analysis
+│   │   │   └── sensitivity_analysis_baseline.png
+│   │   └── training
+│   │       ├── predictions_lightgbm.png
+│   │       ├── predictions_randomforest.png
+│   │       ├── predictions_xgboost.png
+│   │       ├── residuals_lightgbm.png
+│   │       └── residuals_randomforest.png
+│   └── reports
+├── dags
+│   ├── Model_pipeline_withBias_check.py
+│   └── drift_monitoring_dag.py
+├── model_train_lgb.py
+├── model_xgb.py
+├── models
+│   └── production
+│       └── CURRENT_VERSION.txt
+├── monitoring
+│   ├── __init__.py
+│   ├── baseline_stats.py
+│   ├── baselines
+│   ├── drift_detector.py
+│   ├── monitoring_config.py
+│   └── prediction_monitor
+├── scripts
+│   ├── __init__.py
+│   ├── artifact_manager.py
 │   ├── bias_analysis_module.py
-│   └── pipeline_config.py
+│   ├── bias_detection.py
+│   ├── bias_mitigation_module.py
+│   ├── data_module.py
+│   ├── exp_tracking.py
+│   ├── feature_generation.py
+│   ├── integrated_training_pipeline.py
+│   ├── model_training_module.py
+│   ├── pipeline_config.py
+│   ├── pipeline_orchestrator.py
+│   ├── sensitivity_analysis.py
+│   ├── train_catbst.py
+│   ├── train_lgb.py
+│   ├── train_random_forest.py
+│   ├── train_xgb.py
+│   └── xgboost_predictions_analysis.png
+├── test.py
+├── test_model.py
+├── tree.txt
+├── xgb.py
+└── xgb_model.py
+
 
 ```
 ## Pipeline Stages
@@ -282,6 +328,8 @@ python bias_mitigation_module.py
 - MAE: 43-47 rides
 - RMSE: 62-68 rides
 
+![XGBoost Predictions](artifacts/plots/training/predictions_xgboost.png)
+
 #### 2. LightGBM
 
 **Default Parameters:**
@@ -366,6 +414,7 @@ The pipeline uses 41 engineered features:
 - `distance_mean`, `distance_std`, `distance_median`
 - `member_ratio`
 
+![Ramdom Forest Features](artifacts/plots/feature_importance/feature_importance_randomforest.png)
 
 ### Hyperparameter Tuning
 
@@ -546,9 +595,6 @@ comparison = analyzer.compare_reports(
 
 **Example Output:**
 ```
-================================================================================
-                            BIAS COMPARISON                            
-================================================================================
 
 Overall Performance Comparison:
 ============================================================
@@ -684,13 +730,13 @@ GitHub Actions automatically validates the Airflow DAG on every push and pull re
 
 **What GitHub Actions Validates:**
 
-1. ✅ **Docker Image Build**: Builds custom Airflow image with all dependencies
-2. ✅ **Container Health**: Ensures all Airflow services start correctly
-3. ✅ **DAG Import**: Verifies DAGs can be imported without errors
-4. ✅ **DAG Structure**: Validates DAG configuration and task definitions
-5. ✅ **Health Check Script**: Runs comprehensive health check via `airflow-health-check.sh`
-6. ✅ **Service Availability**: Checks webserver, scheduler, and database connectivity
-7. ✅ **Environment Variables**: Validates required secrets (NOAA_API_KEY, DISCORD_WEBHOOK_URL)
+1. **Docker Image Build**: Builds custom Airflow image with all dependencies
+2. **Container Health**: Ensures all Airflow services start correctly
+3. **DAG Import**: Verifies DAGs can be imported without errors
+4. **DAG Structure**: Validates DAG configuration and task definitions
+5. **Health Check Script**: Runs comprehensive health check via `airflow-health-check.sh`
+6. **Service Availability**: Checks webserver, scheduler, and database connectivity
+7. **Environment Variables**: Validates required secrets (NOAA_API_KEY, DISCORD_WEBHOOK_URL)
 
 **GitHub Actions Output:**
 
@@ -755,24 +801,6 @@ dag = DAG(
     max_active_runs=1,
     tags=['ml', 'training', 'bias-detection', 'bluebikes', 'production']
 )
-```
-
-### Pipeline Tasks
-
-```
-start
-  ↓
-run_integrated_pipeline
-  ↓
-validate_mitigated_model
-  ↓
-promote_mitigated_model
-  ↓
-deploy_mitigated_model
-  ↓
-cleanup
-  ↓
-end
 ```
 
 ![workflow](assets/airflow_dag_graph.png)
@@ -1126,14 +1154,3 @@ mlruns/
 - **Bias Issues Reduction**: 30-50%
 - **R² Change**: ±1% (minimal impact)
 - **RMSE Reduction**: 3-6%
-
-
-## Quick Reference
-
-### File Locations
-
-- **Models**: `/opt/airflow/models/`
-- **Data**: `data_splits/` and `data_splits_mitigated/`
-- **Experiments**: `mlruns/`
-- **Logs**: `/opt/airflow/logs/`
-- **Reports**: `bias_detection_report_*.json`

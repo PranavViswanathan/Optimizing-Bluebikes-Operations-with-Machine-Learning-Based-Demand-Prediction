@@ -1,5 +1,7 @@
 # Data Pipeline 
 
+![alt text](<data_pipeline_dag.jpg>)
+
 ## Dataset Information 
 - Bluebikes Trip Data: This dataset consists of comprehensive, anonymized records for every ride taken on the Bluebikes system in the Greater Boston area, serving as critical urban mobility and time-series data. Each record includes granular details such as the trip's start and end time, its duration, the specific station and location coordinates where the bike was picked up and dropped off, the unique bike ID/ride ID, and the type of user (member or casual rider). This data is essential for analyzing seasonal, daily, and hourly commuting patterns, identifying the most popular routes and stations, and understanding overall usage trends within the bike-sharing network.
 
@@ -135,25 +137,61 @@ This project uses Apache Airflow for orchestrating the Bluebikes data pipeline. 
 
 ```
 data_pipeline/
-├── docker-compose.yaml       # Container orchestration configuration
-├── Dockerfile               # Custom Airflow image definition
-├── .env                     # Environment variables (API keys, webhooks)
-├── .env.example            # Template for environment variables
-├── dags/                   # Airflow DAG definitions
+│
+├── assets/
+│   ├── bluebikes_correlation_pearson.png
+│   ├── boston_clg_correlation_pearson.png
+│   └── NOAA_weather_correlation_pearson.png
+│
+├── dags/
 │   ├── data_pipeline_dag.py
 │   └── test_discord_dag.py
-├── scripts/                # Python modules and utilities
-│   ├── discord_notifier.py
-│   ├── datapipeline.py
-│   ├── data_collection.py
-│   ├── data_loader.py
-│   ├── missing_value.py
-│   ├── duplicate_data.py
-│   └── logger.py
-├── data/                   # Data storage (gitignored)
-│   ├── raw/
-│   └── processed/
-└── logs/                   # Airflow logs
+│
+├── data/
+│   ├── processed/
+│   │   ├── bluebikes/
+│   │   │   ├── after_duplicates.pkl
+│   │   │   ├── after_missing_data.pkl
+│   │   │   ├── raw_data.pkl
+│   │   │   └── station_id_mapping.pkl
+│   │   ├── boston_clg/
+│   │   │   ├── after_duplicates.pkl
+│   │   │   ├── after_missing_data.pkl
+│   │   │   └── raw_data.pkl
+│   │   └── NOAA_weather/
+│   │       ├── after_missing_data.pkl
+│   │       └── raw_data.pkl
+│   ├── .gitignore
+│   ├── pipeline_metadata.json
+│   ├── processed.dvc
+│   ├── raw.dvc
+│   └── read_log.csv
+│
+├── scripts/
+│   ├── bluebikes_data_helpers/
+│   │   ├── __pycache__/
+│   │   ├── download_data.py
+│   │   ├── normalize.py
+│   │   ├── read_zips.py
+│   │   ├── record_file.py
+│   │   └── __init__.py
+│   │
+│   ├── logs/
+│   │   ├── data_pipeline_20251027.log
+│   │   └── data_pipeline_20251113.log
+│   │
+│   ├── school_noaa_data_collectors/
+│   │   ├── __pycache__/
+│   │   ├── BostonColleges.py
+│   │   ├── NOAA_DataAcq.py
+│   │   └── __init__.py
+├── tests/
+│   ├── test_data_collection.py
+│   ├── test_data_loader.py
+│   ├── test_duplicate_data.py
+│   ├── test_missing_value.py
+│   └── __init__.py
+├── README.md
 ```
 
 ## Prerequisites
