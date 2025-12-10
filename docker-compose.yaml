@@ -1,42 +1,72 @@
 # docker-compose.yaml
+# BlueBikes MLOps Project - Docker Compose Configuration
+# 
+# Prerequisites:
+#   1. Copy .env.example to .env and fill in your values
+#   2. Run setup.sh or create required directories manually
+#   3. (Optional) Add GCS service account key to keys/gcs_service_account.json
+#
+# Usage:
+#   docker compose up -d        # Start all services
+#   docker compose down         # Stop all services
+#   docker compose logs -f      # View logs
+
 x-airflow-common:
   &airflow-common
   build: 
     context: .
     dockerfile: Dockerfile
-  image: custom-airflow:latest
+  image: bluebikes-airflow:latest
   environment:
     &airflow-common-env
+    # Airflow Core Settings
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
-    AIRFLOW__WEBSERVER__SECRET_KEY: 'secretkey1234567890'
+    AIRFLOW__WEBSERVER__SECRET_KEY: 'bluebikes-mlops-secret-key-change-me'
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
-    DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
-    NOAA_API_KEY: ${NOAA_API_KEY}
-    GITHUB_TOKEN: ${GITHUB_TOKEN}
-    GITHUB_REPO: ${GITHUB_REPO}
+    
+    # Project-specific environment variables (from .env file)
+    DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+    NOAA_API_KEY: ${NOAA_API_KEY:-}
+    GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+    GITHUB_REPO: ${GITHUB_REPO:-}
+    
+    # GCS Configuration (optional - for cloud features)
     GOOGLE_APPLICATION_CREDENTIALS: /keys/gcs_service_account.json
-    GCS_MODEL_BUCKET: ${GCS_MODEL_BUCKET}
+    GCS_MODEL_BUCKET: ${GCS_MODEL_BUCKET:-}
     GCS_MODEL_PREFIX: ${GCS_MODEL_PREFIX:-models/production}
+    GCS_DATA_PREFIX: ${GCS_DATA_PREFIX:-data}
+    
   volumes:
-    - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/dags:/opt/airflow/dags/data_pipeline
-    - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/dags:/opt/airflow/dags/model_pipeline
-    - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/scripts:/opt/airflow/scripts/data_pipeline
-    - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/logs:/opt/airflow/logs/data_pipeline
-    - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/data:/opt/airflow/data
-    - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/scripts:/opt/airflow/scripts/model_pipeline
-    - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/mlruns:/opt/airflow/scripts/model_pipeline/mlruns
-    - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/artifacts:/opt/airflow/artifacts/model_pipeline
-    - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/monitoring:/opt/airflow/scripts/model_pipeline/monitoring
-    - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/models:/opt/airflow/models
+    # DAGs
+    - ./data_pipeline/dags:/opt/airflow/dags/data_pipeline:rw
+    - ./model_pipeline/dags:/opt/airflow/dags/model_pipeline:rw
+    
+    # Scripts
+    - ./data_pipeline/scripts:/opt/airflow/scripts/data_pipeline:rw
+    - ./model_pipeline/scripts:/opt/airflow/scripts/model_pipeline:rw
+    
+    # Data
+    - ./data_pipeline/data:/opt/airflow/data:rw
+    
+    # Logs
+    - ./data_pipeline/logs:/opt/airflow/logs/data_pipeline:rw
+    
+    # Model artifacts
+    - ./model_pipeline/mlruns:/opt/airflow/scripts/model_pipeline/mlruns:rw
+    - ./model_pipeline/artifacts:/opt/airflow/artifacts/model_pipeline:rw
+    - ./model_pipeline/models:/opt/airflow/models:rw
+    
+    # Monitoring
+    - ./model_pipeline/monitoring:/opt/airflow/scripts/model_pipeline/monitoring:rw
 
-    # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/dags:/opt/airflow/dags/model_pipeline
-    # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/mlruns:/opt/airflow/mlruns/model_pipeline
+    # GCS Service Account Key (optional)
+    # If file doesn't exist, mount will fail silently with a directory
     - ./keys/gcs_service_account.json:/keys/gcs_service_account.json:ro
 
   user: "${AIRFLOW_UID:-50000}:0"
@@ -48,8 +78,12 @@ x-airflow-common:
       condition: service_healthy
 
 services:
+  # ============================================================
+  # Database Services
+  # ============================================================
   postgres:
     image: postgres:13
+    container_name: bluebikes-postgres
     environment:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
@@ -61,9 +95,12 @@ services:
       interval: 5s
       retries: 5
     restart: always
+    networks:
+      - bluebikes-network
 
   redis:
-    image: redis:latest
+    image: redis:7-alpine
+    container_name: bluebikes-redis
     expose:
       - 6379
     healthcheck:
@@ -72,87 +109,295 @@ services:
       timeout: 30s
       retries: 50
     restart: always
+    networks:
+      - bluebikes-network
 
+  # ============================================================
+  # Airflow Services
+  # ============================================================
   airflow-webserver:
     <<: *airflow-common
+    container_name: bluebikes-airflow-webserver
     command: webserver
     ports:
-      - 8080:8080
+      - "8080:8080"
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - bluebikes-network
 
   airflow-scheduler:
     <<: *airflow-common
+    container_name: bluebikes-airflow-scheduler
     command: scheduler
     healthcheck:
       test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - bluebikes-network
 
   airflow-worker:
     <<: *airflow-common
+    container_name: bluebikes-airflow-worker
     command: celery worker
-    mem_limit: 13g
-    mem_reservation: 12g
+    # Resource limits - adjust based on your machine
+    deploy:
+      resources:
+        limits:
+          memory: 13G
+        reservations:
+          memory: 12G
     healthcheck:
       test: ["CMD-SHELL", 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"']
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - bluebikes-network
 
   airflow-triggerer:
     <<: *airflow-common
+    container_name: bluebikes-airflow-triggerer
     command: triggerer
     healthcheck:
       test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
-      interval: 10s
+      interval: 30s
       timeout: 10s
       retries: 5
+      start_period: 30s
     restart: always
     depends_on:
       <<: *airflow-common-depends-on
       airflow-init:
         condition: service_completed_successfully
+    networks:
+      - bluebikes-network
 
   airflow-init:
     <<: *airflow-common
+    container_name: bluebikes-airflow-init
     entrypoint: /bin/bash
     command:
       - -c
       - |
+        # Initialize database
         airflow db upgrade
+        
+        # Create admin user
         airflow users create \
-          --username ${_AIRFLOW_WWW_USER_USERNAME:-airflow2} \
-          --password ${_AIRFLOW_WWW_USER_PASSWORD:-airflow2} \
+          --username $${_AIRFLOW_WWW_USER_USERNAME:-airflow} \
+          --password $${_AIRFLOW_WWW_USER_PASSWORD:-airflow} \
           --firstname Airflow \
           --lastname Admin \
           --role Admin \
-          --email admin@example.com
+          --email admin@example.com || true
+        
+        echo "Airflow initialization complete!"
     environment:
       <<: *airflow-common-env
       _AIRFLOW_DB_UPGRADE: 'true'
       _AIRFLOW_WWW_USER_CREATE: 'true'
-    user: "50000:0"
+      _AIRFLOW_WWW_USER_USERNAME: ${_AIRFLOW_WWW_USER_USERNAME:-airflow}
+      _AIRFLOW_WWW_USER_PASSWORD: ${_AIRFLOW_WWW_USER_PASSWORD:-airflow}
+    user: "0:0"  # Run as root for initialization
+    networks:
+      - bluebikes-network
 
+# ============================================================
+# Volumes
+# ============================================================
 volumes:
   postgres-db-volume:
+    name: bluebikes-postgres-data
+
+# ============================================================
+# Networks
+# ============================================================
+networks:
+  bluebikes-network:
+    name: bluebikes-network
+    driver: bridge
+
+
+
+# # docker-compose.yaml
+# x-airflow-common:
+#   &airflow-common
+#   build: 
+#     context: .
+#     dockerfile: Dockerfile
+#   image: custom-airflow:latest
+#   environment:
+#     &airflow-common-env
+#     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+#     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+#     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
+#     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+#     AIRFLOW__CORE__FERNET_KEY: ''
+#     AIRFLOW__WEBSERVER__SECRET_KEY: 'secretkey1234567890'
+#     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+#     AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+#     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+#     DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL}
+#     NOAA_API_KEY: ${NOAA_API_KEY}
+#     GITHUB_TOKEN: ${GITHUB_TOKEN}
+#     GITHUB_REPO: ${GITHUB_REPO}
+#     GOOGLE_APPLICATION_CREDENTIALS: /keys/gcs_service_account.json
+#     GCS_MODEL_BUCKET: ${GCS_MODEL_BUCKET}
+#     GCS_MODEL_PREFIX: ${GCS_MODEL_PREFIX:-models/production}
+#   volumes:
+#     - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/dags:/opt/airflow/dags/data_pipeline
+#     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/dags:/opt/airflow/dags/model_pipeline
+#     - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/scripts:/opt/airflow/scripts/data_pipeline
+#     - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/logs:/opt/airflow/logs/data_pipeline
+#     - ${AIRFLOW_PROJ_DIR:-.}/data_pipeline/data:/opt/airflow/data
+#     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/scripts:/opt/airflow/scripts/model_pipeline
+#     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/mlruns:/opt/airflow/scripts/model_pipeline/mlruns
+#     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/artifacts:/opt/airflow/artifacts/model_pipeline
+#     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/monitoring:/opt/airflow/scripts/model_pipeline/monitoring
+#     - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/models:/opt/airflow/models
+
+#     # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/dags:/opt/airflow/dags/model_pipeline
+#     # - ${AIRFLOW_PROJ_DIR:-.}/model_pipeline/mlruns:/opt/airflow/mlruns/model_pipeline
+#     - ./keys/gcs_service_account.json:/keys/gcs_service_account.json:ro
+
+#   user: "${AIRFLOW_UID:-50000}:0"
+#   depends_on:
+#     &airflow-common-depends-on
+#     redis:
+#       condition: service_healthy
+#     postgres:
+#       condition: service_healthy
+
+# services:
+#   postgres:
+#     image: postgres:13
+#     environment:
+#       POSTGRES_USER: airflow
+#       POSTGRES_PASSWORD: airflow
+#       POSTGRES_DB: airflow
+#     volumes:
+#       - postgres-db-volume:/var/lib/postgresql/data
+#     healthcheck:
+#       test: ["CMD", "pg_isready", "-U", "airflow"]
+#       interval: 5s
+#       retries: 5
+#     restart: always
+
+#   redis:
+#     image: redis:latest
+#     expose:
+#       - 6379
+#     healthcheck:
+#       test: ["CMD", "redis-cli", "ping"]
+#       interval: 5s
+#       timeout: 30s
+#       retries: 50
+#     restart: always
+
+#   airflow-webserver:
+#     <<: *airflow-common
+#     command: webserver
+#     ports:
+#       - 8080:8080
+#     healthcheck:
+#       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+#       interval: 10s
+#       timeout: 10s
+#       retries: 5
+#     restart: always
+#     depends_on:
+#       <<: *airflow-common-depends-on
+#       airflow-init:
+#         condition: service_completed_successfully
+
+#   airflow-scheduler:
+#     <<: *airflow-common
+#     command: scheduler
+#     healthcheck:
+#       test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+#       interval: 10s
+#       timeout: 10s
+#       retries: 5
+#     restart: always
+#     depends_on:
+#       <<: *airflow-common-depends-on
+#       airflow-init:
+#         condition: service_completed_successfully
+
+#   airflow-worker:
+#     <<: *airflow-common
+#     command: celery worker
+#     mem_limit: 13g
+#     mem_reservation: 12g
+#     healthcheck:
+#       test: ["CMD-SHELL", 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"']
+#       interval: 10s
+#       timeout: 10s
+#       retries: 5
+#     restart: always
+#     depends_on:
+#       <<: *airflow-common-depends-on
+#       airflow-init:
+#         condition: service_completed_successfully
+
+#   airflow-triggerer:
+#     <<: *airflow-common
+#     command: triggerer
+#     healthcheck:
+#       test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
+#       interval: 10s
+#       timeout: 10s
+#       retries: 5
+#     restart: always
+#     depends_on:
+#       <<: *airflow-common-depends-on
+#       airflow-init:
+#         condition: service_completed_successfully
+
+#   airflow-init:
+#     <<: *airflow-common
+#     entrypoint: /bin/bash
+#     command:
+#       - -c
+#       - |
+#         airflow db upgrade
+#         airflow users create \
+#           --username ${_AIRFLOW_WWW_USER_USERNAME:-airflow2} \
+#           --password ${_AIRFLOW_WWW_USER_PASSWORD:-airflow2} \
+#           --firstname Airflow \
+#           --lastname Admin \
+#           --role Admin \
+#           --email admin@example.com
+#     environment:
+#       <<: *airflow-common-env
+#       _AIRFLOW_DB_UPGRADE: 'true'
+#       _AIRFLOW_WWW_USER_CREATE: 'true'
+#     user: "50000:0"
+
+# volumes:
+#   postgres-db-volume:
                

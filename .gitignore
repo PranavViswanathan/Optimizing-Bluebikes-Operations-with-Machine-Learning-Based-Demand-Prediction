@@ -1,5 +1,6 @@
 env/
 .env
+!.env.example
 notebooks/test.py
 
 # Data files
@@ -50,7 +51,7 @@ venv/
 
 mlruns/
 .env
-
+.env.bak
 # Node / React frontend
 node_modules/
 bluebikes-ui/frontend/node_modules/
