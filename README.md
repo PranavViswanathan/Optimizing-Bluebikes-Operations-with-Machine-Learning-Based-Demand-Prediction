@@ -1,7 +1,9 @@
 # Optimizing Bluebikes Operations with Machine Learning Based Demand Prediction
 
 ![airflow workflow](https://github.com/PranavViswanathan/Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction/actions/workflows/airflow_ci.yaml/badge.svg)
-    
+
+
+![bluebikes-prediction-ui](assets/image.png)
 ## About
 
 ### Overview
