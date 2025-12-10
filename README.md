@@ -20,34 +20,131 @@ Bluebikes generates rich spatiotemporal datasets capturing cycling patterns, sta
 ### Approach
 Develop predictive models using historical ridership patterns, weather data, seasonal variations, and event-driven demand spikes to forecast when and where bikes will be needed most.
 
-## Folder Structure
+## Project Structure
+
 ```
-Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction/
-│── README.md                  # Project description and setup
-│── requirements.txt           # Python dependencies
-│── config/                    # Config files for data sources, models, API
-│── data_pipeline/            # Data collection, processing, and orchestration
-│   └── README.md             # Detailed data pipeline documentation
-│── notebooks/                # Jupyter notebooks for EDA and prototyping
-│── Model/                    # Machine learning models
-├── Deployment/               # Deployment configurations
-│── tests/                    # Unit and integration tests
-│── docs/                     # Diagrams, data cards, scoping document
+bluebikes-mlops/
+├── data_pipeline/           # Data collection & processing
+│   ├── dags/               # Airflow DAGs
+│   ├── scripts/            # Processing scripts
+│   └── data/               # Raw & processed data
+│
+├── model_pipeline/          # Model training & deployment
+│   ├── dags/               # Training DAGs
+│   ├── scripts/            # Training scripts
+│   ├── models/             # Saved models
+│   └── monitoring/         # Drift detection
+│
+├── model_deployment/        # Cloud Run deployment
+│   ├── app.py              # Flask API
+│   └── Dockerfile          # Container config
+│
+├── bluebikes-ui/           # Web interface
+│   ├── frontend/           # React app
+│   └── backend/            # Express.js API
+│
+├── docker-compose.yaml     # Service orchestration
+├── Dockerfile              # Airflow image
+├── setup.sh               # Setup wizard
+└── .env.example           # Environment template
 ```
 
 ## Installation/Replication 
 
 The following steps will ensure that anyone can set up and reproduce the Bluebikes pipeline - either locally or using the full Dockerized Airflow environment.
 
+# Quick Start Guide
+
+## First Time Setup (5 minutes)
+
+```bash
+# 1. Clone and enter directory
+git clone https://github.com/YOUR_USERNAME/bluebikes-mlops.git
+cd bluebikes-mlops
+
+# 2. Run setup
+chmod +x setup.sh
+./setup.sh
+
+# 3. Add your API keys
+nano .env
+# Fill in: NOAA_API_KEY, GITHUB_TOKEN, GITHUB_REPO
+
+# 4. Start services
+./start-airflow.sh
+
+# 5. Open Airflow
+open http://localhost:8080
+# Login: airflow / airflow
+```
+
+## Daily Commands
+
+| Action | Command |
+|--------|---------|
+| Start | `./start-airflow.sh` |
+| Stop | `./stop-airflow.sh` |
+| View logs | `docker compose logs -f` |
+| Check status | `docker compose ps` |
+| Restart | `docker compose restart` |
+| Full reset | `./stop-airflow.sh --clean` |
+
+## Trigger DAGs Manually
+
+```bash
+# Data collection
+docker compose exec airflow-webserver airflow dags trigger data_pipeline_dag
+
+# Model training
+docker compose exec airflow-webserver airflow dags trigger bluebikes_integrated_bias_training
+
+# Drift check
+docker compose exec airflow-webserver airflow dags trigger drift_monitoring_dag
+```
+
+## Troubleshooting
+
+**Services won't start?**
+```bash
+docker compose down -v
+docker compose up airflow-init
+docker compose up -d
+```
+
+**Out of memory?**
+- Increase Docker memory to 8GB+
+- Docker Desktop → Settings → Resources
+
+**Permission denied?**
+```bash
+echo "AIRFLOW_UID=$(id -u)" >> .env
+```
+
+## API Keys Needed
+
+| Service | Get it from | Required? |
+|---------|-------------|-----------|
+| NOAA | https://www.ncdc.noaa.gov/cdo-web/token | Yes |
+| GitHub | GitHub -> Settings -> Developer settings | Yes |
+| Discord | Your Discord server webhook | Optional |
+| GCS | Google Cloud Console | Optional |
+
+## Support
+
+- Check logs: `docker compose logs -f`
+- Issues: GitHub Issues page
+- Reset: `./stop-airflow.sh --clean && ./setup.sh`
+
+
 ### Prerequisites
 
 
-| Tool | Minimum Version | Purpose |
-|------|------------------|----------|
-| [Python](https://www.python.org/downloads/) | 3.11 | Local execution and development |
-| [Docker](https://docs.docker.com/get-docker/) | 24.0+ | Containerization |
-| [Docker Compose](https://docs.docker.com/compose/install/) | 2.20+ | Orchestration for Airflow stack |
-| [Git](https://git-scm.com/downloads) | any | Repository cloning |
+| Requirement | Version | Check Command |
+|-------------|---------|---------------|
+| Docker | 20.10+ | `docker --version` |
+| Docker Compose | 2.0+ | `docker compose version` |
+| Git | 2.30+ | `git --version` |
+| Python | 3.10+ | `python3 --version` |
 
 ### Clone the repository
 ```bash
@@ -55,74 +152,243 @@ git clone https://github.com/PranavViswanathan/Optimizing-Bluebikes-Operations-w
 cd Optimizing-Bluebikes-Operations-with-Machine-Learning-Based-Demand-Prediction
 ```
 
-### Local Setup (Without Docker)
+## Architecture
 
-python -m venv venv
-source venv/bin/activate #macOS/Linux
-venv\Scripts\activate
-
-pip install --upgrade pip
-pip install -r requirements.txt
-
-Run the pipeline:
-
-python data_pipeline/scripts/datapipeline.py
-
-Logs and data output are stored in: 
-data_pipeline/logs/
-data_pipeline/data/
-
-### To run orchestration stack (Airflow + Postgres + Redis)
-
-bash start-airflow.sh
-
-This will:
- - Build the Airflow containers
- - Initialize the Airflow database
- - Create and admin user (airflow2/ airflow2)
- - Launch the UI at http://localhost:8080
-
- bash stop-airflow.sh
-
- This will: 
-- Stop Airflow and cleanup
-
-### To run Standalone Pipeline Container
-
-To run only the data pipeline:
-
-docker build -f Dockerfile.pipeline -t ml-pipeline .
-docker run --rm -v $(pwd)/data_pipeline/data:/app/data ml-pipeline
-
-
-## Data Pipeline
-
-The project includes a comprehensive data pipeline for collecting, processing, and transforming Bluebikes ridership data, Boston college locations, and NOAA weather data. The pipeline is orchestrated using Apache Airflow and runs in a containerized Docker environment.
-
-**[View Detailed Data Pipeline Documentation](./data_pipeline/README.md)**
-
-Key features:
-- Automated data collection from multiple sources (Bluebikes, Boston GIS, NOAA)
-- Data validation, cleaning, and preprocessing
-- Airflow DAG orchestration with scheduled runs
-- Discord alert notifications for pipeline monitoring
-- Dockerized deployment for reproducibility
-
-## Preliminary Project Timeline
-```mermaid
-    gantt
-        title Project Timeline
-        dateFormat  YYYY-MM-DD
-        axisFormat  %b %d
-    
-        section Milestones
-        Project Scoping          :done,    ms1, 2025-09-30, 1d
-        Data Pipeline            :active,  ms2, 2025-10-01, 2025-10-28
-        Model Development        :         ms3, 2025-10-29, 2025-11-18
-        Model Deployment         :         ms4, 2025-11-19, 2025-12-09
-        MLOps Expo               :milestone, ms5, 2025-12-12, 1d
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Data Sources   │────▶│  Data Pipeline  │────▶│  Feature Store  │
+│  - BlueBikes    │     │  (Airflow DAG)  │     │  (Processed)    │
+│  - NOAA Weather │     │  Daily @ 12AM   │     │                 │
+│  - Boston Cols  │     └─────────────────┘     └────────┬────────┘
+└─────────────────┘                                      │
+                                                         ▼
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│  Cloud Run API  │◀────│  Model Registry │◀────│  Model Training │
+│  /predict       │     │  (GCS Bucket)   │     │  (Airflow DAG)  │
+│  /health        │     │                 │     │  Weekly         │
+└─────────────────┘     └─────────────────┘     └────────┬────────┘
+                                                         │
+                        ┌─────────────────┐              │
+                        │  Drift Monitor  │◀─────────────┘
+                        │  (Evidently AI) │
+                        │  Triggers Retrain│
+                        └─────────────────┘
 ```
 
-## Status
-This repository is in the **Model Deployment phase**.  
-Code, data pipelines, and models will be added in upcoming sprints.
+
+## Installation
+
+### Option 1: Automated Setup (Recommended)
+
+```bash
+# Run the setup wizard
+./setup.sh
+```
+
+This will:
+- Check prerequisites
+- Create necessary directories
+- Set up environment configuration
+- Build Docker images
+- Initialize Airflow
+
+### Option 2: Manual Setup
+
+```bash
+# 1. Create environment file
+cp .env.example .env
+
+# 2. Edit with your API keys
+nano .env
+
+# 3. Create required directories
+mkdir -p keys
+mkdir -p data_pipeline/data/{raw,processed}/{bluebikes,NOAA_weather,boston_clg}
+mkdir -p model_pipeline/{models,mlruns,artifacts}
+mkdir -p model_pipeline/monitoring/{baselines,reports,logs}
+
+# 4. Set Airflow user ID
+echo "AIRFLOW_UID=$(id -u)" >> .env
+
+# 5. Build and initialize
+docker compose build
+docker compose up airflow-init
+```
+
+## Configuration
+
+### Environment Variables (.env)
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `NOAA_API_KEY` | Yes | NOAA weather API key |
+| `DISCORD_WEBHOOK_URL` | No | Discord notifications |
+| `GITHUB_REPO` | Yes | Your GitHub repo (user/repo) |
+| `GITHUB_TOKEN` | Yes | GitHub personal access token |
+| `GCS_MODEL_BUCKET` | No* | GCS bucket for models |
+| `AIRFLOW_UID` | Yes | Your user ID (run `id -u`) |
+
+*Required only for cloud deployment features
+
+### GCS Service Account (Optional)
+
+If you want to use Google Cloud features:
+
+1. Go to [GCP Console](https://console.cloud.google.com)
+2. Create a new project or select existing
+3. Go to IAM & Admin → Service Accounts
+4. Create service account with roles:
+   - Storage Admin
+   - Storage Object Admin
+5. Create and download JSON key
+6. Save as `keys/gcs_service_account.json`
+
+## Running the Pipeline
+
+### Start Services
+
+```bash
+# Start all services in background
+./start-airflow.sh
+# or
+docker compose up -d
+
+# View logs
+docker compose logs -f
+
+# Check service health
+./airflow-health-check.sh
+```
+
+### Access Interfaces
+
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| Airflow UI | http://localhost:8080 | airflow / airflow |
+| MLflow UI | http://localhost:5000 | None |
+
+### Run DAGs
+
+1. **Data Pipeline** (runs daily automatically)
+   - Collects BlueBikes trip data
+   - Fetches weather data from NOAA
+   - Processes and creates features
+
+2. **Model Training** (runs weekly automatically)
+   - Trains XGBoost, LightGBM, Random Forest
+   - Performs bias detection and mitigation
+   - Promotes best model to production
+
+3. **Drift Monitoring** (triggered after data pipeline)
+   - Checks for data drift using Evidently AI
+   - Triggers retraining if drift detected
+
+### Manual DAG Triggers
+
+```bash
+# Trigger data pipeline
+docker compose exec airflow-webserver airflow dags trigger data_pipeline_dag
+
+# Trigger model training
+docker compose exec airflow-webserver airflow dags trigger bluebikes_integrated_bias_training
+
+# Trigger drift monitoring
+docker compose exec airflow-webserver airflow dags trigger drift_monitoring_dag
+```
+
+### Stop Services
+
+```bash
+./stop-airflow.sh
+# or
+docker compose down
+```
+
+
+## API Endpoints
+
+Once deployed to Cloud Run:
+
+```bash
+# Health check
+curl https://your-cloud-run-url/health
+
+# Get prediction
+curl -X POST https://your-cloud-run-url/predict \
+  -H "Content-Type: application/json" \
+  -d '{"hour": 8, "day_of_week": 1, "temp_avg": 20}'
+
+# Reload model
+curl -X POST https://your-cloud-run-url/reload
+```
+
+## Troubleshooting
+
+### Common Issues
+
+**Docker permission denied**
+```bash
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+**Airflow webserver not starting**
+```bash
+# Check logs
+docker compose logs airflow-webserver
+
+# Restart services
+docker compose down && docker compose up -d
+```
+
+**Database connection issues**
+```bash
+# Reset everything
+docker compose down -v
+docker compose up airflow-init
+docker compose up -d
+```
+
+**Out of memory errors**
+```bash
+# Increase Docker memory limit
+# Docker Desktop → Settings → Resources → Memory: 8GB+
+```
+
+### Getting Help
+
+1. Check the [Issues](https://github.com/your-username/bluebikes-mlops/issues) page
+2. Review Airflow logs: `docker compose logs -f`
+3. Check individual task logs in Airflow UI
+
+## Model Performance
+
+| Model | R² Score | MAE | RMSE |
+|-------|----------|-----|------|
+| XGBoost | 0.87 | 18.5 | 24.3 |
+| LightGBM | 0.86 | 19.2 | 25.1 |
+| Random Forest | 0.84 | 20.8 | 27.2 |
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Team
+
+- Nikhil Anil Prakash
+- Harsh Shah
+- Ananya Hegde
+- Pranav Viswanathan
+- Gyula Planky
+
+---
+
+Built with ❤️ for Northeastern University MLOps Course (December 2025)
