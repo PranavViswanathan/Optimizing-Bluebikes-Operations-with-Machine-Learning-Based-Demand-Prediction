@@ -65,6 +65,27 @@
       },
       "status": "staging",
       "bias_mitigated": true
+    },
+    {
+      "version": 4,
+      "model_type": "xgboost",
+      "created_date": "2025-12-09",
+      "promotion_reason": "Performance/bias improvement below thresholds",
+      "file_path": "/opt/airflow/models/versions/model_v4_20251209_bias_mitigated.pkl",
+      "metrics": {
+        "test_r2": 0.9351660013198853,
+        "test_mae": 80.17737579345703,
+        "test_rmse": 126.55067846025165,
+        "r2_improvement": 0.00012046098709106445,
+        "mae_improvement": 0.9476699829101562
+      },
+      "bias_metrics": {
+        "baseline_issues": 6,
+        "mitigated_issues": 7,
+        "issues_reduced": -1
+      },
+      "status": "staging",
+      "bias_mitigated": true
     }
   ],
   "current_production": 1

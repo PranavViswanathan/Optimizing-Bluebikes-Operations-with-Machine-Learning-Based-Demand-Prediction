@@ -1,0 +1,5 @@
+[core]
+    remote = gcs
+['remote "gcs"']
+    url = gs://bluebikes-dvc-storage
+    credentialpath = ../keys/dvc_shared_key.json
