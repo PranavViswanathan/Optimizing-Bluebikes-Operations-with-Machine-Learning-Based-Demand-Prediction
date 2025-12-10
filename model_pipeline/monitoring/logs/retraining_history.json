@@ -13,7 +13,14 @@
       "drift_status": "CRITICAL",
       "n_drifted_features": 25,
       "airflow_run_id": "manual__2025-12-09T09:22:51.485502+00:00"
+    },
+    {
+      "timestamp": "2025-12-09T23:42:32.559273",
+      "trigger": "drift_detected",
+      "drift_status": "CRITICAL",
+      "n_drifted_features": 25,
+      "airflow_run_id": "manual__2025-12-09T23:41:21.162881+00:00"
     }
   ],
-  "last_retraining": "2025-12-09T09:23:59.376333"
+  "last_retraining": "2025-12-09T23:42:32.559258"
 }
