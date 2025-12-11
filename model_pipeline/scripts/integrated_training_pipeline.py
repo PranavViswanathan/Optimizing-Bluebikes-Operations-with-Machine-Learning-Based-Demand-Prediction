@@ -59,7 +59,83 @@ class IntegratedBlueBikesTrainer:
         self.experiment = mlflow.set_experiment(self.experiment_name)
         print(f"MLflow Experiment: {self.experiment_name}")
         print(f"Tracking URI: {mlflow.get_tracking_uri()}")
+    
+    
+    def _calculate_sample_weights(self, X_train, y_train):
+        """
+        Calculate sample weights - CONSERVATIVE VERSION.
         
+        Key insight: Aggressive weighting made things WORSE.
+        This version uses mild weights that won't destabilize the model.
+        
+        Args:
+            X_train: Training features DataFrame
+            y_train: Training target Series
+            
+        Returns:
+            numpy array of weights, one per training sample
+        """
+        print("\n" + "-"*60)
+        print(" CALCULATING SAMPLE WEIGHTS (CONSERVATIVE) ".center(60))
+        print("-"*60)
+        
+        n_samples = len(X_train)
+        sample_weights = np.ones(n_samples)
+        
+        # =============================================================
+        # CONSERVATIVE APPROACH: Small adjustments only
+        # Max weight should be ~1.5x, not 4x
+        # =============================================================
+        
+        # Strategy 1: Mild upweight for worst hours (not aggressive)
+        if 'hour' in X_train.columns:
+            # Only the WORST hour gets a boost
+            hour_17_mask = X_train['hour'] == 17
+            hour_16_mask = X_train['hour'] == 16
+            
+            sample_weights[hour_17_mask] *= 1.3  # Was 2.0
+            sample_weights[hour_16_mask] *= 1.2  # Was 1.8
+            
+            print(f"  ✓ Hour 17 (+30%): {hour_17_mask.sum():,} samples")
+            print(f"  ✓ Hour 16 (+20%): {hour_16_mask.sum():,} samples")
+        
+        # Strategy 2: Mild upweight for very high demand only (top 10%)
+        y_q90 = y_train.quantile(0.90)
+        very_high_demand_mask = y_train > y_q90
+        sample_weights[very_high_demand_mask] *= 1.2  # Was 1.95 (1.3 * 1.5)
+        print(f"  ✓ Very high demand (>q90, +20%): {very_high_demand_mask.sum():,} samples")
+        
+        # Strategy 3: Mild upweight for weekday evening rush
+        if 'is_weekend' in X_train.columns and 'hour' in X_train.columns:
+            weekday_evening = (X_train['is_weekend'] == 0) & (X_train['hour'].isin([16, 17, 18]))
+            sample_weights[weekday_evening] *= 1.15  # Was 1.3
+            print(f"  ✓ Weekday evening rush (+15%): {weekday_evening.sum():,} samples")
+        
+        # =============================================================
+        # NO DOWNWEIGHTING - This was destabilizing the model
+        # =============================================================
+        print(f"  ✓ No downweighting applied (keeps model stable)")
+        
+        # =============================================================
+        # Normalize weights
+        # =============================================================
+        sample_weights = sample_weights * n_samples / sample_weights.sum()
+        
+        # Print statistics
+        print(f"\n  Weight Statistics:")
+        print(f"    Min:    {sample_weights.min():.3f}")
+        print(f"    Max:    {sample_weights.max():.3f}")
+        print(f"    Mean:   {sample_weights.mean():.3f}")
+        print(f"    Std:    {sample_weights.std():.3f}")
+        
+        # Verify weights are reasonable
+        if sample_weights.max() > 2.0:
+            print(f" WARNING: Max weight > 2.0, may cause instability")
+        else:
+            print(f"  ✓ Weights are in safe range")
+        
+        return sample_weights
+
     def load_and_prepare_data(self):
         """Load and split data with proper validation set."""
         print("\n" + "="*80)
@@ -269,6 +345,8 @@ class IntegratedBlueBikesTrainer:
         """
         Apply bias mitigation with PROPER quantile handling.
         
+        UPDATED: Now includes SAMPLE WEIGHTING for bias reduction!
+        
         CRITICAL: Quantiles calculated from TRAINING data only to prevent data leakage.
         """
         print("\n" + "="*80)
@@ -304,7 +382,10 @@ class IntegratedBlueBikesTrainer:
         # Save quantiles for monitoring baseline
         self._save_quantiles_for_monitoring()
         
-        sample_weights = None
+        # =========================================================
+        # CALCULATE SAMPLE WEIGHTS
+        # =========================================================
+        sample_weights = self._calculate_sample_weights(X_train, y_train)
         
         return X_train, X_val, X_test, y_train, y_val, y_test, sample_weights
 
