@@ -4,6 +4,9 @@
 
 
 ![bluebikes-prediction-ui](assets/image.png)
+
+![architecture](<assets/architecture.png>)
+
 ## About
 
 ### Overview

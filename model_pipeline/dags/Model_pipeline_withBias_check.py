@@ -433,7 +433,7 @@ def promote_mitigated_model(**context):
             raise Exception(f"Model file not found at {temp_model_path}")
         
         if should_promote:
-            log.info(f"\n✓ PROMOTING BIAS-MITIGATED MODEL TO PRODUCTION")
+            log.info(f"\n  PROMOTING BIAS-MITIGATED MODEL TO PRODUCTION")
             log.info(f"  Reason: {promotion_reason}")
             
             if os.path.exists(production_link):
@@ -755,13 +755,13 @@ def generate_monitoring_baseline(**context):
     """
     Generate Evidently AI baseline after model deployment.
     This enables drift monitoring for the newly deployed model.
+    Generates both overall baseline AND monthly baselines.
     """
     import sys
-    # sys.path.insert(0, '/opt/airflow/model_pipeline/monitoring')
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline/monitoring')
     
     log.info("="*60)
-    log.info("GENERATING MONITORING BASELINE")
+    log.info("GENERATING MONITORING BASELINES")
     log.info("="*60)
     
     ti = context['task_instance']
@@ -774,23 +774,31 @@ def generate_monitoring_baseline(**context):
         return {'generated': False, 'reason': 'Model not promoted'}
     
     try:
-        from baseline_stats import generate_baseline_from_training
+        from baseline_stats import generate_baseline_from_training, generate_monthly_baselines
+        # from monitoring_config import generate_monthly_baselines
         
-        # Generate baseline from the newly deployed model
+        # 1. Generate overall baseline from the newly deployed model
+        log.info("\n1. Generating overall baseline...")
         baseline_path = generate_baseline_from_training()
+        log.info(f"   Overall baseline generated: {baseline_path}")
         
-        log.info(f"✓ Monitoring baseline generated: {baseline_path}")
+        # 2. Generate monthly baselines for month-specific drift detection
+        log.info("\n2. Generating monthly baselines...")
+        monthly_metadata = generate_monthly_baselines()
+        log.info(f"   Monthly baselines generated: {len(monthly_metadata)} months")
         
         return {
             'generated': True,
             'baseline_path': str(baseline_path),
+            'monthly_baselines_count': len(monthly_metadata),
+            'monthly_baselines': list(monthly_metadata.keys())
         }
         
     except Exception as e:
-        log.error(f"Failed to generate monitoring baseline: {e}")
+        log.error(f"Failed to generate monitoring baselines: {e}")
         import traceback
         traceback.print_exc()
-        # Don't fail the DAG - baseline can be generated manually
+        # Don't fail the DAG - baselines can be generated manually
         return {'generated': False, 'error': str(e)}
 
 def cleanup_temp_files(**context):

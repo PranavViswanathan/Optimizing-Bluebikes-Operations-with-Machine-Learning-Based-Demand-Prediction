@@ -100,7 +100,7 @@ const RebalanceLogo = ({ size = 240 }) => {
         opacity="0.95"
         letterSpacing="2"
       >
-        REBALANCE AI {/*TODO: rename*/}
+        REBALANCE AI {/* */}
       </text>
     </svg>
   );

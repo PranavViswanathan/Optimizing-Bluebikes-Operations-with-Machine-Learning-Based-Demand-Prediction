@@ -103,7 +103,7 @@ const HistoricalChart = ({ stationId }) => {
         if (error) {
             return (
                 <div className="historical-chart-error" style={{ height: '300px' }}>
-                    <p>⚠️ {error}</p>
+                    <p> {error}</p>
                     <p className="error-hint">Make sure the historical data service is running</p>
                 </div>
             );
@@ -112,7 +112,7 @@ const HistoricalChart = ({ stationId }) => {
         if (data.length === 0) {
             return (
                 <div className="historical-chart-empty" style={{ height: '300px' }}>
-                    <p>📊 No historical data available for this station</p>
+                    <p> No historical data available for this station</p>
                 </div>
             );
         }
@@ -122,7 +122,7 @@ const HistoricalChart = ({ stationId }) => {
         if (totalRides === 0) {
             return (
                 <div className="historical-chart-empty" style={{ height: '300px' }}>
-                    <p>📉 Data not collected for this timeframe</p>
+                    <p> Data not collected for this timeframe</p>
                 </div>
             );
         }
@@ -175,7 +175,7 @@ const HistoricalChart = ({ stationId }) => {
     return (
         <div className="historical-chart-container">
             <div className="chart-header">
-                <h4>📈 Historical Trends</h4>
+                <h4> Historical Trends</h4>
                 <div className="time-range-tabs">
                     <button
                         className={`time-tab ${timeRange === 'hourly' ? 'active' : ''}`}
@@ -202,9 +202,9 @@ const HistoricalChart = ({ stationId }) => {
 
             <div className="chart-footer">
                 <p className="chart-info">
-                    {timeRange === 'hourly' && '📅 Hourly data for the past 7 days'}
-                    {timeRange === 'daily' && '📅 Daily data for the past 30 days'}
-                    {timeRange === 'weekly' && '📅 Weekly data for the past 12 weeks'}
+                    {timeRange === 'hourly' && ' Hourly data for the past 7 days'}
+                    {timeRange === 'daily' && ' Daily data for the past 30 days'}
+                    {timeRange === 'weekly' && ' Weekly data for the past 12 weeks'}
                 </p>
             </div>
         </div>

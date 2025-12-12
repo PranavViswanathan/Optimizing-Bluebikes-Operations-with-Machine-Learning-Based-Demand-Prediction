@@ -450,7 +450,85 @@ def generate_baseline_from_training(
     logger.info(f"Saved to: {path}")
     
     return path
+def generate_monthly_baselines():
+    """
+    Generate separate baseline for each month.
+    This allows month-to-month comparisons instead of comparing against all months.
+    """
+    import sys
+    sys.path.insert(0, '/opt/airflow/scripts/model_pipeline')
+    
+    from feature_generation import load_and_prepare_data
+    from monitoring_config import get_config, BASELINES_DIR, DATA_SPLITS
+    import pandas as pd
+    import json
+    
+    logger.info("="*60)
+    logger.info("GENERATING MONTHLY BASELINES")
+    logger.info("="*60)
+    
+    config = get_config()
+    X, y, _ = load_and_prepare_data()
+    X["date"] = pd.to_datetime(X["date"])
+    
+    # Use only training period data
+    train_end = DATA_SPLITS.get_train_end()
+    training_data = X[X["date"] <= train_end].copy()
+    
+    logger.info(f"Total training data: {len(training_data)} samples")
+    logger.info(f"Date range: {training_data['date'].min()} to {training_data['date'].max()}")
+    
+    metadata = {}
+    month_names = ['january', 'february', 'march', 'april', 'may', 'june',
+                'july', 'august', 'september', 'october', 'november', 'december']
+    
+    # Create baseline for each month
+    for month_num in range(1, 13):
+        month_name = month_names[month_num - 1]
+        
+        # Get all data from this month across all years in training period
+        month_data = training_data[training_data["date"].dt.month == month_num].copy()
+        
+        if len(month_data) < config.min_samples_per_baseline:
+            logger.warning(f"  {month_name}: Only {len(month_data)} samples (min: {config.min_samples_per_baseline}), skipping")
+            continue
+        
+        # Drop date column for Evidently (it doesn't need it)
+        month_data_for_baseline = month_data.drop(columns=['date'], errors='ignore')
+        
+        # Save baseline
+        baseline_path = BASELINES_DIR / f"baseline_{month_name}.pkl"
+        month_data_for_baseline.to_pickle(baseline_path)
+        
+        # Store metadata
+        years = sorted(month_data['date'].dt.year.unique().tolist())
+        metadata[month_name] = {
+            'month_number': month_num,
+            'samples': len(month_data),
+            'date_range': f"{month_data['date'].min().date()} to {month_data['date'].max().date()}",
+            'years': years,
+            'path': str(baseline_path),
+            'created': pd.Timestamp.now().isoformat()
+        }
+        
+        logger.info(f"✓ {month_name:12s}: {len(month_data):5d} samples from {years}")
+    
+    # Save metadata
+    metadata_path = BASELINES_DIR / "monthly_baselines_metadata.json"
+    with open(metadata_path, 'w') as f:
+        json.dump(metadata, f, indent=2)
+    
+    logger.info(f"\n✓ Generated {len(metadata)} monthly baselines")
+    logger.info(f"✓ Metadata saved to: {metadata_path}")
+    
+    return metadata
 
+
+def get_month_name(month_number):
+    """Helper function to convert month number to name"""
+    month_names = ['january', 'february', 'march', 'april', 'may', 'june',
+                'july', 'august', 'september', 'october', 'november', 'december']
+    return month_names[month_number - 1]
 
 if __name__ == "__main__":
     import argparse
@@ -483,7 +561,7 @@ if __name__ == "__main__":
     elif args.generate:
         try:
             path = generate_baseline_from_training()
-            print(f"\n✓ Baseline generated: {path}")
+            print(f"\n  Baseline generated: {path}")
         except Exception as e:
             print(f"\n✗ Error: {e}")
             import traceback

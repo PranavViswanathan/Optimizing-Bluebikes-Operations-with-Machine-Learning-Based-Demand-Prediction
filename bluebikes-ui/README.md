@@ -217,12 +217,12 @@ const maxDistance = 1.0;      // Max distance for matches (km)
 **Recipient Station** (Downtown Crossing):
 - Current bikes: 1
 - Predicted demand: 7 bikes/hour
-- Deficit: 6 bikes ⚠️
+- Deficit: 6 bikes 
 
 **Donor Station** (Park Street - 0.3km away):
 - Current bikes: 22
 - Predicted demand: 3 bikes/hour
-- Surplus: 14 bikes ✅
+- Surplus: 14 bikes 
 
 **Recommendation**:
 > Move **6 bikes** from Park St → Downtown Crossing  
@@ -239,11 +239,11 @@ For best results, deploy your trained model following the [Deployed Model Guide]
 
 ### Benefits
 
-✅ **Proactive**: Prevents stockouts before they occur  
-✅ **Efficient**: Matches based on proximity and capacity  
-✅ **Data-Driven**: Uses ML predictions instead of static rules  
-✅ **Scalable**: Analyzes all 590+ stations in real-time  
-✅ **Actionable**: Provides specific transfer quantities and routes
+ **Proactive**: Prevents stockouts before they occur  
+ **Efficient**: Matches based on proximity and capacity  
+ **Data-Driven**: Uses ML predictions instead of static rules  
+ **Scalable**: Analyzes all 590+ stations in real-time  
+ **Actionable**: Provides specific transfer quantities and routes
 
 ## API Endpoints
 

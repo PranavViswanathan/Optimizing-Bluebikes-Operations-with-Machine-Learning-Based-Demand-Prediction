@@ -9,7 +9,7 @@ Usage:
     register_monitoring_routes(app)
 """
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, make_response
 from google.cloud import storage
 import json
 import os
@@ -17,21 +17,36 @@ from datetime import datetime
 
 monitoring_bp = Blueprint('monitoring', __name__, url_prefix='/monitoring')
 
-# Configuration
 GCS_BUCKET = os.environ.get("GCS_MODEL_BUCKET", "mlruns234")
 MONITORING_PREFIX = os.environ.get("GCS_MONITORING_PREFIX", "monitoring")
 
 
-def get_gcs_client():
-    """Get GCS client."""
-    return storage.Client()
+_gcs_client = None
 
+def get_gcs_client():
+    """Get GCS client (reuse connection, but always fresh bucket refs)."""
+    global _gcs_client
+    if _gcs_client is None:
+        _gcs_client = storage.Client()
+    return _gcs_client
+
+def no_cache_response(data, status_code=200):
+    """
+    Create a JSON response with no-cache headers.
+    This ensures browsers and CDNs always fetch fresh data.
+    """
+    response = make_response(jsonify(data), status_code)
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 def list_reports(client, report_type="json"):
-    """List available monitoring reports from GCS."""
+    """List available monitoring reports from GCS with fresh data."""
     bucket = client.bucket(GCS_BUCKET)
-    prefix = f"{MONITORING_PREFIX}/reports/{report_type}/"
+    prefix = f"{MONITORING_PREFIX}/drift_reports/{report_type}/"
     
+    # Force fresh listing by not using any cached iterators
     blobs = list(bucket.list_blobs(prefix=prefix))
     reports = []
     
@@ -51,9 +66,15 @@ def list_reports(client, report_type="json"):
 
 
 def get_report_content(client, report_path):
-    """Get report content from GCS."""
+    """Get report content from GCS - always fresh."""
     bucket = client.bucket(GCS_BUCKET)
     blob = bucket.blob(report_path)
+    
+    # Reload blob metadata to ensure we have latest version
+    try:
+        blob.reload()
+    except Exception:
+        pass  # Blob might not exist
     
     if not blob.exists():
         return None
@@ -67,16 +88,17 @@ def get_report_content(client, report_path):
 
 @monitoring_bp.route('/api/status')
 def get_status():
-    """Get current monitoring status."""
+    """Get current monitoring status - always fresh."""
     try:
         client = get_gcs_client()
         reports = list_reports(client, "json")
         
         if not reports:
-            return jsonify({
+            return no_cache_response({
                 "status": "NO_DATA",
                 "message": "No monitoring reports found. Run drift monitoring first.",
-                "lastUpdated": None
+                "lastUpdated": None,
+                "serverTime": datetime.now().isoformat()  # Helps verify freshness
             })
         
         # Get latest report
@@ -84,11 +106,10 @@ def get_status():
         content = get_report_content(client, latest_path)
         
         if not content:
-            return jsonify({"status": "ERROR", "message": "Could not read report"})
+            return no_cache_response({"status": "ERROR", "message": "Could not read report"})
         
         report = json.loads(content)
         
-        # Build response
         response = {
             "status": report.get("overall_status", "UNKNOWN"),
             "recommendedAction": report.get("recommended_action", "none"),
@@ -96,6 +117,7 @@ def get_status():
             "reportDate": report.get("report_date"),
             "alerts": report.get("alerts", []),
             "context": report.get("context", {}),
+            "serverTime": datetime.now().isoformat(),  # For debugging freshness
             
             "dataDrift": {
                 "detected": report.get("data_drift", {}).get("dataset_drift", False),
@@ -120,15 +142,15 @@ def get_status():
             }
         }
         
-        return jsonify(response)
+        return no_cache_response(response)
         
     except Exception as e:
-        return jsonify({"status": "ERROR", "message": str(e)}), 500
+        return no_cache_response({"status": "ERROR", "message": str(e)}, 500)
 
 
 @monitoring_bp.route('/api/history')
 def get_history():
-    """Get historical monitoring data."""
+    """Get historical monitoring data - always fresh."""
     try:
         client = get_gcs_client()
         reports = list_reports(client, "json")
@@ -155,44 +177,43 @@ def get_history():
             except:
                 continue
         
-        return jsonify(history)
+        return no_cache_response(history)
         
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return no_cache_response({"error": str(e)}, 500)
 
 
 @monitoring_bp.route('/api/report/<date>')
 def get_report(date):
-    """Get specific report details."""
+    """Get specific report details - always fresh."""
     try:
         client = get_gcs_client()
         report_path = f"{MONITORING_PREFIX}/reports/json/monitoring_report_{date}.json"
         
         content = get_report_content(client, report_path)
         if not content:
-            return jsonify({"error": "Report not found"}), 404
+            return no_cache_response({"error": "Report not found"}, 404)
         
-        return jsonify(json.loads(content))
+        return no_cache_response(json.loads(content))
         
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return no_cache_response({"error": str(e)}, 500)
 
 
 @monitoring_bp.route('/api/features/<date>')
 def get_feature_drift(date):
-    """Get feature-level drift details."""
+    """Get feature-level drift details - always fresh."""
     try:
         client = get_gcs_client()
         report_path = f"{MONITORING_PREFIX}/reports/json/monitoring_report_{date}.json"
         
         content = get_report_content(client, report_path)
         if not content:
-            return jsonify({"error": "Report not found"}), 404
+            return no_cache_response({"error": "Report not found"}, 404)
         
         data = json.loads(content)
         feature_details = data.get("data_drift", {}).get("feature_details", {})
         
-        # Sort by drift score
         sorted_features = sorted(
             [
                 {
@@ -208,23 +229,22 @@ def get_feature_drift(date):
             reverse=True
         )
         
-        return jsonify(sorted_features)
+        return no_cache_response(sorted_features)
         
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return no_cache_response({"error": str(e)}, 500)
 
 
 @monitoring_bp.route('/report')
 @monitoring_bp.route('/report/<date>')
 def serve_html_report(date=None):
-    """Serve Evidently HTML report."""
+    """Serve Evidently HTML report - always fresh."""
     try:
         client = get_gcs_client()
         
         if date:
-            report_path = f"{MONITORING_PREFIX}/reports/html/data_drift_report_{date}.html"
+            report_path = f"{MONITORING_PREFIX}/drift_reports/html/data_drift_report_{date}.html"
         else:
-            # Get latest
             reports = list_reports(client, "html")
             if not reports:
                 return "<h1>No reports available</h1>", 404
@@ -234,7 +254,12 @@ def serve_html_report(date=None):
         if not content:
             return "<h1>Report not found</h1>", 404
         
-        return content, 200, {"Content-Type": "text/html"}
+        # Create response with no-cache headers for HTML too
+        response = make_response(content, 200)
+        response.headers['Content-Type'] = 'text/html'
+        response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        return response
         
     except Exception as e:
         return f"<h1>Error: {str(e)}</h1>", 500
@@ -242,26 +267,24 @@ def serve_html_report(date=None):
 
 @monitoring_bp.route('/api/baseline')
 def get_baseline_info():
-    """Get current baseline information."""
+    """Get current baseline information - always fresh."""
     try:
         client = get_gcs_client()
         bucket = client.bucket(GCS_BUCKET)
         
-        # List baseline metadata files
         prefix = f"{MONITORING_PREFIX}/baselines/"
         blobs = list(bucket.list_blobs(prefix=prefix))
         
         metadata_files = [b for b in blobs if b.name.endswith('_metadata.json')]
         
         if not metadata_files:
-            return jsonify({"status": "NO_BASELINE", "message": "No baseline found"})
+            return no_cache_response({"status": "NO_BASELINE", "message": "No baseline found"})
         
-        # Get latest
         latest = sorted(metadata_files, key=lambda x: x.name, reverse=True)[0]
         content = latest.download_as_text()
         metadata = json.loads(content)
         
-        return jsonify({
+        return no_cache_response({
             "version": metadata.get("metadata", {}).get("version"),
             "modelName": metadata.get("metadata", {}).get("model_name"),
             "createdAt": metadata.get("metadata", {}).get("created_at"),
@@ -273,9 +296,27 @@ def get_baseline_info():
         })
         
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return no_cache_response({"error": str(e)}, 500)
 
+@monitoring_bp.route('/api/refresh', methods=['POST'])
+def force_refresh():
+    """
+    Force refresh endpoint - clears any internal state.
+    Call this after uploading new reports to GCS.
+    """
+    global _gcs_client
+    _gcs_client = None  # Force new client on next request
+    
+    return no_cache_response({
+        "status": "refreshed",
+        "message": "GCS client reset. Next request will fetch fresh data.",
+        "timestamp": datetime.now().isoformat()
+    })
 
+def register_monitoring_routes(app):
+    """Register monitoring blueprint with Flask app."""
+    app.register_blueprint(monitoring_bp)
+    print("  Monitoring routes registered at /monitoring/*")
 # =============================================================================
 # REGISTRATION FUNCTION
 # =============================================================================
@@ -283,4 +324,4 @@ def get_baseline_info():
 def register_monitoring_routes(app):
     """Register monitoring blueprint with Flask app."""
     app.register_blueprint(monitoring_bp)
-    print("✓ Monitoring routes registered at /monitoring/*")
+    print("  Monitoring routes registered at /monitoring/*")

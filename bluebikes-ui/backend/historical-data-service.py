@@ -247,7 +247,14 @@ def get_hourly(station_id):
     data = get_station_hourly_data(station_id, days)
     
     if data is None:
-        return jsonify({'error': 'Failed to fetch historical data'}), 500
+        # Return empty data instead of error if data loading failed
+        return jsonify({
+            'station_id': station_id,
+            'time_range': 'hourly',
+            'days': days,
+            'data': [],
+            'message': 'No data available (Data service running but no data found)'
+        })
     
     if len(data) == 0:
         return jsonify({
@@ -275,7 +282,14 @@ def get_daily(station_id):
     data = get_station_daily_data(station_id, days)
     
     if data is None:
-        return jsonify({'error': 'Failed to fetch historical data'}), 500
+        # Return empty data instead of error if data loading failed
+        return jsonify({
+            'station_id': station_id,
+            'time_range': 'daily',
+            'days': days,
+            'data': [],
+            'message': 'No data available (Data service running but no data found)'
+        })
     
     if len(data) == 0:
         return jsonify({
@@ -303,7 +317,14 @@ def get_weekly(station_id):
     data = get_station_weekly_data(station_id, weeks)
     
     if data is None:
-        return jsonify({'error': 'Failed to fetch historical data'}), 500
+        # Return empty data instead of error if data loading failed
+        return jsonify({
+            'station_id': station_id,
+            'time_range': 'weekly',
+            'weeks': weeks,
+            'data': [],
+            'message': 'No data available (Data service running but no data found)'
+        })
     
     if len(data) == 0:
         return jsonify({
@@ -335,14 +356,14 @@ def health():
     })
 
 if __name__ == '__main__':
-    logger.info("🕐 Starting Historical Data Service...")
-    logger.info(f"📂 Data path: {DATA_PATH}")
+    logger.info("Starting Historical Data Service...")
+    logger.info(f"Data path: {DATA_PATH}")
     
     # Preload data on startup
     logger.info("Preloading trip data...")
     load_trip_data()
     
-    logger.info(f"🚀 Historical Data Service running on port {PORT}")
+    logger.info(f"Historical Data Service running on port {PORT}")
     logger.info(f"\nAvailable endpoints:")
     logger.info(f"  GET  /api/historical/:station_id/hourly")
     logger.info(f"  GET  /api/historical/:station_id/daily")

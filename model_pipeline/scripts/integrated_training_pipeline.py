@@ -96,25 +96,25 @@ class IntegratedBlueBikesTrainer:
             sample_weights[hour_17_mask] *= 1.3  # Was 2.0
             sample_weights[hour_16_mask] *= 1.2  # Was 1.8
             
-            print(f"  ✓ Hour 17 (+30%): {hour_17_mask.sum():,} samples")
-            print(f"  ✓ Hour 16 (+20%): {hour_16_mask.sum():,} samples")
+            print(f"    Hour 17 (+30%): {hour_17_mask.sum():,} samples")
+            print(f"    Hour 16 (+20%): {hour_16_mask.sum():,} samples")
         
         # Strategy 2: Mild upweight for very high demand only (top 10%)
         y_q90 = y_train.quantile(0.90)
         very_high_demand_mask = y_train > y_q90
         sample_weights[very_high_demand_mask] *= 1.2  # Was 1.95 (1.3 * 1.5)
-        print(f"  ✓ Very high demand (>q90, +20%): {very_high_demand_mask.sum():,} samples")
+        print(f"    Very high demand (>q90, +20%): {very_high_demand_mask.sum():,} samples")
         
         # Strategy 3: Mild upweight for weekday evening rush
         if 'is_weekend' in X_train.columns and 'hour' in X_train.columns:
             weekday_evening = (X_train['is_weekend'] == 0) & (X_train['hour'].isin([16, 17, 18]))
             sample_weights[weekday_evening] *= 1.15  # Was 1.3
-            print(f"  ✓ Weekday evening rush (+15%): {weekday_evening.sum():,} samples")
+            print(f"    Weekday evening rush (+15%): {weekday_evening.sum():,} samples")
         
         # =============================================================
         # NO DOWNWEIGHTING - This was destabilizing the model
         # =============================================================
-        print(f"  ✓ No downweighting applied (keeps model stable)")
+        print(f"    No downweighting applied (keeps model stable)")
         
         # =============================================================
         # Normalize weights
@@ -132,7 +132,7 @@ class IntegratedBlueBikesTrainer:
         if sample_weights.max() > 2.0:
             print(f" WARNING: Max weight > 2.0, may cause instability")
         else:
-            print(f"  ✓ Weights are in safe range")
+            print(f"    Weights are in safe range")
         
         return sample_weights
 

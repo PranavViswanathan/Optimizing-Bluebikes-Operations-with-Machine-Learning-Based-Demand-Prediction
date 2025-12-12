@@ -101,7 +101,7 @@ const AdminDashboard = () => {
     return (
         <div className="admin-dashboard-container">
             <div className="dashboard-header">
-                <h1>⚡ Operations Control Dashboard</h1>
+                <h1>Operations Control Dashboard</h1>
                 <button className="logout-btn" onClick={handleLogout}>Logout</button>
             </div>
 

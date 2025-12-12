@@ -28,7 +28,7 @@ echo -e "${YELLOW}Step 1: Checking prerequisites...${NC}"
 
 check_command() {
     if command -v $1 &> /dev/null; then
-        echo -e "  ${GREEN}✓${NC} $1 is installed"
+        echo -e "  ${GREEN} ${NC} $1 is installed"
         return 0
     else
         echo -e "  ${RED}✗${NC} $1 is NOT installed"
@@ -61,14 +61,14 @@ echo -e "${YELLOW}Step 2: Setting up environment configuration...${NC}"
 if [ ! -f .env ]; then
     if [ -f .env.example ]; then
         cp .env.example .env
-        echo -e "  ${GREEN}✓${NC} Created .env from .env.example"
+        echo -e "  ${GREEN} ${NC} Created .env from .env.example"
         echo -e "  ${YELLOW}!${NC} Please edit .env and add your API keys"
     else
         echo -e "  ${RED}✗${NC} .env.example not found!"
         exit 1
     fi
 else
-    echo -e "  ${GREEN}✓${NC} .env already exists"
+    echo -e "  ${GREEN} ${NC} .env already exists"
 fi
 
 # ------------------------------------------------------------
@@ -98,7 +98,7 @@ DIRS=(
 
 for dir in "${DIRS[@]}"; do
     mkdir -p "$dir"
-    echo -e "  ${GREEN}✓${NC} Created $dir"
+    echo -e "  ${GREEN} ${NC} Created $dir"
 done
 
 # ------------------------------------------------------------
@@ -107,7 +107,7 @@ done
 echo -e "\n${YELLOW}Step 4: Checking GCS service account key...${NC}"
 
 if [ -f "keys/gcs_service_account.json" ]; then
-    echo -e "  ${GREEN}✓${NC} GCS service account key found"
+    echo -e "  ${GREEN} ${NC} GCS service account key found"
 else
     echo -e "  ${YELLOW}!${NC} GCS service account key NOT found"
     echo ""
@@ -139,7 +139,7 @@ if grep -q "AIRFLOW_UID=" .env; then
 else
     echo "AIRFLOW_UID=$CURRENT_UID" >> .env
 fi
-echo -e "  ${GREEN}✓${NC} Set AIRFLOW_UID=$CURRENT_UID"
+echo -e "  ${GREEN} ${NC} Set AIRFLOW_UID=$CURRENT_UID"
 
 # ------------------------------------------------------------
 # Step 6: Build Docker Images
@@ -149,7 +149,7 @@ echo "  This may take several minutes on first run..."
 
 docker compose build --no-cache
 
-echo -e "  ${GREEN}✓${NC} Docker images built successfully"
+echo -e "  ${GREEN} ${NC} Docker images built successfully"
 
 # ------------------------------------------------------------
 # Step 7: Initialize Airflow Database
@@ -158,7 +158,7 @@ echo -e "\n${YELLOW}Step 7: Initializing Airflow...${NC}"
 
 docker compose up airflow-init
 
-echo -e "  ${GREEN}✓${NC} Airflow initialized"
+echo -e "  ${GREEN} ${NC} Airflow initialized"
 
 # ------------------------------------------------------------
 # Complete!

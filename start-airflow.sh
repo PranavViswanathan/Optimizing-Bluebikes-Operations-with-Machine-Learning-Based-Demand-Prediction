@@ -44,7 +44,7 @@ docker compose ps
 
 echo -e "\n${GREEN}"
 echo "============================================================"
-echo "   Services Started Successfully! 🚀"
+echo "   Services Started Successfully!  "
 echo "============================================================"
 echo -e "${NC}"
 echo ""

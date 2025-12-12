@@ -13,7 +13,9 @@ from typing import Dict, List, Optional
 from pathlib import Path
 import os
 import pandas as pd
-
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # =============================================================================
 # DATA SPLIT CONFIGURATION (Must match integrated_training_pipeline.py!)
@@ -264,7 +266,8 @@ class MonitoringConfig:
     alerts: AlertConfig = field(default_factory=AlertConfig)
     retraining: RetrainingConfig = field(default_factory=RetrainingConfig)
     schedule: ScheduleConfig = field(default_factory=ScheduleConfig)
-    
+    use_monthly_baselines: bool = True
+    min_samples_per_baseline: int = 500
     def to_dict(self) -> Dict:
         """Convert config to dictionary."""
         import dataclasses
@@ -377,8 +380,8 @@ if __name__ == "__main__":
     
     warnings = validate_config(config)
     if warnings:
-        print(f"\n⚠️  Warnings:")
+        print(f"\n   Warnings:")
         for w in warnings:
             print(f"  - {w}")
     else:
-        print(f"\n✓ Configuration valid")
+        print(f"\n  Configuration valid")

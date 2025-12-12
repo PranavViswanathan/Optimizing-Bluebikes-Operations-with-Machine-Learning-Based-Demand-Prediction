@@ -59,7 +59,7 @@ def time_based_split(df, date_col="hour_timestamp", cutoff="2025-03-01"):
 # Main training function
 # ---------------------------
 def train_model():
-    logger.info("🔹 Loading feature dataset...")
+    logger.info("  Loading feature dataset...")
     df = pd.read_pickle(INPUT_PICKLE)
 
     # Encode station_name as category codes
@@ -69,10 +69,10 @@ def train_model():
     # Drop NA rows that might exist due to lag features
     df = df.dropna(subset=["net_flow"]).copy()
 
-    logger.info("🔹 Adding rolling features...")
+    logger.info("Adding rolling features...")
     df = add_rolling_features(df)
 
-    logger.info("🔹 Splitting data by time...")
+    logger.info("Splitting data by time...")
     train_df, test_df = time_based_split(df)
 
     target = "net_flow"
@@ -90,7 +90,7 @@ def train_model():
     # ---------------------------
     # LightGBM Dataset + Training
     # ---------------------------
-    logger.info("🔹 Training LightGBM regression model...")
+    logger.info("Training LightGBM regression model...")
     train_data = lgb.Dataset(X_train, label=y_train)
     val_data = lgb.Dataset(X_test, label=y_test, reference=train_data)
 
@@ -126,22 +126,22 @@ def train_model():
     # ---------------------------
     # Evaluation
     # ---------------------------
-    logger.info("🔹 Evaluating model...")
+    logger.info("Evaluating model...")
     preds = model.predict(X_test, num_iteration=model.best_iteration_)
     mae = mean_absolute_error(y_test, preds)
     rmse = sqrt(mean_squared_error(y_test, preds))
     r2 = r2_score(y_test, preds)
 
-    logger.info(f"✅ MAE:  {mae:.3f}")
-    logger.info(f"✅ RMSE: {rmse:.3f}")
-    logger.info(f"✅ R²:   {r2:.3f}")
+    logger.info(f"MAE:  {mae:.3f}")
+    logger.info(f"RMSE: {rmse:.3f}")
+    logger.info(f"R²:   {r2:.3f}")
 
     # ---------------------------
     # Save Model
     # ---------------------------
     os.makedirs(Path(MODEL_OUTPUT).parent, exist_ok=True)
     joblib.dump(model, MODEL_OUTPUT)
-    logger.info(f"✅ Model saved to: {MODEL_OUTPUT}")
+    logger.info(f"Model saved to: {MODEL_OUTPUT}")
 
 
 if __name__ == "__main__":

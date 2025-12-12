@@ -189,7 +189,7 @@ const RebalancingView = () => {
 
             {recommendations.length === 0 ? (
                 <div className="no-recommendations">
-                    <h3>✅ All Stations Well Balanced!</h3>
+                    <h3> All Stations Well Balanced!</h3>
                     <p>No rebalancing needed at this time. All stations have adequate bikes for predicted demand.</p>
                 </div>
             ) : (

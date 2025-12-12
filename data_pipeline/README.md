@@ -465,7 +465,7 @@ cd data_pipeline
 docker compose exec airflow-scheduler bash
 
 # Check Python imports
-docker compose exec airflow-scheduler python -c "from scripts.discord_notifier import send_discord_alert; print('✓ Import successful')"
+docker compose exec airflow-scheduler python -c "from scripts.discord_notifier import send_discord_alert; print('  Import successful')"
 
 # Check environment variables
 docker compose exec airflow-scheduler env | grep DISCORD

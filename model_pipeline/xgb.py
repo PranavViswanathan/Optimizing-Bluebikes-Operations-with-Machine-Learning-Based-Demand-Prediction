@@ -11,7 +11,7 @@ warnings.filterwarnings("ignore")
 
 
 # ----------------------------
-# 🔹 Load preprocessed features
+# Load preprocessed features
 # ----------------------------
 features_path = "D:\\MLOps_Coursework\\ML-OPs\\data_pipeline\\data\\processed\\bluebikes\\features_full.pkl"
 df = pd.read_pickle(features_path)
@@ -22,7 +22,7 @@ print(f" Loaded features: {df.shape[0]} rows, {df.shape[1]} columns")
 df = df[df["ride_count"] > 0].copy()
 
 # ----------------------------
-# 🔹 Define target and features
+# Define target and features
 # ----------------------------
 target_col = "ride_count"
 
@@ -37,14 +37,14 @@ y = df[target_col]
 print(f" Using {len(feature_cols)} features for training")
 
 # ----------------------------
-# 🔹 Train/Test Split
+# Train/Test Split
 # ----------------------------
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42, shuffle=False
 )
 
 # ----------------------------
-# 🔹 Train XGBoost Regressor
+#  Train XGBoost Regressor
 # ----------------------------
 model = xgb.XGBRegressor(
     n_estimators=1200,
@@ -67,7 +67,7 @@ model.fit(
 )
 
 # ----------------------------
-# 🔹 Evaluate Model
+# Evaluate Model
 # ----------------------------
 y_pred = model.predict(X_test)
 
@@ -81,7 +81,7 @@ print(f"MAE : {mae:.3f}")
 print(f"R²  : {r2:.3f}")
 
 # ----------------------------
-# 🔹 Feature Importance
+# Feature Importance
 # ----------------------------
 plt.figure(figsize=(10, 6))
 xgb.plot_importance(model, importance_type="gain", max_num_features=20)
@@ -90,7 +90,7 @@ plt.tight_layout()
 plt.show()
 
 # ----------------------------
-# 🔹 Actual vs Predicted Plot
+# Actual vs Predicted Plot
 # ----------------------------
 plt.figure(figsize=(7, 6))
 sns.scatterplot(x=y_test, y=y_pred, alpha=0.5)
@@ -102,7 +102,7 @@ plt.tight_layout()
 plt.show()
 
 # ----------------------------
-# 🔹 Save Model
+# Save Model
 # ----------------------------
 model_path_json = "D:\\MLOps_Coursework\\ML-OPs\\model_pipeline\\models\\xgb_bluebikes_demand.json"
 model_path_pkl = "D:\\MLOps_Coursework\\ML-OPs\\model_pipeline\\models\\xgb_bluebikes_demand.pkl"

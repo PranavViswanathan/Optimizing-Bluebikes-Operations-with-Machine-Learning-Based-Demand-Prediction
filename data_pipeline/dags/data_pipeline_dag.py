@@ -268,7 +268,7 @@ def final_status_check(**context):
     
     for dataset in ["bluebikes", "NOAA_weather"]:
         has_data = dm.has_processed_data(dataset)
-        status = "✓ Ready" if has_data else "✗ Missing"
+        status = "  Ready" if has_data else "✗ Missing"
         print(f"{dataset}: {status}")
         
         if not has_data:
@@ -282,281 +282,107 @@ def final_status_check(**context):
     return all_ready
 
 def upload_data_to_gcs(**context):
-    """
-    Upload processed data folder to GCS bucket.
-    
-    This function uploads the entire data folder (raw and processed)
-    to Google Cloud Storage, excluding:
-    - DVC files (.dvc, .dvcignore)
-    - Temp folders
-    - __pycache__ directories
-    - .gitignore files
-    
-    IMPORTANT: Large files (>50MB) use resumable uploads to handle
-    network timeouts gracefully.
-    """
     from google.cloud import storage
     from pathlib import Path
     import json
     
-    log.info("="*60)
-    log.info("UPLOADING DATA TO GOOGLE CLOUD STORAGE")
-    log.info("="*60)
+    LARGE_FILE_THRESHOLD = 50 * 1024 * 1024
+    MAX_FILE_SIZE = 500 * 1024 * 1024
+    UPLOAD_TIMEOUT = 600
     
-    # ===========================================
-    # CONFIGURATION - Adjust these as needed
-    # ===========================================
+    PRIORITY_FILES = {"after_duplicates.pkl", "after_missing_data.pkl", "raw_data.pkl"}
+    PRIORITY_PATTERNS = ["after_duplicates.pkl", "_metadata.json"]
     
-    # Files larger than this will use resumable upload (in bytes)
-    LARGE_FILE_THRESHOLD = 50 * 1024 * 1024  # 50 MB
+    EXCLUDE_PATTERNS = {'.dvc', '.dvcignore', 'dvc.lock', 'dvc.yaml', 'temp', 'tmp', '__pycache__', '.cache', '.gitignore', '.git'}
+    EXCLUDE_EXTENSIONS = {'.dvc', '.pyc', '.pyo'}
     
-    # Maximum file size to upload (skip files larger than this)
-    # Set to None to upload all files regardless of size
-    MAX_FILE_SIZE = 500 * 1024 * 1024  # 500 MB (set to None to disable)
+    def is_priority(path):
+        name = path.name
+        return name in PRIORITY_FILES or any(p in name for p in PRIORITY_PATTERNS)
     
-    # Timeout for uploads (in seconds)
-    UPLOAD_TIMEOUT = 600  # 10 minutes for large files
+    def should_exclude(path):
+        if any(part in EXCLUDE_PATTERNS or part.startswith('.') for part in path.parts):
+            return True
+        return path.suffix in EXCLUDE_EXTENSIONS
     
-    # Get GCS configuration from environment
+    def upload_large(bucket, blob_path, file_path, size):
+        blob = bucket.blob(blob_path)
+        blob.chunk_size = 10 * 1024 * 1024
+        try:
+            blob.upload_from_filename(str(file_path), timeout=UPLOAD_TIMEOUT)
+            return True
+        except Exception as e:
+            log.error(f"Failed resumable upload {file_path.name}: {e}")
+            return False
+    
     bucket_name = os.environ.get("GCS_MODEL_BUCKET")
     prefix = os.environ.get("GCS_DATA_PREFIX", "data")
     
     if not bucket_name:
-        log.warning("GCS_MODEL_BUCKET not set, skipping data upload")
-        return {
-            'uploaded': False, 
-            'reason': 'GCS_MODEL_BUCKET environment variable not set'
-        }
+        log.warning("GCS_MODEL_BUCKET not set, skipping upload")
+        return {'uploaded': False, 'reason': 'GCS_MODEL_BUCKET not set'}
     
-    # Define the local data directory
     data_dir = Path("/opt/airflow/data")
-    
     if not data_dir.exists():
-        log.error(f"Data directory not found: {data_dir}")
         return {'uploaded': False, 'reason': 'Data directory not found'}
     
-    # Define patterns/folders to exclude
-    EXCLUDE_PATTERNS = {
-        # DVC related files
-        '.dvc',
-        '.dvcignore',
-        'dvc.lock',
-        'dvc.yaml',
-        # Temp and cache
-        'temp',
-        'tmp',
-        '__pycache__',
-        '.cache',
-        # Git related
-        '.gitignore',
-        '.git',
-    }
+    client = storage.Client()
+    bucket = client.bucket(bucket_name)
     
-    EXCLUDE_EXTENSIONS = {
-        '.dvc',
-        '.pyc',
-        '.pyo',
-    }
+    uploaded, skipped, failed = [], [], []
+    total_bytes = 0
     
-    def should_exclude(file_path: Path) -> bool:
-        """Check if a file or directory should be excluded from upload."""
-        for part in file_path.parts:
-            if part in EXCLUDE_PATTERNS:
-                return True
-            if part.startswith('.') and part not in ['.']:
-                return True
-        
-        if file_path.suffix in EXCLUDE_EXTENSIONS:
-            return True
-        
-        return False
+    all_files = [f for f in data_dir.rglob('*') if f.is_file() and not should_exclude(f)]
+    log.info(f"Found {len(all_files)} files to upload to gs://{bucket_name}/{prefix}/")
     
-    def upload_large_file_resumable(bucket, blob_path, file_path, file_size):
-        """
-        Upload large files using resumable upload.
+    for idx, file_path in enumerate(all_files, 1):
+        relative_path = file_path.relative_to(data_dir)
+        blob_path = f"{prefix}/{relative_path}"
+        size = file_path.stat().st_size
+        priority = is_priority(file_path)
         
-        Resumable uploads can handle network interruptions and timeouts
-        by uploading in chunks and resuming from where they left off.
-        """
-        blob = bucket.blob(blob_path)
-        
-        # Configure for large file upload
-        blob.chunk_size = 10 * 1024 * 1024  # 10 MB chunks
-        
-        log.info(f"  Starting resumable upload: {file_path.name} ({file_size / (1024*1024):.1f} MB)")
+        if MAX_FILE_SIZE and size > MAX_FILE_SIZE and not priority:
+            skipped.append({'path': str(relative_path), 'reason': 'too_large', 'size_mb': size / (1024*1024)})
+            continue
         
         try:
-            # Use resumable upload with timeout
-            blob.upload_from_filename(
-                str(file_path),
-                timeout=UPLOAD_TIMEOUT,
-            )
-            log.info(f"  Completed: {file_path.name}")
-            return True
+            if size > LARGE_FILE_THRESHOLD:
+                if not upload_large(bucket, blob_path, file_path, size):
+                    failed.append({'path': str(relative_path), 'priority': priority})
+                    continue
+            else:
+                bucket.blob(blob_path).upload_from_filename(str(file_path), timeout=120)
             
+            uploaded.append({'path': str(relative_path), 'size': size, 'priority': priority})
+            total_bytes += size
+            
+            if idx % 20 == 0:
+                log.info(f"Progress: {idx}/{len(all_files)}")
         except Exception as e:
-            log.error(f"  Failed resumable upload for {file_path.name}: {e}")
-            return False
+            log.error(f"Failed {relative_path}: {e}")
+            failed.append({'path': str(relative_path), 'priority': priority})
     
-    try:
-        # Initialize GCS client
-        client = storage.Client()
-        bucket = client.bucket(bucket_name)
-        
-        # Track upload statistics
-        uploaded_files = []
-        skipped_files = []
-        failed_files = []
-        total_bytes = 0
-        
-        execution_date = context['ds_nodash']
-        
-        log.info(f"Scanning data directory: {data_dir}")
-        log.info(f"Target bucket: gs://{bucket_name}/{prefix}/")
-        log.info(f"Large file threshold: {LARGE_FILE_THRESHOLD / (1024*1024):.0f} MB")
-        if MAX_FILE_SIZE:
-            log.info(f"Max file size: {MAX_FILE_SIZE / (1024*1024):.0f} MB")
-        log.info(f"Excluding patterns: {EXCLUDE_PATTERNS}")
-        
-        # Collect all files first to show progress
-        all_files = []
-        for file_path in data_dir.rglob('*'):
-            if file_path.is_dir():
-                continue
-            if should_exclude(file_path):
-                skipped_files.append({'path': str(file_path), 'reason': 'excluded_pattern'})
-                continue
-            all_files.append(file_path)
-        
-        log.info(f"Found {len(all_files)} files to upload")
-        
-        # Upload files
-        for idx, file_path in enumerate(all_files, 1):
-            relative_path = file_path.relative_to(data_dir)
-            blob_path = f"{prefix}/{relative_path}"
-            file_size = file_path.stat().st_size
-            
-            # Check if file is too large
-            if MAX_FILE_SIZE and file_size > MAX_FILE_SIZE:
-                log.warning(f"  Skipping (too large): {relative_path} ({file_size / (1024*1024):.1f} MB)")
-                skipped_files.append({
-                    'path': str(relative_path),
-                    'reason': 'exceeds_max_size',
-                    'size_mb': round(file_size / (1024*1024), 2)
-                })
-                continue
-            
-            try:
-                # Use resumable upload for large files
-                if file_size > LARGE_FILE_THRESHOLD:
-                    success = upload_large_file_resumable(bucket, blob_path, file_path, file_size)
-                    if not success:
-                        failed_files.append({
-                            'path': str(relative_path),
-                            'size_mb': round(file_size / (1024*1024), 2)
-                        })
-                        continue
-                else:
-                    # Regular upload for smaller files
-                    blob = bucket.blob(blob_path)
-                    blob.upload_from_filename(str(file_path), timeout=120)
-                
-                uploaded_files.append({
-                    'local_path': str(relative_path),
-                    'gcs_path': blob_path,
-                    'size_bytes': file_size
-                })
-                total_bytes += file_size
-                
-                # Progress logging every 10 files or for large files
-                if idx % 10 == 0 or file_size > LARGE_FILE_THRESHOLD:
-                    log.info(f"  Progress: {idx}/{len(all_files)} files uploaded")
-                    
-            except Exception as e:
-                log.error(f"  Failed to upload {relative_path}: {e}")
-                failed_files.append({
-                    'path': str(relative_path),
-                    'error': str(e),
-                    'size_mb': round(file_size / (1024*1024), 2)
-                })
-        
-        # Create and upload manifest
-        manifest = {
-            'upload_date': context['ds'],
-            'upload_timestamp': datetime.now().isoformat(),
-            'execution_date': execution_date,
-            'airflow_run_id': context['run_id'],
-            'total_files_uploaded': len(uploaded_files),
-            'total_files_skipped': len(skipped_files),
-            'total_files_failed': len(failed_files),
-            'total_bytes': total_bytes,
-            'total_mb': round(total_bytes / (1024 * 1024), 2),
-            'uploaded_files': [f['local_path'] for f in uploaded_files],
-            'skipped_files': skipped_files,
-            'failed_files': failed_files,
-        }
-        
-        manifest_blob_path = f"{prefix}/manifests/data_manifest_{execution_date}.json"
-        manifest_blob = bucket.blob(manifest_blob_path)
-        manifest_blob.upload_from_string(
-            json.dumps(manifest, indent=2),
-            content_type='application/json'
-        )
-        
-        # Update latest manifest
-        latest_manifest_path = f"{prefix}/manifests/latest_manifest.json"
-        latest_blob = bucket.blob(latest_manifest_path)
-        latest_blob.upload_from_string(
-            json.dumps(manifest, indent=2),
-            content_type='application/json'
-        )
-        
-        # Log summary
-        log.info("="*60)
-        log.info("UPLOAD COMPLETE")
-        log.info("="*60)
-        log.info(f"Files uploaded: {len(uploaded_files)}")
-        log.info(f"Files skipped: {len(skipped_files)}")
-        log.info(f"Files failed: {len(failed_files)}")
-        log.info(f"Total size uploaded: {total_bytes / (1024*1024):.2f} MB")
-        log.info(f"Manifest: gs://{bucket_name}/{manifest_blob_path}")
-        
-        if failed_files:
-            log.warning("Failed files:")
-            for f in failed_files:
-                log.warning(f"  - {f['path']} ({f.get('size_mb', '?')} MB)")
-        
-        # Push results to XCom
-        context['task_instance'].xcom_push(key='gcs_upload_result', value={
-            'uploaded': True,
-            'bucket': bucket_name,
-            'prefix': prefix,
-            'files_count': len(uploaded_files),
-            'failed_count': len(failed_files),
-            'total_mb': round(total_bytes / (1024 * 1024), 2),
-            'manifest_path': manifest_blob_path
-        })
-        
-        return {
-            'uploaded': True,
-            'bucket': bucket_name,
-            'prefix': prefix,
-            'files_count': len(uploaded_files),
-            'skipped_count': len(skipped_files),
-            'failed_count': len(failed_files),
-            'total_bytes': total_bytes,
-            'manifest_path': manifest_blob_path
-        }
-        
-    except Exception as e:
-        log.error(f"Failed to upload data to GCS: {e}")
-        import traceback
-        traceback.print_exc()
-        
-        return {
-            'uploaded': False,
-            'error': str(e)
-        }
+    manifest = {
+        'upload_date': context['ds'],
+        'timestamp': datetime.now().isoformat(),
+        'run_id': context['run_id'],
+        'files_uploaded': len(uploaded),
+        'files_skipped': len(skipped),
+        'files_failed': len(failed),
+        'total_mb': round(total_bytes / (1024 * 1024), 2),
+    }
+    
+    manifest_path = f"{prefix}/manifests/data_manifest_{context['ds_nodash']}.json"
+    bucket.blob(manifest_path).upload_from_string(json.dumps(manifest, indent=2), content_type='application/json')
+    bucket.blob(f"{prefix}/manifests/latest_manifest.json").upload_from_string(json.dumps(manifest, indent=2), content_type='application/json')
+    
+    log.info(f"Upload complete: {len(uploaded)} uploaded, {len(skipped)} skipped, {len(failed)} failed, {total_bytes/(1024*1024):.1f} MB total")
+    
+    priority_failed = [f for f in failed if f.get('priority')]
+    if priority_failed:
+        log.error(f"PRIORITY FILES FAILED: {[f['path'] for f in priority_failed]}")
+    
+    return {'uploaded': True, 'files_count': len(uploaded), 'failed_count': len(failed), 'total_mb': total_bytes/(1024*1024)}
 
 def should_run_drift_monitoring(**context):
     """
@@ -662,7 +488,7 @@ with DAG(
     # If data changed: trigger the drift monitoring DAG
     trigger_drift = TriggerDagRunOperator(
         task_id="trigger_drift_monitoring",
-        trigger_dag_id="drift_monitoring_dag",  # change if your drift DAG has a different dag_id
+        trigger_dag_id="drift_monitoring_dag",  
         reset_dag_run=True,
         wait_for_completion=False,
     )

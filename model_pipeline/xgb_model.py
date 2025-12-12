@@ -58,16 +58,16 @@ def time_based_split(df, date_col="hour_timestamp", cutoff="2025-03-01"):
 # Main training function
 # ---------------------------
 def train_model():
-    logger.info("🔹 Loading feature dataset...")
+    logger.info("Loading feature dataset...")
     df = pd.read_pickle(INPUT_PICKLE)
 
     # Drop NA rows that might exist
     df = df.dropna(subset=["trips_started"]).copy()
 
-    logger.info("🔹 Adding rolling features...")
+    logger.info("Adding rolling features...")
     df = add_rolling_features(df, target_cols=["trips_started"])
 
-    logger.info("🔹 Splitting data by time...")
+    logger.info("Splitting data by time...")
     train_df, test_df = time_based_split(df)
 
     target = "trips_started"
@@ -94,7 +94,7 @@ def train_model():
     # ---------------------------
     # XGBoost Model
     # ---------------------------
-    logger.info("🔹 Training XGBoost regression model...")
+    logger.info("Training XGBoost regression model...")
 
     params = {
         "objective": "reg:squarederror",
@@ -123,7 +123,7 @@ def train_model():
     # ---------------------------
     # Evaluation
     # ---------------------------
-    logger.info("🔹 Evaluating model...")
+    logger.info("Evaluating model...")
     preds = model.predict(dtest)
 
     mae = mean_absolute_error(y_test, preds)
