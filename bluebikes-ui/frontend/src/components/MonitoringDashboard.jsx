@@ -11,7 +11,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import '../styles/MonitoringDashboard.css';
 
 // Cloud Run API base URL
-const API_BASE = process.env.REACT_APP_API_URL || 'https://bluebikes-prediction-202855070348.us-central1.run.app';
+// const API_BASE = process.env.REACT_APP_API_URL || 'https://bluebikes-prediction-202855070348.us-central1.run.app';
+const API_BASE = process.env.REACT_APP_MONITORING_URL || 'https://bluebikes-prediction-202855070348.us-central1.run.app';
 
 // Status badge component
 const StatusBadge = ({ status }) => {
@@ -69,47 +70,69 @@ const MonitoringDashboard = () => {
 
   // Fetch monitoring status
   const fetchStatus = useCallback(async () => {
-    try {
-      const response = await fetch(`${API_BASE}/monitoring/api/status`);
-      if (!response.ok) throw new Error('Failed to fetch status');
-      const data = await response.json();
-      setStatus(data);
-      return data;
-    } catch (err) {
-      console.error('Error fetching status:', err);
-      setError(err.message);
-      return null;
-    }
-  }, []);
+  try {
+    const timestamp = Date.now();
+    const response = await fetch(
+      `${API_BASE}/monitoring/api/status?_t=${timestamp}`,
+      {
+        cache: 'no-store',  // Tell browser not to cache
+        headers: {
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache'
+        }
+      }
+    );
+    if (!response.ok) throw new Error('Failed to fetch status');
+    const data = await response.json();
+    setStatus(data);
+    return data;
+  } catch (err) {
+    console.error('Error fetching status:', err);
+    setError(err.message);
+    return null;
+  }
+}, []);
 
   // Fetch history
   const fetchHistory = useCallback(async () => {
-    try {
-      const response = await fetch(`${API_BASE}/monitoring/api/history?limit=14`);
-      if (!response.ok) throw new Error('Failed to fetch history');
-      const data = await response.json();
-      setHistory(data);
-    } catch (err) {
-      console.error('Error fetching history:', err);
-    }
-  }, []);
+  try {
+    const timestamp = Date.now();
+    const response = await fetch(
+      `${API_BASE}/monitoring/api/history?limit=14&_t=${timestamp}`,
+      { cache: 'no-store' }
+    );
+    if (!response.ok) throw new Error('Failed to fetch history');
+    const data = await response.json();
+    setHistory(data);
+  } catch (err) {
+    console.error('Error fetching history:', err);
+  }
+}, []);
 
   // Fetch feature drift details
   const fetchFeatures = useCallback(async (date) => {
-    try {
-      const response = await fetch(`${API_BASE}/monitoring/api/features/${date}`);
-      if (!response.ok) throw new Error('Failed to fetch features');
-      const data = await response.json();
-      setFeatures(data);
-    } catch (err) {
-      console.error('Error fetching features:', err);
-    }
-  }, []);
+  try {
+    const timestamp = Date.now();
+    const response = await fetch(
+      `${API_BASE}/monitoring/api/features/${date}?_t=${timestamp}`,
+      { cache: 'no-store' }
+    );
+    if (!response.ok) throw new Error('Failed to fetch features');
+    const data = await response.json();
+    setFeatures(data);
+  } catch (err) {
+    console.error('Error fetching features:', err);
+  }
+}, []);
 
   // Fetch baseline info
   const fetchBaseline = useCallback(async () => {
     try {
-      const response = await fetch(`${API_BASE}/monitoring/api/baseline`);
+      const timestamp = Date.now();
+      const response = await fetch(
+        `${API_BASE}/monitoring/api/baseline?_t=${timestamp}`,
+        { cache: 'no-store' }
+      );
       if (!response.ok) throw new Error('Failed to fetch baseline');
       const data = await response.json();
       setBaseline(data);
@@ -117,8 +140,6 @@ const MonitoringDashboard = () => {
       console.error('Error fetching baseline:', err);
     }
   }, []);
-
-  // Initial load
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);

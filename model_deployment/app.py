@@ -31,10 +31,10 @@ CORS(app, resources={
             "http://34.110.183.151",
             "http://localhost:3000",
             "http://localhost:5173",
-            "*"  # Allow all origins for development
+            "*"
         ],
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization", "X-Auth-Token"]
+        "allow_headers": ["Content-Type", "Authorization", "Cache-Control", "Pragma"]  # ADD Cache-Control and Pragma
     }
 })
 # Configuration from environment variables

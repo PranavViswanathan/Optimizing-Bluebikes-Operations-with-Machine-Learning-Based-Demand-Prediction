@@ -23,6 +23,48 @@
       },
       "status": "production",
       "bias_mitigated": true
+    },
+    {
+      "version": 2,
+      "model_type": "xgboost",
+      "created_date": "2025-12-12",
+      "promotion_reason": "Performance/bias improvement below thresholds",
+      "file_path": "/opt/airflow/models/versions/model_v2_20251212_bias_mitigated.pkl",
+      "metrics": {
+        "test_r2": 0.9342955350875854,
+        "test_mae": 80.28433990478516,
+        "test_rmse": 127.39736218079635,
+        "r2_improvement": -0.0007500052452087402,
+        "mae_improvement": 0.8407058715820312
+      },
+      "bias_metrics": {
+        "baseline_issues": 6,
+        "mitigated_issues": 6,
+        "issues_reduced": 0
+      },
+      "status": "staging",
+      "bias_mitigated": true
+    },
+    {
+      "version": 3,
+      "model_type": "xgboost",
+      "created_date": "2025-12-12",
+      "promotion_reason": "Performance/bias improvement below thresholds",
+      "file_path": "/opt/airflow/models/versions/model_v3_20251212_bias_mitigated.pkl",
+      "metrics": {
+        "test_r2": 0.9342955350875854,
+        "test_mae": 80.28433990478516,
+        "test_rmse": 127.39736218079635,
+        "r2_improvement": -0.0007500052452087402,
+        "mae_improvement": 0.8407058715820312
+      },
+      "bias_metrics": {
+        "baseline_issues": 6,
+        "mitigated_issues": 6,
+        "issues_reduced": 0
+      },
+      "status": "staging",
+      "bias_mitigated": true
     }
   ],
   "current_production": 1
