@@ -19,7 +19,7 @@ const AdminLogin = () => {
     return (
         <div className="admin-login-container">
             <div className="admin-login-card glass-card">
-                <h2>🔐 Admin Access</h2>
+                <h2> Admin Access</h2>
                 <form onSubmit={handleLogin}>
                     <div className="form-group">
                         <input

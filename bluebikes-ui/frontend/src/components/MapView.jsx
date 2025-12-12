@@ -169,7 +169,7 @@ const MapView = () => {
     if (error) {
         return (
             <div className="error-container">
-                <h2>⚠️ Error</h2>
+                <h2> Error</h2>
                 <p>{error}</p>
                 <p className="error-hint">
                     Make sure the backend server is running on <code>http://localhost:5000</code>
@@ -309,7 +309,7 @@ const MapView = () => {
             {userLocation && nearestStations.length > 0 && (
                 <div className="nearest-stations-section">
                     <h3 className="nearest-title">
-                        📍 Nearest Stations to You
+                         Nearest Stations to You
                     </h3>
                     <div className="nearest-stations-grid">
                         {nearestStations.map((station) => {

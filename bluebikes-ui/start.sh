@@ -86,4 +86,4 @@ sleep 3
 open http://localhost:3000
 
 echo ""
-echo "✨ Bluebikes UI is ready!"
+echo "Bluebikes UI is ready!"

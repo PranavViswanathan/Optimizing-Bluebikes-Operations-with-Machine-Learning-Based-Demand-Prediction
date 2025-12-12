@@ -335,14 +335,14 @@ def health():
     })
 
 if __name__ == '__main__':
-    logger.info("🕐 Starting Historical Data Service...")
-    logger.info(f"📂 Data path: {DATA_PATH}")
+    logger.info("Starting Historical Data Service...")
+    logger.info(f"Data path: {DATA_PATH}")
     
     # Preload data on startup
     logger.info("Preloading trip data...")
     load_trip_data()
     
-    logger.info(f"🚀 Historical Data Service running on port {PORT}")
+    logger.info(f"Historical Data Service running on port {PORT}")
     logger.info(f"\nAvailable endpoints:")
     logger.info(f"  GET  /api/historical/:station_id/hourly")
     logger.info(f"  GET  /api/historical/:station_id/daily")

@@ -76,7 +76,7 @@ const StationDetail = () => {
             <div className="detail-grid">
                 {/* Station Info Card */}
                 <div className="detail-card">
-                    <h3>📍 Station Information</h3>
+                    <h3>Station Information</h3>
                     <div className="detail-item">
                         <span className="label">Station ID:</span>
                         <span className="value">{station.station_id}</span>
@@ -99,7 +99,7 @@ const StationDetail = () => {
 
                 {/* Real-time Status Card */}
                 <div className="detail-card highlight">
-                    <h3>⚡ Real-time Status</h3>
+                    <h3>Real-time Status</h3>
                     {status ? (
                         <>
                             <div className="detail-item large">
@@ -109,16 +109,16 @@ const StationDetail = () => {
                                 </span>
                             </div>
                             <div className="detail-item large">
-                                <span className="label">🅿️ Available Docks:</span>
+                                <span className="label"> Available Docks:</span>
                                 <span className="value">{docksAvailable}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="label">Is Renting:</span>
-                                <span className="value">{status.is_renting ? '✅ Yes' : '❌ No'}</span>
+                                <span className="value">{status.is_renting ? ' Yes' : ' No'}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="label">Is Returning:</span>
-                                <span className="value">{status.is_returning ? '✅ Yes' : '❌ No'}</span>
+                                <span className="value">{status.is_returning ? ' Yes' : ' No'}</span>
                             </div>
                             <div className="detail-item">
                                 <span className="label">Last Reported:</span>
@@ -136,7 +136,7 @@ const StationDetail = () => {
 
                 {/* ML Prediction Card */}
                 <div className="detail-card prediction-card">
-                    <h3>🔮 ML Demand Prediction</h3>
+                    <h3>ML Demand Prediction</h3>
                     {prediction && prediction.predicted_demand !== null ? (
                         <>
                             <div className="prediction-display">
@@ -159,7 +159,7 @@ const StationDetail = () => {
                             </div>
                             {prediction.model_status === 'mock' && (
                                 <div className="warning-box">
-                                    <p>⚠️ Using mock predictions (ML model not loaded)</p>
+                                    <p>Using mock predictions (ML model not loaded)</p>
                                     <p className="small-text">Place trained model at backend/models/best_model.pkl</p>
                                 </div>
                             )}
@@ -182,7 +182,7 @@ const StationDetail = () => {
 
                 {/* Availability Indicator */}
                 <div className="detail-card availability-indicator">
-                    <h3>📊 Availability Status</h3>
+                    <h3>Availability Status</h3>
                     <div className="availability-visualization">
                         {status && (
                             <>

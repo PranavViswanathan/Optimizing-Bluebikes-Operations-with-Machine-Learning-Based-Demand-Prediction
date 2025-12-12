@@ -24,7 +24,7 @@ def quick_preprocess(filepath, sample_size=50000, top_n_stations=10):
     print("="*50)
     
     # Load sample of data
-    print(f"\n📂 Loading {sample_size:,} random rows...")
+    print(f"\nLoading {sample_size:,} random rows...")
     
     # First, get total rows to sample properly
     total_rows = sum(1 for line in open(filepath)) - 1
@@ -41,12 +41,12 @@ def quick_preprocess(filepath, sample_size=50000, top_n_stations=10):
     print(f"✓ Loaded {len(df):,} rows")
     
     # Convert datetime columns
-    print("\n⏰ Converting datetime columns...")
+    print("\nConverting datetime columns...")
     df['starttime'] = pd.to_datetime(df['starttime'])
     df['stoptime'] = pd.to_datetime(df['stoptime'])
     
     # Filter to top stations only (for faster processing)
-    print(f"\n🎯 Filtering to top {top_n_stations} stations...")
+    print(f"\nFiltering to top {top_n_stations} stations...")
     top_start_stations = df['start_station_id'].value_counts().head(top_n_stations).index
     df_filtered = df[df['start_station_id'].isin(top_start_stations)]
     print(f"✓ Reduced to {len(df_filtered):,} trips from top stations")
@@ -70,7 +70,7 @@ def create_station_demand_features(df):
     df['month'] = df['starttime'].dt.month
     
     # Create hourly demand aggregation
-    print("\n📊 Aggregating to hourly station demand...")
+    print("\nAggregating to hourly station demand...")
     
     hourly_demand = df.groupby(['start_station_id', 'start_station_name', 
                                 'date', 'hour', 'day_of_week', 
@@ -88,7 +88,7 @@ def create_station_demand_features(df):
     print(f"✓ Created {len(hourly_demand):,} station-hour records")
     
     # Create lag features (previous hours' demand)
-    print("\n🔄 Creating lag features...")
+    print("\nCreating lag features...")
     
     for lag in [1, 2, 3, 24]:  # 1hr, 2hr, 3hr, and same hour yesterday
         hourly_demand[f'departures_lag_{lag}h'] = \
@@ -159,7 +159,7 @@ def prepare_model_data(hourly_demand):
                                     drop_first=True)
     X = pd.concat([X, station_dummies], axis=1)
     
-    print(f"\n📊 Feature Matrix:")
+    print(f"\nFeature Matrix:")
     print(f"   Shape: {X.shape}")
     print(f"   Features: {X.shape[1]}")
     print(f"   Samples: {X.shape[0]}")
@@ -173,7 +173,7 @@ def prepare_model_data(hourly_demand):
     y_train = y[:split_index]
     y_test = y[split_index:]
     
-    print(f"\n📂 Train/Test Split:")
+    print(f"\nTrain/Test Split:")
     print(f"   Training samples: {len(X_train):,}")
     print(f"   Testing samples: {len(X_test):,}")
     
@@ -196,7 +196,7 @@ def train_quick_model(X_train, X_test, y_train, y_test):
     print("TRAINING MODEL")
     print("="*50)
     
-    print("\n🌲 Training Random Forest...")
+    print("\nTraining Random Forest...")
     print("   (Using small parameters for speed)")
     
     # Simple Random Forest with small parameters for speed
@@ -216,7 +216,7 @@ def train_quick_model(X_train, X_test, y_train, y_test):
     y_pred_test = model.predict(X_test)
     
     # Calculate metrics
-    print("\n📈 Model Performance:")
+    print("\nModel Performance:")
     print("\nTraining Set:")
     print(f"   MAE: {mean_absolute_error(y_train, y_pred_train):.2f} bikes")
     print(f"   RMSE: {np.sqrt(mean_squared_error(y_train, y_pred_train)):.2f} bikes")
@@ -237,7 +237,7 @@ def train_quick_model(X_train, X_test, y_train, y_test):
         'importance': model.feature_importances_
     }).sort_values('importance', ascending=False)
     
-    print("\n🎯 Top 10 Most Important Features:")
+    print("\nTop 10 Most Important Features:")
     for idx, row in feature_importance.head(10).iterrows():
         print(f"   {row['feature']:30s}: {row['importance']:.4f}")
     
@@ -259,7 +259,7 @@ def analyze_predictions(y_test, y_pred_test, metadata):
     test_results['abs_error'] = abs(test_results['error'])
     
     # Best predictions
-    print("\n✅ Best Predictions (Lowest Error):")
+    print("\n Best Predictions (Lowest Error):")
     best = test_results.nsmallest(5, 'abs_error')
     for _, row in best.iterrows():
         print(f"   Station: {row['start_station_name'][:30]:30s} | "
@@ -269,7 +269,7 @@ def analyze_predictions(y_test, y_pred_test, metadata):
               f"Error: {row['error']:+.1f}")
     
     # Worst predictions
-    print("\n❌ Worst Predictions (Highest Error):")
+    print("\nWorst Predictions (Highest Error):")
     worst = test_results.nlargest(5, 'abs_error')
     for _, row in worst.iterrows():
         print(f"   Station: {row['start_station_name'][:30]:30s} | "
@@ -279,7 +279,7 @@ def analyze_predictions(y_test, y_pred_test, metadata):
               f"Error: {row['error']:+.1f}")
     
     # Performance by station
-    print("\n📊 Performance by Station:")
+    print("\nPerformance by Station:")
     station_performance = test_results.groupby('start_station_name')['abs_error'].agg(['mean', 'std']).sort_values('mean')
     print("\nBest Performing Stations:")
     for station, row in station_performance.head(3).iterrows():
@@ -287,7 +287,7 @@ def analyze_predictions(y_test, y_pred_test, metadata):
     
     # Performance by hour
     hourly_performance = test_results.groupby('hour')['abs_error'].mean().sort_values()
-    print("\n⏰ Best Predicted Hours:")
+    print("\nBest Predicted Hours:")
     for hour, error in hourly_performance.head(3).items():
         print(f"   {hour:02d}:00 - MAE: {error:.2f} bikes")
     
@@ -322,9 +322,9 @@ def run_quick_model(filepath):
     results = analyze_predictions(y_test, y_pred_test, metadata)
     
     print("\n" + "="*50)
-    print("✅ MODEL COMPLETE!")
+    print("MODEL COMPLETE!")
     print("="*50)
-    print("\n💡 Next Steps:")
+    print("\nNext Steps:")
     print("   1. Try with more data (increase sample_size)")
     print("   2. Add weather features")
     print("   3. Try different algorithms (XGBoost, LSTM)")
@@ -349,4 +349,4 @@ if __name__ == "__main__":
     # import joblib
     # joblib.dump(model, 'bluebikes_demand_model.pkl')
     
-    print("\n🎉 Done! Model trained successfully.")
+    print("\nDone! Model trained successfully.")

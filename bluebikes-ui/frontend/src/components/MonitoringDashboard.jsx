@@ -224,7 +224,7 @@ const MonitoringDashboard = () => {
       {/* Demo Mode Notice */}
       {status?.context?.demo_mode && (
         <div className="demo-notice">
-          ⚠️ Demo Mode: Comparing test data against training baseline
+           Demo Mode: Comparing test data against training baseline
           {status?.context?.drift_injected && ' (Artificial drift injected)'}
         </div>
       )}
@@ -315,7 +315,7 @@ const MonitoringDashboard = () => {
                 rel="noopener noreferrer"
                 className="btn-primary"
               >
-                📊 View Full Evidently Report
+                 View Full Evidently Report
               </a>
             </div>
           </div>

@@ -69,7 +69,7 @@ const StationList = () => {
     if (error) {
         return (
             <div className="error-container">
-                <h2>⚠️ Error</h2>
+                <h2> Error</h2>
                 <p>{error}</p>
             </div>
         );
@@ -81,7 +81,7 @@ const StationList = () => {
                 <h2>All Bluebikes Stations ({stations.length})</h2>
                 <input
                     type="text"
-                    placeholder="🔍 Search stations..."
+                    placeholder="Search stations..."
                     className="search-input"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
