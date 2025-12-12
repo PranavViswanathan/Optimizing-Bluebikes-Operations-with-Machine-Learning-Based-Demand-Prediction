@@ -5,7 +5,7 @@
 
 ![bluebikes-prediction-ui](assets/image.png)
 
-![architecture](<assests/architecture.png>)
+![architecture](<assets/architecture.png>)
 
 ## About
 
