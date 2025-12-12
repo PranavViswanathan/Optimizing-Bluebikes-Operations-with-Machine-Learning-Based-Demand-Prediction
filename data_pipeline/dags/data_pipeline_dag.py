@@ -268,7 +268,7 @@ def final_status_check(**context):
     
     for dataset in ["bluebikes", "NOAA_weather"]:
         has_data = dm.has_processed_data(dataset)
-        status = "✓ Ready" if has_data else "✗ Missing"
+        status = "  Ready" if has_data else "✗ Missing"
         print(f"{dataset}: {status}")
         
         if not has_data:

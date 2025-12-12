@@ -377,8 +377,8 @@ if __name__ == "__main__":
     
     warnings = validate_config(config)
     if warnings:
-        print(f"\n⚠️  Warnings:")
+        print(f"\n   Warnings:")
         for w in warnings:
             print(f"  - {w}")
     else:
-        print(f"\n✓ Configuration valid")
+        print(f"\n  Configuration valid")

@@ -15,18 +15,18 @@
 # print("-"*50)
 
 # # First, check health
-# print("\n🏥 Checking service health...")
+# print("\n  Checking service health...")
 # try:
 #     health_response = requests.get(HEALTH_ENDPOINT, timeout=10)
 #     if health_response.status_code == 200:
 #         health_data = health_response.json()
-#         print(f"✅ Service is healthy")
+#         print(f"  Service is healthy")
 #         print(f"   Model type: {health_data.get('model_type', 'Unknown')}")
 #     else:
-#         print(f"⚠️ Health check returned status {health_response.status_code}")
+#         print(f"  Health check returned status {health_response.status_code}")
 #         print(f"   Response: {health_response.text}")
 # except Exception as e:
-#     print(f"❌ Health check failed: {e}")
+#     print(f"  Health check failed: {e}")
 #     print("   Service might not be running or URL might be incorrect")
 #     exit(1)
 
@@ -166,7 +166,7 @@
 #     ]
 # ]
 
-# print(f"\n📊 Sending {len(test_samples)} test predictions...")
+# print(f"\n  Sending {len(test_samples)} test predictions...")
 # print("-" * 50)
 
 # # Prepare request payload
@@ -195,30 +195,30 @@
 #             "Saturday night, cold & rainy"
 #         ]
         
-#         print("\n📈 Prediction Results:")
+#         print("\n  Prediction Results:")
 #         print("-" * 30)
 #         for i, (scenario, prediction) in enumerate(zip(scenarios, predictions)):
 #             print(f"\nScenario {i+1}: {scenario}")
 #             print(f"  Predicted bike demand: {prediction:.2f} bikes")
             
 #         # Quick statistics
-#         print(f"\n📊 Prediction Statistics:")
+#         print(f"\n  Prediction Statistics:")
 #         print(f"  Average: {np.mean(predictions):.2f} bikes")
 #         print(f"  Min: {np.min(predictions):.2f} bikes")
 #         print(f"  Max: {np.max(predictions):.2f} bikes")
 #         print(f"  Std Dev: {np.std(predictions):.2f}")
         
 #     else:
-#         print(f"❌ Prediction failed with status {response.status_code}")
+#         print(f"  Prediction failed with status {response.status_code}")
 #         print(f"   Response: {response.text}")
         
 # except requests.exceptions.Timeout:
-#     print("❌ Request timed out. The model might be taking too long to respond.")
+#     print("  Request timed out. The model might be taking too long to respond.")
 #     print("   This could happen on the first request if the model is loading.")
 #     print("   Try running the script again.")
     
 # except Exception as e:
-#     print(f"❌ Error making prediction: {e}")
+#     print(f"  Error making prediction: {e}")
 #     print("\nTroubleshooting:")
 #     print("1. Check if the service URL is correct")
 #     print("2. Verify the model expects exactly 43 features")
@@ -243,16 +243,16 @@
     
 #     if response.status_code == 200:
 #         result = response.json()
-#         print(f"✅ Single prediction successful: {result}")
+#         print(f"  Single prediction successful: {result}")
 #     else:
-#         print(f"⚠️ Single prediction returned status {response.status_code}")
+#         print(f"  Single prediction returned status {response.status_code}")
 #         print(f"   Response: {response.text}")
         
 # except Exception as e:
-#     print(f"❌ Single prediction failed: {e}")
+#     print(f"  Single prediction failed: {e}")
 
 # print("\n" + "="*50)
-# print("✅ Test complete!")
+# print("  Test complete!")
 # print(f"\n🔗 Your API is live at: {SERVICE_URL}")
 # print(f"   You can share this URL for others to use your model!")
 

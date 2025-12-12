@@ -59,19 +59,19 @@ def check_prerequisites(**context):
     
     baseline_path = get_baseline_path()
     if baseline_path.exists():
-        log.info(f"✓ Baseline found: {baseline_path}")
+        log.info(f"  Baseline found: {baseline_path}")
     else:
         issues.append(f"Baseline not found at {baseline_path}")
         log.warning(f"✗ Baseline missing: {baseline_path}")
     
     if PRODUCTION_MODEL_PATH.exists():
-        log.info(f"✓ Production model found: {PRODUCTION_MODEL_PATH}")
+        log.info(f"  Production model found: {PRODUCTION_MODEL_PATH}")
     else:
         issues.append(f"Production model not found at {PRODUCTION_MODEL_PATH}")
         log.warning(f"✗ Model missing: {PRODUCTION_MODEL_PATH}")
     
     if PRODUCTION_METADATA_PATH.exists():
-        log.info(f"✓ Model metadata found: {PRODUCTION_METADATA_PATH}")
+        log.info(f"  Model metadata found: {PRODUCTION_METADATA_PATH}")
         with open(PRODUCTION_METADATA_PATH, 'r') as f:
             metadata = json.load(f)
         log.info(f"  Model version: {metadata.get('version', 'N/A')}")
@@ -79,7 +79,7 @@ def check_prerequisites(**context):
         issues.append(f"Model metadata not found at {PRODUCTION_METADATA_PATH}")
     
     if PROCESSED_DATA_PATH.exists():
-        log.info(f"✓ Processed data found: {PROCESSED_DATA_PATH}")
+        log.info(f"  Processed data found: {PROCESSED_DATA_PATH}")
     else:
         issues.append(f"Processed data not found at {PROCESSED_DATA_PATH}")
     
@@ -194,12 +194,12 @@ def load_current_data(**context):
             if 'temp_avg' in X_current.columns:
                 original_mean = X_current['temp_avg'].mean()
                 X_current['temp_avg'] = X_current['temp_avg'] + 10
-                log.info(f"  ✓ Temperature drift: +10°C (mean: {original_mean:.1f} → {X_current['temp_avg'].mean():.1f})")
+                log.info(f"    Temperature drift: +10°C (mean: {original_mean:.1f} → {X_current['temp_avg'].mean():.1f})")
         
         if drift_type in ["demand", "all"]:
             if 'rides_last_hour' in X_current.columns:
                 X_current['rides_last_hour'] = X_current['rides_last_hour'] * 1.8
-                log.info("  ✓ Demand drift: +80%")
+                log.info("    Demand drift: +80%")
             if 'rides_rolling_3h' in X_current.columns:
                 X_current['rides_rolling_3h'] = X_current['rides_rolling_3h'] * 1.8
         
@@ -207,7 +207,7 @@ def load_current_data(**context):
             if 'is_weekend' in X_current.columns:
                 flip_mask = (X_current['is_weekend'] == 0) & (np.random.random(len(X_current)) < 0.4)
                 X_current.loc[flip_mask, 'is_weekend'] = 1
-                log.info("  ✓ Temporal drift: weekend pattern shift")
+                log.info("    Temporal drift: weekend pattern shift")
         
         if drift_type in ["hour", "all"]:
             if 'hour' in X_current.columns:
@@ -215,7 +215,7 @@ def load_current_data(**context):
                 # Also update cyclical features
                 X_current['hour_sin'] = np.sin(2 * np.pi * X_current['hour'] / 24)
                 X_current['hour_cos'] = np.cos(2 * np.pi * X_current['hour'] / 24)
-                log.info("  ✓ Hour drift: +3 hour shift")
+                log.info("    Hour drift: +3 hour shift")
         
         log.info("Drift injection complete!")
     
@@ -314,9 +314,9 @@ def run_drift_detection(**context):
     log.info(f"Recommended Action: {report.get('recommended_action')}")
     
     if demo_mode:
-        log.info("\n⚠️  DEMO MODE: Results based on test data vs training baseline")
+        log.info("\n   DEMO MODE: Results based on test data vs training baseline")
     if drift_injected:
-        log.info("⚠️  DRIFT INJECTED: Artificial drift was added for demonstration")
+        log.info("   DRIFT INJECTED: Artificial drift was added for demonstration")
     
     return report.get('overall_status')
 
@@ -346,7 +346,7 @@ def evaluate_drift_action(**context):
     
     # In demo mode with injected drift, still trigger alerts but maybe skip retraining
     if demo_mode and drift_injected:
-        log.info("\n⚠️  Demo mode with injected drift - will send alerts but skip actual retraining")
+        log.info("\n   Demo mode with injected drift - will send alerts but skip actual retraining")
         if overall_status == 'CRITICAL':
             return 'send_critical_alert'
         elif overall_status == 'WARNING':
@@ -384,7 +384,7 @@ def send_critical_alert(**context):
     drift_share = drift_report.get('drift_share', 0)
     demo_mode = drift_report.get('demo_mode', False)
     
-    title = "🚨 CRITICAL: Model Drift Detected"
+    title = "CRITICAL: Model Drift Detected"
     if demo_mode:
         title += " (DEMO)"
     
@@ -428,7 +428,7 @@ def send_warning_alert(**context):
     n_drifted = drift_report.get('n_drifted_features', 0)
     demo_mode = drift_report.get('demo_mode', False)
     
-    title = "⚠️ WARNING: Minor Drift Detected"
+    title = "  WARNING: Minor Drift Detected"
     if demo_mode:
         title += " (DEMO)"
     

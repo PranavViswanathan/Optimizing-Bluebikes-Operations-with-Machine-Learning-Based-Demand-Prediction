@@ -283,4 +283,4 @@ def get_baseline_info():
 def register_monitoring_routes(app):
     """Register monitoring blueprint with Flask app."""
     app.register_blueprint(monitoring_bp)
-    print("✓ Monitoring routes registered at /monitoring/*")
+    print("  Monitoring routes registered at /monitoring/*")

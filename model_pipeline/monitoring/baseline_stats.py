@@ -483,7 +483,7 @@ if __name__ == "__main__":
     elif args.generate:
         try:
             path = generate_baseline_from_training()
-            print(f"\n✓ Baseline generated: {path}")
+            print(f"\n  Baseline generated: {path}")
         except Exception as e:
             print(f"\n✗ Error: {e}")
             import traceback

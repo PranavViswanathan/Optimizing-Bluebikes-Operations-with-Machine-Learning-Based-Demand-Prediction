@@ -38,7 +38,7 @@ def quick_preprocess(filepath, sample_size=50000, top_n_stations=10):
     # Standardize column names
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
     
-    print(f"✓ Loaded {len(df):,} rows")
+    print(f"  Loaded {len(df):,} rows")
     
     # Convert datetime columns
     print("\nConverting datetime columns...")
@@ -49,7 +49,7 @@ def quick_preprocess(filepath, sample_size=50000, top_n_stations=10):
     print(f"\nFiltering to top {top_n_stations} stations...")
     top_start_stations = df['start_station_id'].value_counts().head(top_n_stations).index
     df_filtered = df[df['start_station_id'].isin(top_start_stations)]
-    print(f"✓ Reduced to {len(df_filtered):,} trips from top stations")
+    print(f"  Reduced to {len(df_filtered):,} trips from top stations")
     
     return df_filtered
 
@@ -85,7 +85,7 @@ def create_station_demand_features(df):
     # Sort by station and time
     hourly_demand = hourly_demand.sort_values(['start_station_id', 'date', 'hour'])
     
-    print(f"✓ Created {len(hourly_demand):,} station-hour records")
+    print(f"  Created {len(hourly_demand):,} station-hour records")
     
     # Create lag features (previous hours' demand)
     print("\nCreating lag features...")

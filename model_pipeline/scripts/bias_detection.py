@@ -162,9 +162,9 @@ class BikeShareBiasDetector:
         print(f"  P-value: {p_value:.4f}")
         
         if p_value < 0.05:
-            print("  ⚠️  SIGNIFICANT BIAS DETECTED: Performance varies significantly across time categories")
+            print("     SIGNIFICANT BIAS DETECTED: Performance varies significantly across time categories")
         else:
-            print("  ✓  No significant bias detected across time categories")
+            print("     No significant bias detected across time categories")
         
         self.slice_results['rush_hour'] = df_results
         return df_results
@@ -222,9 +222,9 @@ class BikeShareBiasDetector:
         
         mae_ratio = adverse_metrics['mae'] / normal_metrics['mae']
         if mae_ratio > 1.2:
-            print(f"  ⚠️  BIAS DETECTED: Model performs {((mae_ratio-1)*100):.1f}% worse in adverse weather")
+            print(f"     BIAS DETECTED: Model performs {((mae_ratio-1)*100):.1f}% worse in adverse weather")
         else:
-            print(f"  ✓  Acceptable performance: {((mae_ratio-1)*100):.1f}% difference")
+            print(f"     Acceptable performance: {((mae_ratio-1)*100):.1f}% difference")
         
         self.slice_results['weather'] = df_results
         return df_results
@@ -258,9 +258,9 @@ class BikeShareBiasDetector:
         
         print(f"\nDisparity Ratio: {disparity_ratio:.3f}")
         if disparity_ratio > 1.15:
-            print(f"  ⚠️  BIAS DETECTED: {((disparity_ratio-1)*100):.1f}% performance difference")
+            print(f"     BIAS DETECTED: {((disparity_ratio-1)*100):.1f}% performance difference")
         else:
-            print(f"  ✓  Acceptable disparity")
+            print(f"     Acceptable disparity")
         
         self.slice_results['weekday_weekend'] = df_results
         return df_results
@@ -558,7 +558,7 @@ class BikeShareBiasDetector:
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"\n📊 Bias visualization saved to: {save_path}")
+        print(f"\n Bias visualization saved to: {save_path}")
         plt.close()
     
     def run_full_analysis(self):

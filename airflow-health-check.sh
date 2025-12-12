@@ -9,7 +9,7 @@ if ! docker info >/dev/null 2>&1; then
   echo "Docker daemon is NOT running. Please start Docker."
   exit 1
 else
-  echo "✓ Docker daemon is running."
+  echo "  Docker daemon is running."
 fi
 
 if [ ! -f "$COMPOSE_FILE" ]; then
@@ -27,7 +27,7 @@ healthy_containers=$(docker compose -f "$COMPOSE_FILE" ps --format "{{.Health}}"
 total_containers=$(docker compose -f "$COMPOSE_FILE" ps --format "{{.Names}}" | wc -l | tr -d ' ')
 
 if [ "$healthy_containers" -eq "$total_containers" ] && [ "$total_containers" -gt 0 ]; then
-  echo "✓ All $total_containers containers are healthy."
+  echo "  All $total_containers containers are healthy."
 else
   echo "⚠ $healthy_containers / $total_containers containers are healthy."
   echo "Use 'docker compose -f $COMPOSE_FILE ps' or 'docker compose -f $COMPOSE_FILE logs <service>' for details."
@@ -52,7 +52,7 @@ echo "Checking Airflow webserver HTTP response on port $WEB_PORT..."
 HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:$WEB_PORT" || echo "000")
 
 if [ "$HTTP_RESPONSE" = "200" ] || [ "$HTTP_RESPONSE" = "302" ] || [ "$HTTP_RESPONSE" = "301" ]; then
-  echo "✓ Airflow Web UI is reachable at http://localhost:$WEB_PORT (HTTP $HTTP_RESPONSE)"
+  echo "  Airflow Web UI is reachable at http://localhost:$WEB_PORT (HTTP $HTTP_RESPONSE)"
 else
   echo "✗ Airflow Web UI not reachable on port $WEB_PORT (HTTP $HTTP_RESPONSE)."
   echo "Try running: docker compose -f $COMPOSE_FILE logs airflow-webserver"
@@ -67,7 +67,7 @@ echo "Scanning for broken DAGs..."
 BROKEN_DAGS=$(docker compose -f "$COMPOSE_FILE" exec -T airflow-scheduler airflow dags list-import-errors 2>/dev/null || echo "")
 
 if [ -z "$BROKEN_DAGS" ] || echo "$BROKEN_DAGS" | grep -q "No data found"; then
-  echo "✓ No broken DAGs found"
+  echo "  No broken DAGs found"
 else
   echo "✗ BROKEN DAGs detected:"
   echo "$BROKEN_DAGS"
@@ -86,7 +86,7 @@ echo ""
 
 echo "Recent scheduler errors (last 50 lines):"
 docker compose -f "$COMPOSE_FILE" logs --tail=50 airflow-scheduler 2>/dev/null | \
-  grep -E "(ERROR|CRITICAL|Broken DAG|ModuleNotFoundError|ImportError)" || echo "✓ No recent errors in scheduler logs"
+  grep -E "(ERROR|CRITICAL|Broken DAG|ModuleNotFoundError|ImportError)" || echo "  No recent errors in scheduler logs"
 
 echo ""
 echo "Health check complete."

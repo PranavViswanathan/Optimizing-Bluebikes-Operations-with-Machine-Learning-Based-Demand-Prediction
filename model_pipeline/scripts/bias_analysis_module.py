@@ -170,8 +170,8 @@ class BiasAnalyzer:
         
         if not baseline_report or not mitigated_report:
             print("Warning: Missing reports for comparison")
-            print(f"Baseline: {'✓' if baseline_report else '✗'}")
-            print(f"Mitigated: {'✓' if mitigated_report else '✗'}")
+            print(f"Baseline: {' ' if baseline_report else '✗'}")
+            print(f"Mitigated: {' ' if mitigated_report else '✗'}")
             return None
         
         baseline_overall = baseline_report.get('overall_performance', {})

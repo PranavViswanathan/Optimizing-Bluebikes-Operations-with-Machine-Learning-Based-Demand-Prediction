@@ -119,9 +119,9 @@ def run_bias_audit(file_path, dataset_type="bluebikes"):
             missing_students = df['NumStudent'].isnull().sum()
             
             if zero_students > 0:
-                print(f"\n⚠️ {zero_students} colleges have 0 students - likely data quality issue")
+                print(f"\n  {zero_students} colleges have 0 students - likely data quality issue")
             if missing_students > 0:
-                print(f"⚠️ {missing_students} colleges missing student count")
+                print(f"  {missing_students} colleges missing student count")
             
             # Plot 3: Student population distribution (histogram with log scale option)
             ax3 = fig.add_subplot(2, 2, 2)

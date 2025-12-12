@@ -63,7 +63,7 @@ SERVICE_URL=$(gcloud run services describe ${SERVICE_NAME} \
     --format 'value(status.url)' \
     --project ${PROJECT_ID})
 
-echo -e "${GREEN}✓ Deployment successful!${NC}"
+echo -e "${GREEN}  Deployment successful!${NC}"
 echo -e "${GREEN}Service URL: ${SERVICE_URL}${NC}"
 
 # Step 5: Test the deployment

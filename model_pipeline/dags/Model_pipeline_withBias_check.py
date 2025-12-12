@@ -433,7 +433,7 @@ def promote_mitigated_model(**context):
             raise Exception(f"Model file not found at {temp_model_path}")
         
         if should_promote:
-            log.info(f"\n✓ PROMOTING BIAS-MITIGATED MODEL TO PRODUCTION")
+            log.info(f"\n  PROMOTING BIAS-MITIGATED MODEL TO PRODUCTION")
             log.info(f"  Reason: {promotion_reason}")
             
             if os.path.exists(production_link):
@@ -779,7 +779,7 @@ def generate_monitoring_baseline(**context):
         # Generate baseline from the newly deployed model
         baseline_path = generate_baseline_from_training()
         
-        log.info(f"✓ Monitoring baseline generated: {baseline_path}")
+        log.info(f"  Monitoring baseline generated: {baseline_path}")
         
         return {
             'generated': True,
