@@ -6,3 +6,4 @@ mlruns/
 scripts/*.json
 scripts/*.log
 reports/
+monitoring/__pycache__/

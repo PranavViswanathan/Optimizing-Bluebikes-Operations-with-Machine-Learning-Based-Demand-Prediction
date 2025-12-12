@@ -2,7 +2,7 @@
   "model_type": "xgboost",
   "version": 1,
   "deployed_date": "2025-12-12",
-  "deployment_timestamp": "2025-12-12T01:35:54.357190",
+  "deployment_timestamp": "2025-12-12T07:12:19.450266",
   "bias_mitigated": true,
   "metrics": {
     "baseline_r2": 0.9350455403327942,
@@ -18,6 +18,6 @@
     "mitigated_issues": 6,
     "issues_reduced": 0
   },
-  "airflow_run_id": "manual__2025-12-12T01:33:34.479627+00:00",
+  "airflow_run_id": "manual__2025-12-12T07:09:16.775315+00:00",
   "model_path": "/opt/airflow/models/production/current_model.pkl"
 }

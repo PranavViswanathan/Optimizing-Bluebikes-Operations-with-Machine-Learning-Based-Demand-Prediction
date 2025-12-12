@@ -36,7 +36,7 @@ default_args = {
     'email_on_failure': False,
     'email_on_retry': False,
     'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retry_delay': timedelta(minutes=2),
 }
 
 
@@ -242,7 +242,7 @@ def load_current_data(**context):
 
 
 def run_drift_detection(**context):
-    """Run Evidently AI drift detection."""
+    """Run Evidently AI drift detection with month-specific baseline."""
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline')
     sys.path.insert(0, '/opt/airflow/scripts/model_pipeline/monitoring')
 
@@ -266,14 +266,45 @@ def run_drift_detection(**context):
     log.info(f"Demo mode: {demo_mode}")
     log.info(f"Drift injected: {drift_injected}")
     
-    # Initialize detector - loads baseline (training data reference)
+    # Determine which month we're analyzing for month-specific baseline
+    config = get_config()
+    target_month = None
+    month_name = "overall"
+    
+    # Check if month was specified in DAG config
+    dag_conf = context.get('dag_run').conf or {}
+    target_month = dag_conf.get('target_month', None)
+    
+    if target_month is None and config.use_monthly_baselines:
+        # Auto-detect month from current data
+        try:
+            # Reload data with date column to detect month
+            current_data_full = pd.read_pickle(current_data_path)
+            if 'date' in current_data_full.columns:
+                dates = pd.to_datetime(current_data_full['date'])
+                target_month = dates.dt.month.mode()[0]
+                month_names = ['January', 'February', 'March', 'April', 'May', 'June',
+                             'July', 'August', 'September', 'October', 'November', 'December']
+                month_name = month_names[target_month - 1]
+                log.info(f"\nAuto-detected month: {month_name} (month {target_month})")
+        except Exception as e:
+            log.warning(f"Could not auto-detect month: {e}")
+            log.info("Will use overall baseline")
+    elif target_month is not None:
+        month_names = ['January', 'February', 'March', 'April', 'May', 'June',
+                     'July', 'August', 'September', 'October', 'November', 'December']
+        month_name = month_names[target_month - 1]
+        log.info(f"\nUsing specified month: {month_name} (month {target_month})")
+    
+    # Initialize detector with month-specific baseline
     detector = EvidentlyDriftDetector()
-    detector.load_reference_data()  # Loads training data baseline
+    detector.load_reference_data(month=target_month)
     detector.load_model()
     
     # Log what we're comparing
+    baseline_type = f"{month_name} historical data" if target_month else "overall training data"
     if hasattr(detector, 'reference_data') and detector.reference_data is not None:
-        log.info(f"Reference (baseline): {len(detector.reference_data)} samples from training data")
+        log.info(f"Reference (baseline): {len(detector.reference_data)} samples from {baseline_type}")
     
     # Run full monitoring suite
     report = detector.run_full_monitoring(
@@ -288,7 +319,9 @@ def run_drift_detection(**context):
         'demo_mode': demo_mode,
         'drift_injected': drift_injected,
         'current_data_range': date_range,
-        'baseline_source': 'training_data'
+        'baseline_source': baseline_type,
+        'target_month': target_month,
+        'month_name': month_name
     }
     
     # Push results to XCom
@@ -303,20 +336,26 @@ def run_drift_detection(**context):
         'html_report_path': report.get('data_drift', {}).get('html_report_path', ''),
         'demo_mode': demo_mode,
         'drift_injected': drift_injected,
+        'target_month': target_month,
+        'month_name': month_name,
+        'baseline_type': baseline_type
     })
     
     log.info("="*60)
     log.info("DRIFT DETECTION COMPLETE")
     log.info("="*60)
+    log.info(f"Comparison: {month_name} current vs {baseline_type}")
     log.info(f"Overall Status: {report.get('overall_status')}")
     log.info(f"Data Drift Detected: {report.get('data_drift', {}).get('dataset_drift', False)}")
     log.info(f"Features Drifted: {report.get('data_drift', {}).get('n_drifted_features', 0)}")
     log.info(f"Recommended Action: {report.get('recommended_action')}")
     
     if demo_mode:
-        log.info("\n   DEMO MODE: Results based on test data vs training baseline")
+        log.info("\n   DEMO MODE: Results based on test data vs baseline")
     if drift_injected:
         log.info("   DRIFT INJECTED: Artificial drift was added for demonstration")
+    if target_month:
+        log.info(f"   MONTH-SPECIFIC: Using {month_name} baseline for accurate comparison")
     
     return report.get('overall_status')
 
@@ -574,6 +613,24 @@ def cleanup_temp_files(**context):
             log.info(f"Removed: {f}")
 
 
+def trigger_dashboard_refresh(**context):
+    """
+    Call the Cloud Run refresh endpoint after uploading reports.
+    This ensures the dashboard shows fresh data immediately.
+    """
+    import requests
+    
+    refresh_url = "https://bluebikes-prediction-202855070348.us-central1.run.app/monitoring/api/refresh"
+    
+    try:
+        response = requests.post(refresh_url, timeout=10)
+        response.raise_for_status()
+        log.info(f"Dashboard refresh triggered: {response.json()}")
+        return {"refreshed": True}
+    except Exception as e:
+        log.warning(f"Could not trigger dashboard refresh: {e}")
+        return {"refreshed": False, "error": str(e)}
+
 def upload_drift_reports_to_gcs(**context):
     """
     Upload drift monitoring reports (HTML and JSON) to GCS bucket.
@@ -742,6 +799,12 @@ with DAG(
     python_callable=upload_drift_reports_to_gcs,
     trigger_rule='none_failed_min_one_success',  # Run even if some branches skipped
 )
+    trigger_refresh = PythonOperator(
+    task_id='trigger_dashboard_refresh',
+    python_callable=trigger_dashboard_refresh,
+    trigger_rule='none_failed_min_one_success',
+)
+    
     
     # End markers
     end_critical = EmptyOperator(task_id='end_critical_path', trigger_rule='none_failed_min_one_success')
@@ -761,7 +824,7 @@ with DAG(
     evaluate_action >> log_healthy >> end_healthy
 
     # Upload reports after drift detection (regardless of which branch)
-    detect_drift >> upload_reports
+    detect_drift >> upload_reports >> trigger_refresh
 
     # Cleanup after all branches AND upload
     [end_critical, end_warning, end_healthy, upload_reports] >> cleanup

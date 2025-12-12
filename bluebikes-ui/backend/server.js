@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); 
 
 const corsOptions = {
   origin: [
@@ -103,6 +104,7 @@ app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
+app.use(express.static(path.join(__dirname, '../frontend/build')));
 
 // ========== GBFS API ENDPOINTS ==========
 
@@ -523,14 +525,17 @@ app.get('/health', (req, res) => {
   });
 });
 
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+});
 // Start server
 app.listen(PORT, () => {
   console.log(`Bluebikes Backend Server running on port ${PORT}`);
   console.log(`GBFS API: ${GBFS_BASE_URL}`);
   console.log(`ML Service: ${EXTERNAL_ML_API_URL}`);
   console.log(`Historical Service: ${HISTORICAL_SERVICE_URL}`);
-  console.log(`\n✅ Loaded ${Object.keys(WEEKDAY_PATTERNS).length} hourly patterns`);
-  console.log(`✅ Loaded ${Object.keys(STATION_SHARES_BY_NAME).length} station shares`);
+  console.log(`\nLoaded ${Object.keys(WEEKDAY_PATTERNS).length} hourly patterns`);
+  console.log(`Loaded ${Object.keys(STATION_SHARES_BY_NAME).length} station shares`);
   console.log(`\nAvailable endpoints:`);
   console.log(`  GET  /api/stations`);
   console.log(`  GET  /api/stations/status`);

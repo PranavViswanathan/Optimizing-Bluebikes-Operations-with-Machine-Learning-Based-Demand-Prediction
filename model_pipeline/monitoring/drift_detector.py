@@ -45,6 +45,7 @@ from monitoring_config import (
     get_report_path,
     get_baseline_path,
     HTML_REPORTS_DIR,
+    BASELINES_DIR,
     JSON_REPORTS_DIR,
     PRODUCTION_MODEL_PATH,
 )
@@ -72,32 +73,41 @@ class EvidentlyDriftDetector:
         self.model = None
         self.drift_report: Dict = {}
         
-    def load_reference_data(self, reference_df: Optional[pd.DataFrame] = None, path: Optional[Path] = None):
+    def load_reference_data(self, month=None):
         """
-        Load reference (baseline) data for comparison.
+        Load baseline reference data.
         
         Args:
-            reference_df: Reference DataFrame directly
-            path: Path to pickled reference data
+            month: Optional month number (1-12). If provided, loads month-specific baseline.
+                Falls back to overall baseline if month-specific doesn't exist.
         """
-        if reference_df is not None:
-            self.reference_data = reference_df
-        elif path is not None:
-            self.reference_data = pd.read_pickle(path)
-        else:
-            # Load from default baseline path
-            baseline_path = get_baseline_path()
+        config = get_config()
+        
+        # Try to load month-specific baseline if requested and enabled
+        if month is not None and config.use_monthly_baselines:
+            from baseline_stats import get_month_name
+            month_name = get_month_name(month)
+            baseline_path = BASELINES_DIR / f"baseline_{month_name}.pkl"
+            
             if baseline_path.exists():
-                with open(baseline_path, 'rb') as f:
-                    baseline = pickle.load(f)
-                self.reference_data = baseline.get('reference_data')
+                self.reference_data = pd.read_pickle(baseline_path)
+                logger.info(f"✓ Loaded {month_name} baseline: {len(self.reference_data)} samples")
+                logger.info(f"  Comparing {month_name} current data vs {month_name} historical baseline")
+                return
             else:
-                raise FileNotFoundError(f"No baseline found at {baseline_path}")
+                logger.warning(f"  No baseline for {month_name}, falling back to overall baseline")
         
-        # Setup column mapping
-        self._setup_column_mapping()
-        
-        logger.info(f"Reference data loaded: {len(self.reference_data)} samples")
+        # Fall back to overall baseline
+        baseline_path = get_baseline_path()
+        if baseline_path.exists():
+            self.reference_data = pd.read_pickle(baseline_path)
+            logger.info(f"✓ Loaded overall baseline: {len(self.reference_data)} samples")
+            logger.info(f"  Using overall baseline (all months combined)")
+        else:
+            raise FileNotFoundError(
+                f"No baseline found. Run baseline generation first.\n"
+                f"Expected at: {baseline_path}"
+            )
     
     def load_model(self, model_path: Optional[Path] = None):
         """Load the production model for making predictions."""
