@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
 const StationContext = createContext();
-
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://bluebikes-backend-202855070348.us-central1.run.app/api';
 
 export const useStations = () => {
@@ -68,20 +67,41 @@ export const StationProvider = ({ children }) => {
         }
     };
 
-    const getPrediction = async (stationId, datetime = null) => {
-        try {
-            const response = await axios.post(`${API_BASE_URL}/predict`, {
-                station_id: stationId,
-                datetime: datetime || new Date().toISOString(),
-                temperature: 15, // Default values
-                precipitation: 0
-            });
-            return response.data;
-        } catch (err) {
-            console.error(`Error getting prediction for station ${stationId}:`, err);
-            return { predicted_demand: null, error: 'Prediction unavailable' };
-        }
-    };
+   const getPrediction = async (stationId, datetime = null) => {
+    try {
+        // Create local datetime WITHOUT timezone
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        const localDatetime = datetime || 
+            `${year}-${month}-${day}T${hours}:${minutes}:00`;
+        
+        console.log('🎯 Prediction request:', {
+            station_id: stationId,
+            datetime: localDatetime,
+            local_hour: now.getHours()
+        });
+        
+        const response = await axios.post(`${API_BASE_URL}/predict`, {
+            station_id: stationId,
+            datetime: localDatetime,  // No 'Z' suffix!
+            temperature: 15,
+            precipitation: 0
+        });
+        
+        console.log('✅ Prediction response:', response.data);
+        
+        return response.data;
+    } catch (err) {
+        console.error(`Error getting prediction for station ${stationId}:`, err);
+        console.error('Error details:', err.response?.data);
+        return { predicted_demand: null, error: 'Prediction unavailable' };
+    }
+};;
 
     const getStationInfo = (stationId) => {
         return stations.find(s => s.station_id === stationId);

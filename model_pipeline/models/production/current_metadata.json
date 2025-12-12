@@ -1,23 +1,23 @@
 {
   "model_type": "xgboost",
   "version": 1,
-  "deployed_date": "2025-12-09",
-  "deployment_timestamp": "2025-12-09T08:53:30.476827",
+  "deployed_date": "2025-12-12",
+  "deployment_timestamp": "2025-12-12T01:35:54.357190",
   "bias_mitigated": true,
   "metrics": {
     "baseline_r2": 0.9350455403327942,
     "baseline_mae": 81.12504577636719,
-    "mitigated_r2": 0.9351660013198853,
-    "mitigated_mae": 80.17737579345703,
-    "mitigated_rmse": 126.55067846025165,
-    "r2_improvement": 0.00012046098709106445,
-    "mae_improvement": 0.9476699829101562
+    "mitigated_r2": 0.9342955350875854,
+    "mitigated_mae": 80.28433990478516,
+    "mitigated_rmse": 127.39736218079635,
+    "r2_improvement": -0.0007500052452087402,
+    "mae_improvement": 0.8407058715820312
   },
   "bias_metrics": {
     "baseline_issues": 6,
-    "mitigated_issues": 7,
-    "issues_reduced": -1
+    "mitigated_issues": 6,
+    "issues_reduced": 0
   },
-  "airflow_run_id": "manual__2025-12-09T08:51:16.457226+00:00",
+  "airflow_run_id": "manual__2025-12-12T01:33:34.479627+00:00",
   "model_path": "/opt/airflow/models/production/current_model.pkl"
 }
