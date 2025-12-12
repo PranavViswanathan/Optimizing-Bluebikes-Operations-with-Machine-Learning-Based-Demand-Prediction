@@ -5,10 +5,10 @@ const corsOptions = {
   origin: [
     'http://localhost:3000',
     'http://localhost:5173',
-    'http://34.110.183.151',                    // Your Load Balancer IP
-    'https://storage.googleapis.com',           // GCS bucket hosting
-    /\.run\.app$/,                              // Cloud Run domains
-    /\.googleapis\.com$/                        // All googleapis domains
+    'http://34.110.183.151',                    
+    'https://storage.googleapis.com',           
+    /\.run\.app$/,                              
+    /\.googleapis\.com$/                        
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -484,7 +484,7 @@ function getMockPrediction(stationId, datetime, temperature = 15, precipitation 
   return Math.max(0, stationPrediction);
 }
 
-// ========== HISTORICAL DATA ENDPOINT ==========
+
 
 app.get('/api/historical/:stationId/:timeRange', async (req, res) => {
   try {
@@ -512,7 +512,7 @@ app.get('/api/historical/:stationId/:timeRange', async (req, res) => {
   }
 });
 
-// ========== HEALTH CHECK ==========
+
 
 app.get('/health', (req, res) => {
   res.json({ 
