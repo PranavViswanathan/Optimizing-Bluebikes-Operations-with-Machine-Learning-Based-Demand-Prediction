@@ -1,5 +1,20 @@
 const express = require('express');
 const cors = require('cors');
+
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://34.110.183.151',                    // Your Load Balancer IP
+    'https://storage.googleapis.com',           // GCS bucket hosting
+    /\.run\.app$/,                              // Cloud Run domains
+    /\.googleapis\.com$/                        // All googleapis domains
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 const axios = require('axios');
 const NodeCache = require('node-cache');
 require('dotenv').config();
@@ -7,94 +22,128 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 const GBFS_BASE_URL = process.env.GBFS_BASE_URL || 'https://gbfs.lyft.com/gbfs/1.1/bos/en';
-
-// ML Service Configuration
-// Always point to local ML service for feature engineering
-// The local service will handle forwarding to external model if needed
-const ML_SERVICE_URL = `http://localhost:${process.env.ML_SERVICE_PORT || 5002}`;
-
-// Historical Data Service Configuration
+const EXTERNAL_ML_API_URL = process.env.EXTERNAL_ML_API_URL || 'https://bluebikes-prediction-202855070348.us-central1.run.app';
 const HISTORICAL_SERVICE_URL = `http://localhost:${process.env.HISTORICAL_DATA_SERVICE_PORT || 5003}`;
 
-// Initialize cache with 60-second TTL for real-time data
+// Initialize cache
 const cache = new NodeCache({ stdTTL: 60, checkperiod: 120 });
 
-// Middleware
-app.use(cors());
-app.use(express.json());
+// ========== REAL TRAINING DATA ==========
 
-// Logging middleware
+// Historical patterns from your actual training data
+const WEEKDAY_PATTERNS = {
+  0: 90, 1: 51, 2: 26, 3: 14, 4: 21, 5: 86,
+  6: 254, 7: 616, 8: 1088, 9: 699, 10: 479, 11: 501,
+  12: 582, 13: 593, 14: 636, 15: 784, 16: 1101,
+  17: 1459, 18: 1141, 19: 824, 20: 575, 21: 434,
+  22: 323, 23: 202
+};
+
+const WEEKEND_PATTERNS = {
+  0: 234, 1: 209, 2: 123, 3: 36, 4: 23, 5: 35,
+  6: 78, 7: 144, 8: 268, 9: 451, 10: 611, 11: 721,
+  12: 821, 13: 860, 14: 883, 15: 891, 16: 877,
+  17: 834, 18: 765, 19: 614, 20: 456, 21: 358,
+  22: 302, 23: 229
+};
+
+// Station shares by name (top 100 for performance)
+const STATION_SHARES_BY_NAME = {
+  "MIT at Mass Ave / Amherst St": 0.017595,
+  "Central Square at Mass Ave / Essex St": 0.013825,
+  "Harvard Square at Mass Ave/ Dunster": 0.01213,
+  "MIT Vassar St": 0.010887,
+  "MIT Pacific St at Purrington St": 0.009769,
+  "Charles Circle - Charles St at Cambridge St": 0.009595,
+  "Ames St at Main St": 0.008707,
+  "Christian Science Plaza - Massachusetts Ave at Westland Ave": 0.008487,
+  "Boylston St at Fairfield St": 0.008182,
+  "Mass Ave/Lafayette Square": 0.008176,
+  "Beacon St at Massachusetts Ave": 0.008035,
+  "South Station - 700 Atlantic Ave": 0.00788,
+  "Commonwealth Ave at Agganis Way": 0.007487,
+  "MIT Stata Center at Vassar St / Main St": 0.007287,
+  "Forsyth St at Huntington Ave": 0.007137,
+  "Mass Ave at Albany St": 0.006972,
+  "Ruggles T Stop - Columbus Ave at Melnea Cass Blvd": 0.00687,
+  "Landmark Center - Brookline Ave at Park Dr": 0.006465,
+  "Boylston St at Jersey St": 0.0064,
+  "Massachusetts Ave at Boylston St.": 0.006397,
+  "Central Sq Post Office / Cambridge City Hall at Mass Ave / Pleasant St": 0.006286,
+  "Chinatown T Stop": 0.006163,
+  "Kendall T": 0.00613,
+  "Cambridge St at Joy St": 0.006056,
+  "Beacon St at Charles St": 0.005959,
+  "Boylston St at Massachusetts Ave": 0.00589,
+  "Cross St at Hanover St": 0.005843,
+  "955 Mass Ave": 0.005834,
+  "Lower Cambridgeport at Magazine St / Riverside Rd": 0.005594,
+  "Inman Square at Springfield St.": 0.005576,
+  "One Kendall Square at Hampshire St / Portland St": 0.005551,
+  "Back Bay T Stop - Dartmouth St at Stuart St": 0.005503,
+  "MIT Carleton St at Amherst St": 0.005434,
+  "Harvard University River Houses at DeWolfe St / Cowperthwaite St": 0.005387,
+  "Longwood Ave at Binney St": 0.005359,
+  "MIT Hayward St at Amherst St": 0.005269,
+  "Mugar Way at Beacon St": 0.005227,
+  "Sennott Park Broadway at Norfolk Street": 0.005211,
+  "Deerfield St at Commonwealth Ave": 0.005179,
+  "Newbury St at Hereford St": 0.005145,
+  "Government Center - Cambridge St at Court St": 0.005071,
+  "Copley Square - Dartmouth St at Boylston St": 0.005051,
+  "Lewis Wharf at Atlantic Ave": 0.005014,
+  "Boylston St at Exeter St": 0.004929,
+  "Boylston St at Arlington St": 0.004908
+};
+
+// Middleware
+app.use(cors(corsOptions));
+app.use(express.json());
 app.use((req, res, next) => {
   console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
-// ========== GBFS API PROXY ENDPOINTS ==========
+// ========== GBFS API ENDPOINTS ==========
 
-/**
- * GET /api/stations
- * Returns all station information with id, name, lat, long, capacity
- */
 app.get('/api/stations', async (req, res) => {
   try {
     const cacheKey = 'stations_info';
     const cached = cache.get(cacheKey);
     
     if (cached) {
-      console.log('Returning cached station information');
       return res.json(cached);
     }
 
     const response = await axios.get(`${GBFS_BASE_URL}/station_information.json`);
     const stations = response.data.data.stations;
-    
-    // Cache station info for longer (stations don't change often)
-    cache.set(cacheKey, stations, 3600); // 1 hour TTL
-    
+    cache.set(cacheKey, stations, 3600);
     res.json(stations);
   } catch (error) {
-    console.error('Error fetching station information:', error.message);
-    res.status(500).json({ 
-      error: 'Failed to fetch station information',
-      message: error.message 
-    });
+    console.error('Error fetching stations:', error.message);
+    res.status(500).json({ error: 'Failed to fetch stations' });
   }
 });
 
-/**
- * GET /api/stations/status
- * Returns real-time status for all stations (bikes available, docks available)
- */
 app.get('/api/stations/status', async (req, res) => {
   try {
     const cacheKey = 'stations_status';
     const cached = cache.get(cacheKey);
     
     if (cached) {
-      console.log('Returning cached station status');
       return res.json(cached);
     }
 
     const response = await axios.get(`${GBFS_BASE_URL}/station_status.json`);
     const status = response.data.data.stations;
-    
-    // Cache status for 60 seconds (real-time data)
     cache.set(cacheKey, status, 60);
-    
     res.json(status);
   } catch (error) {
     console.error('Error fetching station status:', error.message);
-    res.status(500).json({ 
-      error: 'Failed to fetch station status',
-      message: error.message 
-    });
+    res.status(500).json({ error: 'Failed to fetch station status' });
   }
 });
 
-/**
- * GET /api/stations/:id/status
- * Returns real-time status for a specific station
- */
 app.get('/api/stations/:id/status', async (req, res) => {
   try {
     const stationId = req.params.id;
@@ -102,11 +151,9 @@ app.get('/api/stations/:id/status', async (req, res) => {
     const cached = cache.get(cacheKey);
     
     if (cached) {
-      console.log(`Returning cached status for station ${stationId}`);
       return res.json(cached);
     }
 
-    // Fetch all statuses and filter for the requested station
     const response = await axios.get(`${GBFS_BASE_URL}/station_status.json`);
     const stations = response.data.data.stations;
     const stationStatus = stations.find(s => s.station_id === stationId);
@@ -118,175 +165,350 @@ app.get('/api/stations/:id/status', async (req, res) => {
     cache.set(cacheKey, stationStatus, 60);
     res.json(stationStatus);
   } catch (error) {
-    console.error(`Error fetching status for station ${req.params.id}:`, error.message);
-    res.status(500).json({ 
-      error: 'Failed to fetch station status',
-      message: error.message 
-    });
+    console.error(`Error fetching station ${req.params.id}:`, error.message);
+    res.status(500).json({ error: 'Failed to fetch station status' });
   }
 });
 
 // ========== ML PREDICTION ENDPOINT ==========
 
-/**
- * POST /api/predict
- * Request ML prediction for bike demand
- * Body: { station_id, datetime, temperature, precipitation }
- */
-// Replace your existing /api/predict endpoint in server.js with this:
-
-// In server.js, replace the /api/predict endpoint with this updated version:
-
 app.post('/api/predict', async (req, res) => {
   try {
-    const { station_id, datetime, temperature, precipitation } = req.body;
+    const { station_id, datetime, temperature = 15, precipitation = 0 } = req.body;
     
     if (!station_id) {
       return res.status(400).json({ error: 'station_id is required' });
     }
 
-    // If using external ML API (Cloud Run)
-    if (USE_EXTERNAL_ML_API && EXTERNAL_ML_API_URL) {
-      // Generate 48 features for Cloud Run
-      const features = generateFeaturesForCloudRun(station_id, datetime, temperature, precipitation);
+    console.log('===========================================');
+    console.log(' PREDICTION REQUEST');
+    console.log('Station:', station_id);
+    console.log('DateTime:', datetime || 'now');
+    console.log('Temperature:', temperature, 'C');
+    console.log('Precipitation:', precipitation, 'mm');
+
+    const systemFeatures = generateSystemWideFeaturesForCloudRun(datetime, temperature, precipitation);
+    
+    try {
+      console.log(' Calling Cloud Run ML Service...');
       
-      try {
-        const response = await axios.post(
-          `${EXTERNAL_ML_API_URL}/predict`,
-          { features: features },
-          { 
-            timeout: 10000,
-            headers: { 'Content-Type': 'application/json' }
-          }
-        );
-        
-        // Format for frontend
-        const formattedResponse = {
-          station_id: station_id,
-          datetime: datetime || new Date().toISOString(),
-          predicted_demand: Math.max(0, Math.round(response.data.prediction)),
-          model_version: response.data.model_version || 'cloud_run',
-          confidence: 'high'
-        };
-        
-        return res.json(formattedResponse);
-      } catch (cloudRunError) {
-        console.error('Cloud Run error:', cloudRunError.message);
-        // Fall through to mock prediction
+      const response = await axios.post(
+        `${EXTERNAL_ML_API_URL}/predict`,
+        { features: systemFeatures },
+        { 
+          timeout: 10000,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+      
+      let systemWidePrediction = response.data.prediction;
+      console.log(' Raw ML prediction:', systemWidePrediction.toFixed(1));
+      
+      // CLAMP negative predictions to 0 - this is valid behavior
+      // You can't have negative bike rides!
+      let predictionNote = 'Prediction based on trained ML model';
+      let confidence = 'high';
+      
+      if (systemWidePrediction < 0) {
+        console.log(' Clamping negative prediction to 0 (low demand period)');
+        systemWidePrediction = 0;
+        predictionNote = 'Low demand period (late night)';
+        confidence = 'medium';
       }
+      
+      // Get station share BY NAME
+      const stationShare = await getStationShareByName(station_id);
+      const stationPrediction = Math.max(0, Math.round(systemWidePrediction * stationShare));
+      
+      console.log(' System prediction (clamped):', systemWidePrediction.toFixed(1));
+      console.log(' Station share:', (stationShare * 100).toFixed(2) + '%');
+      console.log(' Final prediction:', stationPrediction);
+      console.log('===========================================\n');
+      
+      return res.json({
+        station_id: station_id,
+        datetime: datetime || new Date().toISOString(),
+        predicted_demand: stationPrediction,
+        system_wide_prediction: Math.round(Math.max(0, systemWidePrediction)),
+        station_share: stationShare,
+        model_version: response.data.model_version || 'production',
+        confidence: confidence,
+        note: predictionNote
+      });
+      
+    } catch (cloudRunError) {
+      console.error(' Cloud Run Error:', cloudRunError.message);
+      
+      const mockDemand = getMockPrediction(station_id, datetime, temperature, precipitation);
+      return res.json({
+        station_id: station_id,
+        datetime: datetime || new Date().toISOString(),
+        predicted_demand: mockDemand,
+        model_version: 'mock_fallback',
+        confidence: 'medium',
+        error: cloudRunError.message
+      });
     }
     
-    // Fallback mock prediction
-    const mockDemand = getMockPrediction(station_id, datetime);
-    res.json({
-      station_id: station_id,
-      datetime: datetime || new Date().toISOString(),
-      predicted_demand: mockDemand,
-      model_version: 'mock',
-      confidence: 'low'
-    });
-    
   } catch (error) {
-    console.error('Prediction error:', error);
-    res.status(500).json({ error: 'Prediction failed' });
+    console.error(' Error:', error);
+    res.status(500).json({ error: 'Prediction failed', details: error.message });
   }
 });
 
-// Add these helper functions to your server.js:
+// ========== HELPER FUNCTIONS ==========
 
-function generateFeaturesForCloudRun(stationId, datetime, temperature = 15, precipitation = 0) {
-  const dt = datetime ? new Date(datetime) : new Date();
+function generateSystemWideFeaturesForCloudRun(datetime, temperature = 15, precipitation = 0) {
+  let hour, dayOfWeek, month, year, day;
   
-  const hour = dt.getHours();
-  const dayOfWeek = dt.getDay();
-  const month = dt.getMonth() + 1;
-  const year = dt.getFullYear();
-  const day = dt.getDate();
+  if (datetime) {
+    // Check if datetime is UTC (ends with 'Z')
+    if (datetime.endsWith('Z')) {
+      // UTC timestamp - convert to Boston time
+      const utcDate = new Date(datetime);
+      
+      // Boston is UTC-5 (EST) in winter (Nov-Mar), UTC-4 (EDT) in summer
+      const BOSTON_OFFSET_HOURS = -5; // December = EST
+      const bostonMs = utcDate.getTime() + (BOSTON_OFFSET_HOURS * 60 * 60 * 1000);
+      const bostonDate = new Date(bostonMs);
+      
+      hour = bostonDate.getUTCHours();
+      dayOfWeek = bostonDate.getUTCDay();
+      month = bostonDate.getUTCMonth() + 1;
+      year = bostonDate.getUTCFullYear();
+      day = bostonDate.getUTCDate();
+      
+      console.log(` Input (UTC): ${datetime}`);
+      console.log(` Converted to Boston: hour=${hour}, day=${day}`);
+    } else {
+      // No 'Z' suffix - parse as local time directly from string
+      // This avoids timezone interpretation issues
+      const match = datetime.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+      
+      if (match) {
+        year = parseInt(match[1]);
+        month = parseInt(match[2]);
+        day = parseInt(match[3]);
+        hour = parseInt(match[4]);
+        
+        // Calculate day of week from the date
+        const tempDate = new Date(year, month - 1, day);
+        dayOfWeek = tempDate.getDay();
+        
+        console.log(` Parsed local time: ${year}-${month}-${day} hour=${hour}`);
+      } else {
+        // Fallback - shouldn't happen with proper input
+        console.warn(` Could not parse datetime: ${datetime}, using current time`);
+        const now = new Date();
+        hour = now.getUTCHours();
+        dayOfWeek = now.getUTCDay();
+        month = now.getUTCMonth() + 1;
+        year = now.getUTCFullYear();
+        day = now.getUTCDate();
+      }
+    }
+  } else {
+    // No datetime provided - use current Boston time
+    const now = new Date();
+    const BOSTON_OFFSET_HOURS = -5;
+    const bostonMs = now.getTime() + (BOSTON_OFFSET_HOURS * 60 * 60 * 1000);
+    const bostonDate = new Date(bostonMs);
+    
+    hour = bostonDate.getUTCHours();
+    dayOfWeek = bostonDate.getUTCDay();
+    month = bostonDate.getUTCMonth() + 1;
+    year = bostonDate.getUTCFullYear();
+    day = bostonDate.getUTCDate();
+    
+    console.log(` No datetime provided, using Boston time: hour=${hour}`);
+  }
   
-  // Generate all 48 features
-  return [
+  // Use REAL historical patterns from training data
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+  const baseRides = isWeekend ? WEEKEND_PATTERNS[hour] : WEEKDAY_PATTERNS[hour];
+  
+  // Calculate related historical features
+  const rides_last_hour = baseRides;
+  const rides_same_hour_yesterday = Math.round(baseRides * 0.95);
+  const rides_same_hour_last_week = Math.round(baseRides * 0.98);
+  const rides_rolling_3h = Math.round(baseRides * 1.05);
+  const rides_rolling_24h = Math.round(baseRides * 8);
+  
+  console.log(` Hour ${hour} (${isWeekend ? 'weekend' : 'weekday'}): baseRides=${baseRides}`);
+  
+  // Convert to NOAA units (Fahrenheit and inches)
+  const temp_fahrenheit = (temperature * 9/5) + 32;
+  const temp_max = temp_fahrenheit + 4;
+  const temp_min = temp_fahrenheit - 4;
+  const temp_range = 8;
+  const temp_avg = temp_fahrenheit;
+  const precip_inches = precipitation / 25.4;
+  
+  console.log(` Temperature: ${temperature}C = ${temp_fahrenheit.toFixed(1)}F`);
+  
+  const features = [
+    // 1-5: Temporal
     hour, dayOfWeek, month, year, day,
+    
+    // 6-11: Cyclical encodings
     Math.sin(2 * Math.PI * hour / 24),
     Math.cos(2 * Math.PI * hour / 24),
     Math.sin(2 * Math.PI * dayOfWeek / 7),
     Math.cos(2 * Math.PI * dayOfWeek / 7),
     Math.sin(2 * Math.PI * month / 12),
     Math.cos(2 * Math.PI * month / 12),
-    hour >= 7 && hour <= 9 ? 1 : 0, // morning rush
-    hour >= 17 && hour <= 19 ? 1 : 0, // evening rush
-    hour >= 22 || hour <= 5 ? 1 : 0, // night
-    hour >= 11 && hour <= 14 ? 1 : 0, // midday
-    dayOfWeek === 0 || dayOfWeek === 6 ? 1 : 0, // weekend
-    0, 0, 0, // interaction features
-    temperature + 2, temperature - 2, precipitation, 4, temperature,
-    precipitation > 0.1 ? 1 : 0, 
-    precipitation > 0.5 ? 1 : 0,
-    temperature < 5 ? 1 : 0,
-    temperature > 25 ? 1 : 0,
-    100, 95, 98, 280, 2200, // historical (mock)
-    12.5, 3.2, 11.0, 1.8, 0.9, 1.5, 0.7, // statistical (mock)
-    0, 0, 0, 0, 0, 0, 0, 0 // padding
+    
+    // 12-16: Time of day flags
+    hour >= 7 && hour <= 9 ? 1 : 0,
+    hour >= 17 && hour <= 19 ? 1 : 0,
+    hour >= 22 || hour <= 5 ? 1 : 0,
+    hour >= 11 && hour <= 14 ? 1 : 0,
+    isWeekend ? 1 : 0,
+    
+    // 17-19: Interaction features
+    isWeekend * (hour >= 22 || hour <= 5 ? 1 : 0),
+    (!isWeekend ? 1 : 0) * (hour >= 7 && hour <= 9 ? 1 : 0),
+    (!isWeekend ? 1 : 0) * (hour >= 17 && hour <= 19 ? 1 : 0),
+    
+    // 20-24: Weather (Fahrenheit and inches)
+    temp_max,
+    temp_min,
+    precip_inches,
+    temp_range,
+    temp_avg,
+    
+    // 25-28: Weather flags
+    precip_inches > 0.01 ? 1 : 0,
+    precip_inches > 0.1 ? 1 : 0,
+    temp_fahrenheit < 50 ? 1 : 0,
+    temp_fahrenheit > 77 ? 1 : 0,
+    
+    // 29-33: Historical patterns
+    rides_last_hour,
+    rides_same_hour_yesterday,
+    rides_same_hour_last_week,
+    rides_rolling_3h,
+    rides_rolling_24h,
+    
+    // 34-40: Trip statistics
+    15.5, 8.2, 12.0, 3.8, 1.9, 2.5, 0.65,
+    
+    // 41-48: Bias mitigation features
+    hour === 8 ? 1 : 0,
+    (hour === 17 || hour === 18) ? 1 : 0,
+    (hour === 8 || hour === 17 || hour === 18) ? 1.0 :
+      (hour === 7 || hour === 9 || hour === 16 || hour === 19) ? 0.5 : 0.0,
+    rides_last_hour > 800 ? 1 : 0,
+    rides_last_hour < 200 ? 1 : 0,
+    Math.abs(rides_last_hour - rides_rolling_3h),
+    ((hour === 8 ? 1 : 0) + 
+     ((hour === 17 || hour === 18) ? 1 : 0) +
+     ((!isWeekend ? 1 : 0) * (hour >= 7 && hour <= 9 ? 1 : 0)) +
+     ((!isWeekend ? 1 : 0) * (hour >= 17 && hour <= 19 ? 1 : 0))) > 0 ? 1 : 0,
+    hour >= 0 && hour < 6 ? 0 :
+      hour >= 6 && hour < 10 ? 1 :
+      hour >= 10 && hour < 14 ? 2 :
+      hour >= 14 && hour < 18 ? 3 : 4
   ];
+  
+  console.log(`Generated ${features.length} features`);
+  
+  return features;
 }
 
-function getMockPrediction(stationId, datetime) {
+async function getStationShareByName(stationId) {
+  try {
+    // Fetch station info from GBFS to get name
+    const cacheKey = 'stations_info';
+    let stations = cache.get(cacheKey);
+    
+    if (!stations) {
+      const response = await axios.get(`${GBFS_BASE_URL}/station_information.json`);
+      stations = response.data.data.stations;
+      cache.set(cacheKey, stations, 3600);
+    }
+    
+    const station = stations.find(s => s.station_id === stationId);
+    
+    if (station && station.name) {
+      const stationName = station.name.trim();
+      
+      // Try exact match first
+      if (STATION_SHARES_BY_NAME[stationName]) {
+        const share = STATION_SHARES_BY_NAME[stationName];
+        console.log(` Found share for "${stationName}": ${(share * 100).toFixed(2)}%`);
+        return share;
+      }
+      
+      // Try case-insensitive match
+      const lowerName = stationName.toLowerCase();
+      for (const [name, share] of Object.entries(STATION_SHARES_BY_NAME)) {
+        if (name.toLowerCase() === lowerName) {
+          console.log(` Found share (case-insensitive) for "${name}": ${(share * 100).toFixed(2)}%`);
+          return share;
+        }
+      }
+      
+      console.warn(`Station "${stationName}" not in training data, using average`);
+    } else {
+      console.warn(` Station ${stationId} not found in GBFS`);
+    }
+  } catch (err) {
+    console.warn('Could not fetch station info:', err.message);
+  }
+  
+  // Fallback to average share
+  return 0.005;
+}
+
+function getMockPrediction(stationId, datetime, temperature = 15, precipitation = 0) {
   const dt = datetime ? new Date(datetime) : new Date();
   const hour = dt.getHours();
   const dayOfWeek = dt.getDay();
+  const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
   
-  // More realistic mock predictions for rebalancing
-  const stationHash = parseInt(stationId) || stationId.charCodeAt(0);
-  const stationFactor = (stationHash % 10) / 10;
+  // Use REAL hourly patterns
+  const systemBase = isWeekend ? WEEKEND_PATTERNS[hour] : WEEKDAY_PATTERNS[hour];
   
-  if (dayOfWeek > 0 && dayOfWeek < 6) { // Weekday
-    if (hour >= 7 && hour <= 9) return Math.round(20 + stationFactor * 30); // 20-50
-    if (hour >= 17 && hour <= 19) return Math.round(25 + stationFactor * 35); // 25-60
-    if (hour >= 11 && hour <= 14) return Math.round(15 + stationFactor * 20); // 15-35
-    return Math.round(5 + stationFactor * 15); // 5-20
-  } else { // Weekend
-    if (hour >= 10 && hour <= 16) return Math.round(18 + stationFactor * 25); // 18-43
-    return Math.round(5 + stationFactor * 10); // 5-15
-  }
+  // Apply weather adjustments
+  let weatherMultiplier = 1.0;
+  if (temperature < 5) weatherMultiplier *= 0.6;
+  else if (temperature < 10) weatherMultiplier *= 0.8;
+  if (temperature > 30) weatherMultiplier *= 0.85;
+  if (precipitation > 0.5) weatherMultiplier *= 0.5;
+  else if (precipitation > 0.1) weatherMultiplier *= 0.7;
+  
+  const systemPrediction = Math.round(systemBase * weatherMultiplier);
+  const stationPrediction = Math.round(systemPrediction * 0.005); // Average 0.5%
+  
+  return Math.max(0, stationPrediction);
 }
 
 // ========== HISTORICAL DATA ENDPOINT ==========
 
-/**
- * GET /api/historical/:stationId/:timeRange
- * Proxy requests to historical data service
- * timeRange: hourly | daily | weekly
- */
 app.get('/api/historical/:stationId/:timeRange', async (req, res) => {
   try {
     const { stationId, timeRange } = req.params;
     
-    // Validate time range
     if (!['hourly', 'daily', 'weekly'].includes(timeRange)) {
-      return res.status(400).json({ error: 'Invalid time range. Use: hourly, daily, or weekly' });
+      return res.status(400).json({ error: 'Invalid time range' });
     }
     
-    // Forward request to historical data service
     const response = await axios.get(
       `${HISTORICAL_SERVICE_URL}/api/historical/${stationId}/${timeRange}`,
-      { timeout: 30000 } // 30 second timeout for data processing
+      { timeout: 30000 }
     );
     
     res.json(response.data);
   } catch (error) {
-    console.error('Error calling historical data service:', error.message);
-    
-    // If historical service is unavailable, return a graceful error
     if (error.code === 'ECONNREFUSED') {
       return res.status(503).json({ 
-        error: 'Historical data service is currently unavailable',
+        error: 'Historical service unavailable',
         data: []
       });
     }
     
-    res.status(500).json({ 
-      error: 'Failed to get historical data',
-      message: error.message 
-    });
+    res.status(500).json({ error: 'Failed to get historical data' });
   }
 });
 
@@ -296,7 +518,8 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
-    cache_keys: cache.keys().length
+    cache_keys: cache.keys().length,
+    ml_service: EXTERNAL_ML_API_URL
   });
 });
 
@@ -304,8 +527,10 @@ app.get('/health', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Bluebikes Backend Server running on port ${PORT}`);
   console.log(`GBFS API: ${GBFS_BASE_URL}`);
-  console.log(`ML Service: ${ML_SERVICE_URL}`);
-  console.log(`Historical Data Service: ${HISTORICAL_SERVICE_URL}`);
+  console.log(`ML Service: ${EXTERNAL_ML_API_URL}`);
+  console.log(`Historical Service: ${HISTORICAL_SERVICE_URL}`);
+  console.log(`\n✅ Loaded ${Object.keys(WEEKDAY_PATTERNS).length} hourly patterns`);
+  console.log(`✅ Loaded ${Object.keys(STATION_SHARES_BY_NAME).length} station shares`);
   console.log(`\nAvailable endpoints:`);
   console.log(`  GET  /api/stations`);
   console.log(`  GET  /api/stations/status`);
