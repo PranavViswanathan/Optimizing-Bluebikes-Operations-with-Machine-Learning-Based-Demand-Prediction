@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStations } from '../context/StationContext';
-import HistoricalChart from './HistoricalChart';
+
 
 const StationDetail = () => {
     const { stationId } = useParams();
@@ -208,11 +208,6 @@ const StationDetail = () => {
                             </>
                         )}
                     </div>
-                </div>
-
-                {/* Historical Trends Card */}
-                <div className="detail-card historical-trends-card">
-                    <HistoricalChart stationId={stationId} />
                 </div>
             </div>
         </div>
