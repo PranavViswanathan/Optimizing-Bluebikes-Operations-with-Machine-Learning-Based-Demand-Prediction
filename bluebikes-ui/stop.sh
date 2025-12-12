@@ -55,7 +55,7 @@ if [ -f "logs/frontend.pid" ]; then
     rm -f logs/frontend.pid
 fi
 
-# Also kill any lingering processes by name (backup cleanup)
+# Also kill any lingering processes by name
 pkill -f "node server.js" 2>/dev/null && echo "   Cleaned up lingering backend process"
 pkill -f "python ml-service.py" 2>/dev/null && echo "   Cleaned up lingering ML service"
 pkill -f "python historical-data-service.py" 2>/dev/null && echo "   Cleaned up lingering Historical service"

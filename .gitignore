@@ -1,68 +1,84 @@
+############################
+# Environment / Secrets
+############################
 env/
+venv/
+.Python
 .env
+.env.bak
 !.env.example
-notebooks/test.py
+!bluebikes-ui/**/.env*
 
-# Data files
+############################
+# Data Files
+############################
 *.csv
 *.pkl
 *.pickle
 *.parquet
 *.xlsx
 *.xls
-*.json
-!bluebikes-ui/**/*.json
 *.tsv
 *.tfevents
 
-# Data directories
-# data/processed/
-# data/raw/
+# JSON is ignored EXCEPT UI config JSON
+*.json
+!bluebikes-ui/**/*.json
+
+############################
+# Data Directories
+############################
 data/interim/
 DatasetGeneration/bluebikes/*.csv
 DatasetGeneration/*.csv
 data_pipeline/logs/
-*.log
-bluebikes_proj
-
 data_pipeline/data/
 !data_pipeline/data.dvc
 
-# Keep directory structure with .gitkeep
+# Keep directory structure
 !data/.gitkeep
-# !data/processed/.gitkeep
-# !data/raw/.gitkeep
 
-# Mac files
-__MACOSX/
-.DS_Store
-**/ .DS_Store
-
-# Python
+############################
+# Python Cache
+############################
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
-env/
-venv/
-.env
-!bluebikes-ui/**/.env*
 
+############################
+# Logs
+############################
+*.log
 mlruns/
-.env
-.env.bak
-# Node / React frontend
+
+############################
+# Mac OS Files
+############################
+.DS_Store
+__MACOSX/
+**/.DS_Store
+
+############################
+# Node / React
+############################
 node_modules/
 bluebikes-ui/frontend/node_modules/
 bluebikes-ui/**/node_modules/
 
-# Build caches
+############################
+# Build Caches
+############################
 **/.cache/
 **/cache/
 
-# Build artifacts
+############################
+# Build Artifacts
+############################
 build/
 dist/
 
-keys/
+############################
+# Misc
+############################
+bluebikes_proj
