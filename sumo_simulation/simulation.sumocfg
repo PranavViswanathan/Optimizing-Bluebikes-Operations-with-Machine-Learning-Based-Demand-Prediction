@@ -1,0 +1,11 @@
+<configuration>
+    <input>
+        <net-file value="boston.net.xml"/>
+        <route-files value="trips.trips.xml"/>
+        <additional-files value="stations.add.xml,suggestions.add.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <end value="3600"/>
+    </time>
+</configuration>

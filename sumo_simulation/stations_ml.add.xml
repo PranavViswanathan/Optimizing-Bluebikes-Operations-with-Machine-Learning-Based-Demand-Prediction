@@ -1,0 +1,2119 @@
+<additional>
+    <!-- Bluebikes stations color-coded by predicted demand -->
+    <poi id="M32037" type="station" x="-71.088163376" y="42.362356782" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Ames St at Main St"/>
+    </poi>
+    <poi id="M32053" type="station" x="-71.080272794" y="42.361697435" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="One Memorial Drive"/>
+    </poi>
+    <poi id="C32063" type="station" x="-71.08336953450817" y="42.34135615767354" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mass Ave T Station"/>
+    </poi>
+    <poi id="B32063" type="station" x="-71.10124647617339" y="42.33329254719182" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="St. Alphonsus St at Tremont St"/>
+    </poi>
+    <poi id="S32023" type="station" x="-71.10402522613185" y="42.38100143038052" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="30 Dane St"/>
+    </poi>
+    <poi id="C32064" type="station" x="-71.053419113" y="42.320072532" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Sydney St at Carson St"/>
+    </poi>
+    <poi id="S32013" type="station" x="-71.10594004465383" y="42.39778339961249" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Magoun Square at Trum Field"/>
+    </poi>
+    <poi id="S32042" type="station" x="-71.107833" y="42.398444" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Trum Field @ Cedar St (Temp Winter Station)"/>
+    </poi>
+    <poi id="M32083" type="station" x="-71.086543798" y="42.369074702" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="John Ahern Field at Kennedy-Longfellow School"/>
+    </poi>
+    <poi id="C32021" type="station" x="-71.031749964" y="42.34482646" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="ID Building West"/>
+    </poi>
+    <poi id="S32004" type="station" x="-71.108569026" y="42.383641124" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Conway Park - Somerville Avenue"/>
+    </poi>
+    <poi id="D32019" type="station" x="-71.062802076" y="42.352372289" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Chinatown T Stop"/>
+    </poi>
+    <poi id="M32018" type="station" x="-71.118483305" y="42.373244882" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard Square at Mass Ave/ Dunster"/>
+    </poi>
+    <poi id="Z32998" type="station" x="-71.0873863200095" y="42.36412658996667" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broadway at Kittie Knox Bike Path"/>
+    </poi>
+    <poi id="A32017" type="station" x="-71.13275302578586" y="42.34922469338298" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Commonwealth Ave at Griggs St"/>
+    </poi>
+    <poi id="B32008" type="station" x="-71.058426499" y="42.358255148" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boston City Hall - 28 State St"/>
+    </poi>
+    <poi id="D32049" type="station" x="-71.0724207387284" y="42.34954403114251" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Stuart St at Berkeley St"/>
+    </poi>
+    <poi id="A32056" type="station" x="-71.11004680395126" y="42.33661005730433" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Riverway at Brookline Ave"/>
+    </poi>
+    <poi id="M32062" type="station" x="-71.10026478767395" y="42.37426713524931" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Inman Square at Springfield St."/>
+    </poi>
+    <poi id="B32002" type="station" x="-71.08798563480377" y="42.33624444796878" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Ruggles T Stop - Columbus Ave at Melnea Cass Blvd"/>
+    </poi>
+    <poi id="M32034" type="station" x="-71.070141554" y="42.369975567" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="EF - North Point Park"/>
+    </poi>
+    <poi id="C32027" type="station" x="-71.092225" y="42.309796" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Franklin Park - Seaver St at Humboldt Ave"/>
+    </poi>
+    <poi id="M32038" type="station" x="-71.116998434" y="42.369152784" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard University River Houses at DeWolfe St / Cowperthwaite St"/>
+    </poi>
+    <poi id="M32065" type="station" x="-71.08579014980933" y="42.36955297756508" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Kennedy-Longfellow School 158 Spring St"/>
+    </poi>
+    <poi id="C32055" type="station" x="-71.071103692" y="42.287441015" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Codman Square Library"/>
+    </poi>
+    <poi id="V32004" type="station" x="-71.06546759905541" y="42.39648358247693" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broadway at Lynde St"/>
+    </poi>
+    <poi id="C32046" type="station" x="-71.128205" y="42.286307" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Roslindale Village - Washington St"/>
+    </poi>
+    <poi id="C32037" type="station" x="-71.07929527759552" y="42.30412792739016" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Four Corners - 157 Washington St"/>
+    </poi>
+    <poi id="V32008" type="station" x="-71.052636027" y="42.410352468" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broadway at Maple St"/>
+    </poi>
+    <poi id="G32002" type="station" x="-71.067793" y="42.42386" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Northern Strand at Main St"/>
+    </poi>
+    <poi id="A32052" type="station" x="-71.124257445" y="42.367926002" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard Stadium: N. Harvard St at Soldiers Field Rd"/>
+    </poi>
+    <poi id="M32042" type="station" x="-71.104046702" y="42.355448723" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="MIT Vassar St"/>
+    </poi>
+    <poi id="A32008" type="station" x="-71.105259657" y="42.347254753" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Park Dr at Buswell St"/>
+    </poi>
+    <poi id="D32007" type="station" x="-71.067877889" y="42.352503061" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boylston St at Arlington St"/>
+    </poi>
+    <poi id="M32005" type="station" x="-71.09115600585936" y="42.3621312344991" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="MIT Stata Center at Vassar St / Main St"/>
+    </poi>
+    <poi id="S32017" type="station" x="-71.08318716287613" y="42.3876281075134" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="East Somerville Library (Broadway and Illinois)"/>
+    </poi>
+    <poi id="M32011" type="station" x="-71.102935195" y="42.365048885" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Central Square at Mass Ave / Essex St"/>
+    </poi>
+    <poi id="D32029" type="station" x="-71.16031676530838" y="42.3489528466951" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Brock St"/>
+    </poi>
+    <poi id="D32054" type="station" x="-71.145646811" y="42.346976042" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="The Overlook at St. Gabriel's"/>
+    </poi>
+    <poi id="M32049" type="station" x="-71.07200495972165" y="42.37197678467975" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Child Street at Brian P. Murphy Staircase"/>
+    </poi>
+    <poi id="K32005" type="station" x="-71.120472193" y="42.333786368" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Brookline Town Hall"/>
+    </poi>
+    <poi id="K32017" type="station" x="-71.12490355968475" y="42.3443517550051" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard St and Stedman St"/>
+    </poi>
+    <poi id="V32016" type="station" x="-71.04731440549585" y="42.40336946230013" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Chelsea St at Vine St"/>
+    </poi>
+    <poi id="D32011" type="station" x="-71.066128612" y="42.350756407" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Stuart St at Charles St"/>
+    </poi>
+    <poi id="M32002" type="station" x="-71.09169" y="42.366277" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="One Kendall Square at Hampshire St / Portland St"/>
+    </poi>
+    <poi id="A32022" type="station" x="-71.068687916" y="42.379190326" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Edwards Playground - Main St at Eden St"/>
+    </poi>
+    <poi id="C32105" type="station" x="-71.109530687" y="42.28589952" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="606 American Legion Hwy at Canterbury St"/>
+    </poi>
+    <poi id="T32006" type="station" x="-70.89183300733566" y="42.51142784358897" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lafayette at Leach St"/>
+    </poi>
+    <poi id="A32025" type="station" x="-71.064214945" y="42.365620375" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Nashua Street at Red Auerbach Way"/>
+    </poi>
+    <poi id="A32006" type="station" x="-71.1182756971175" y="42.36426344063853" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Soldiers Field Park - 111 Western Ave"/>
+    </poi>
+    <poi id="A32002" type="station" x="-71.11903488636017" y="42.35169201885973" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Commonwealth Ave at Agganis Way"/>
+    </poi>
+    <poi id="W32002" type="station" x="-71.18573324459247" y="42.365260317694485" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Watertown Sq"/>
+    </poi>
+    <poi id="C32015" type="station" x="-71.075354" y="42.325333" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Dudley Town Common - Mt Pleasant Ave at Blue Hill Ave"/>
+    </poi>
+    <poi id="V32003" type="station" x="-71.055786" y="42.406872" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Everett Square (Broadway at Norwood St)"/>
+    </poi>
+    <poi id="D32038" type="station" x="-71.063814878" y="42.374891877" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Main St at Thompson Sq"/>
+    </poi>
+    <poi id="M32026" type="station" x="-71.104459405" y="42.370756626" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="359 Broadway - Broadway at Fayette Street"/>
+    </poi>
+    <poi id="B32020" type="station" x="-71.100694" y="42.345733" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Burlington Ave at Brookline Ave"/>
+    </poi>
+    <poi id="D32042" type="station" x="-71.06781138111728" y="42.35182806892068" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Park Plaza at Charles St S."/>
+    </poi>
+    <poi id="A32032" type="station" x="-71.03270328" y="42.374138832" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bremen St at Marion St"/>
+    </poi>
+    <poi id="M32068" type="station" x="-71.124487042" y="42.382961988" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Graham and Parks School – Linnaean St at Walker St"/>
+    </poi>
+    <poi id="H32003" type="station" x="-71.03857017704286" y="42.39022671103383" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Chelsea Square"/>
+    </poi>
+    <poi id="C32017" type="station" x="-71.03877" y="42.335741" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="South Boston Library - 646 E Broadway"/>
+    </poi>
+    <poi id="C32060" type="station" x="-71.07421449387857" y="42.34254913737952" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Tremont St at W. Dedham St"/>
+    </poi>
+    <poi id="M32051" type="station" x="-71.143478951426" y="42.38267827521855" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Fresh Pond Reservation"/>
+    </poi>
+    <poi id="M32055" type="station" x="-71.09522221614498" y="42.36599432867437" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard St at Greene-Rose Heritage Park"/>
+    </poi>
+    <poi id="C32089" type="station" x="-71.115944028" y="42.296115041" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hyde Park Ave at Walk Hill St"/>
+    </poi>
+    <poi id="S32036" type="station" x="-71.097713709" y="42.391664505" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Somerville City Hall Annex"/>
+    </poi>
+    <poi id="S32034" type="station" x="-71.10347712" y="42.379321694" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Perry Park"/>
+    </poi>
+    <poi id="S32011" type="station" x="-71.12590793383788" y="42.40087950159558" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Teele Square"/>
+    </poi>
+    <poi id="M32069" type="station" x="-71.15058331757609" y="42.39239749145834" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Smith Pl at Wilson Rd"/>
+    </poi>
+    <poi id="M32063" type="station" x="-71.09930185605663" y="42.36860524248197" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Sennott Park Broadway at Norfolk Street"/>
+    </poi>
+    <poi id="M32024" type="station" x="-71.125107" y="42.380287" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard University Radcliffe Quadrangle at Shepard St / Garden St"/>
+    </poi>
+    <poi id="S32019" type="station" x="-71.12011306006025" y="42.396386809455" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Grove St at Community Path"/>
+    </poi>
+    <poi id="T32017" type="station" x="-70.90166732668875" y="42.48628784971989" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Vinnin Square"/>
+    </poi>
+    <poi id="S32050" type="station" x="-71.09117388747109" y="42.375447604963405" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boynton Yards at 101 South Street"/>
+    </poi>
+    <poi id="T32009" type="station" x="-70.891444" y="42.503332" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Salem State University - North Campus"/>
+    </poi>
+    <poi id="D32016" type="station" x="-71.071290374" y="42.360728383" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Charles Circle - Charles St at Cambridge St"/>
+    </poi>
+    <poi id="V32013" type="station" x="-71.06041654944418" y="42.40616124132245" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Kearins Playground"/>
+    </poi>
+    <poi id="M32061" type="station" x="-71.09670273977825" y="42.36135837662249" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mass Ave at Albany St"/>
+    </poi>
+    <poi id="A32035" type="station" x="-71.006044388" y="42.386827707" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Orient Heights T Stop - Bennington St at Saratoga St"/>
+    </poi>
+    <poi id="M32014" type="station" x="-71.114214" y="42.366621" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard University Housing - 115 Putnam Ave at Peabody Terrace"/>
+    </poi>
+    <poi id="D32006" type="station" x="-71.050877" y="42.363871" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lewis Wharf at Atlantic Ave"/>
+    </poi>
+    <poi id="M32030" type="station" x="-71.10809952020645" y="42.36178043960605" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Dana Park"/>
+    </poi>
+    <poi id="M32031" type="station" x="-71.132788" y="42.388966" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Danehy Park"/>
+    </poi>
+    <poi id="M32029" type="station" x="-71.119084" y="42.387995" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Porter Square Station"/>
+    </poi>
+    <poi id="R32002" type="station" x="-70.99272429943085" y="42.40715655698643" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Orr Sq (Shirley Ave)"/>
+    </poi>
+    <poi id="M32067" type="station" x="-71.089989901" y="42.371945739" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Berkshire Street at Cambridge Street"/>
+    </poi>
+    <poi id="M32023" type="station" x="-71.116919279" y="42.377991199" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard University / SEAS Cruft-Pierce Halls at 29 Oxford St"/>
+    </poi>
+    <poi id="M32087" type="station" x="-71.11966431146357" y="42.37433925370521" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Church St"/>
+    </poi>
+    <poi id="M32075" type="station" x="-71.139056683" y="42.389552355" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Danehy Park at New Street"/>
+    </poi>
+    <poi id="C32033" type="station" x="-71.0539" y="42.3106" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Savin Hill T Stop - S Sydney St at Bay St"/>
+    </poi>
+    <poi id="A32058" type="station" x="-71.059624" y="42.359322" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Tremont St. at Court St."/>
+    </poi>
+    <poi id="A32009" type="station" x="-71.076742649" y="42.341329217" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="South End Library - Tremont St at W Newton St"/>
+    </poi>
+    <poi id="S32053" type="station" x="-71.085974813" y="42.377710819" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Chestnut St at Poplar St"/>
+    </poi>
+    <poi id="D32034" type="station" x="-71.13997217276847" y="42.348358628170445" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Commonwealth Ave at Kelton St"/>
+    </poi>
+    <poi id="D32017" type="station" x="-71.07286870479584" y="42.35553628489709" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mugar Way at Beacon St"/>
+    </poi>
+    <poi id="C32035" type="station" x="-71.062179685" y="42.34372139" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Troy Boston"/>
+    </poi>
+    <poi id="D32014" type="station" x="-71.063348" y="42.354979" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Tremont St at West St"/>
+    </poi>
+    <poi id="M32017" type="station" x="-71.12098601080106" y="42.373328798874056" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard Square at Brattle St / Eliot St"/>
+    </poi>
+    <poi id="L32005" type="station" x="-71.14456963094199" y="42.40016804853787" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Thorndike Field at Minuteman Bikeway"/>
+    </poi>
+    <poi id="T32012" type="station" x="-70.89684" y="42.523994" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Salem MBTA - Lower Level"/>
+    </poi>
+    <poi id="K32003" type="station" x="-71.11626680949485" y="42.33274392304887" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Brookline Village - Station Street at MBTA"/>
+    </poi>
+    <poi id="C32005" type="station" x="-71.07903778553009" y="42.3350989929096" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Lenox St"/>
+    </poi>
+    <poi id="B32018" type="station" x="-71.08678414955648" y="42.34740620525209" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boylston St at Massachusetts Ave"/>
+    </poi>
+    <poi id="C32032" type="station" x="-71.03764" y="42.3481" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Congress St at Northern Ave"/>
+    </poi>
+    <poi id="C32085" type="station" x="-71.153460383" y="42.286265135" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Centre St at W. Roxbury Post Office"/>
+    </poi>
+    <poi id="A32051" type="station" x="-71.027786732" y="42.379206181" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Day Sq"/>
+    </poi>
+    <poi id="T32007" type="station" x="-70.89478075504303" y="42.50182398896298" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Salem State University - Bike Path at Loring Ave"/>
+    </poi>
+    <poi id="C32103" type="station" x="-71.080286" y="42.278747" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Morton St at Gallivan Blvd"/>
+    </poi>
+    <poi id="S32018" type="station" x="-71.07746601104736" y="42.39223284004628" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Assembly Square T"/>
+    </poi>
+    <poi id="M32032" type="station" x="-71.08216792345047" y="42.36356015842989" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Kendall Street"/>
+    </poi>
+    <poi id="L32002" type="station" x="-71.14906518727366" y="42.40935395518158" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Linwood St at Minuteman Bikeway"/>
+    </poi>
+    <poi id="R32007" type="station" x="-71.008942" y="42.408088" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Revere Public Library"/>
+    </poi>
+    <poi id="B32059" type="station" x="-71.09218861916816" y="42.33286288486264" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Whittier St Health Center"/>
+    </poi>
+    <poi id="E32011" type="station" x="-71.096403956" y="42.319332957" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="The Dimock Center"/>
+    </poi>
+    <poi id="B32034" type="station" x="-71.09732501226972" y="42.34465062887831" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boylston St at Jersey St"/>
+    </poi>
+    <poi id="Z32999" type="station" x="-71.09746182817616" y="42.269988465946064" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cummins Highway at Blue Hill Ave T Stop"/>
+    </poi>
+    <poi id="E32001" type="station" x="-71.11543" y="42.309054" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Curtis Hall - South St at Centre St"/>
+    </poi>
+    <poi id="K32002" type="station" x="-71.139063597" y="42.338193417" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Beacon St at Tappan St"/>
+    </poi>
+    <poi id="A32036" type="station" x="-71.0410200806291" y="42.373312125824704" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boston East - 126 Border St"/>
+    </poi>
+    <poi id="B32029" type="station" x="-71.072902679" y="42.309596658" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Columbia Rd at Ceylon St"/>
+    </poi>
+    <poi id="M32009" type="station" x="-71.10057324171066" y="42.36346469304347" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lafayette Square at Mass Ave / Main St / Columbia St"/>
+    </poi>
+    <poi id="S32006" type="station" x="-71.123024" y="42.396969" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Davis Square"/>
+    </poi>
+    <poi id="V32011" type="station" x="-71.06373842814719" y="42.39836059620832" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broadway at Beacham St"/>
+    </poi>
+    <poi id="D32015" type="station" x="-71.059367" y="42.351356" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Chinatown Gate Plaza"/>
+    </poi>
+    <poi id="C32048" type="station" x="-71.12119538714069" y="42.29266592872725" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Archdale Rd at Washington St"/>
+    </poi>
+    <poi id="W32005" type="station" x="-71.18751436471939" y="42.36759307632294" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Watertown City Hall"/>
+    </poi>
+    <poi id="D32035" type="station" x="-71.13022770741735" y="42.34953016890375" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard Ave at Brainerd Rd"/>
+    </poi>
+    <poi id="D32031" type="station" x="-71.166263819" y="42.350497365" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Oak Square - 615 Washington St"/>
+    </poi>
+    <poi id="B32028" type="station" x="-71.081306696" y="42.307773352" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Grove Hall Library - 41 Geneva Ave"/>
+    </poi>
+    <poi id="E32016" type="station" x="-71.123798" y="42.351911" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Commonwealth Ave at Naples Rd"/>
+    </poi>
+    <poi id="C32051" type="station" x="-71.02495" y="42.3334" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Farragut Rd at E. 6th St"/>
+    </poi>
+    <poi id="F32008" type="station" x="-71.096565127" y="42.418046832" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Logan Park"/>
+    </poi>
+    <poi id="C32028" type="station" x="-71.044024" y="42.344792" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="The Lawn on D"/>
+    </poi>
+    <poi id="A32005" type="station" x="-71.137776375" y="42.361482739" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Brighton Mills - 370 Western Ave"/>
+    </poi>
+    <poi id="K32015" type="station" x="-71.115234017" y="42.344000697" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="1200 Beacon St"/>
+    </poi>
+    <poi id="M32003" type="station" x="-71.083199143" y="42.362322688" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="One Broadway / Kendall Sq at Main St / 3rd St"/>
+    </poi>
+    <poi id="M32048" type="station" x="-71.08277142047882" y="42.36544486137399" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Third at Binney"/>
+    </poi>
+    <poi id="L32001" type="station" x="-71.15336636682059" y="42.41606457115141" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Railroad Lot and Minuteman Bikeway"/>
+    </poi>
+    <poi id="F32005" type="station" x="-71.09124541293568" y="42.423331368452885" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Haines Square"/>
+    </poi>
+    <poi id="A32044" type="station" x="-71.0333597474255" y="42.36774122306014" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Maverick St at Massport Path"/>
+    </poi>
+    <poi id="S32015" type="station" x="-71.090477943" y="42.391018867" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Foss Park"/>
+    </poi>
+    <poi id="M32086" type="station" x="-71.076274037" y="42.372285366" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Morgan Ave at North First St"/>
+    </poi>
+    <poi id="C32057" type="station" x="-71.0638403149278" y="42.34521562115022" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harrison Ave at Mullins Way"/>
+    </poi>
+    <poi id="C32107" type="station" x="-71.044247031" y="42.349967003" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Pier 4 Blvd at Autumn Ln"/>
+    </poi>
+    <poi id="S32005" type="station" x="-71.114050746" y="42.385668039" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Wilson Square"/>
+    </poi>
+    <poi id="B32055" type="station" x="-71.0901582" y="42.3294633" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bartlett St at John Elliot Sq"/>
+    </poi>
+    <poi id="M32004" type="station" x="-71.08495473861694" y="42.3624278429124" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Kendall T"/>
+    </poi>
+    <poi id="M32059" type="station" x="-71.0875672" y="42.3636929" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Ames St at Broadway"/>
+    </poi>
+    <poi id="F32002" type="station" x="-71.108129382" y="42.417519093" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Medford Sq - Riverside Ave at River St"/>
+    </poi>
+    <poi id="C32043" type="station" x="-71.087111" y="42.2945833" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Talbot Ave At Blue Hill Ave"/>
+    </poi>
+    <poi id="K32010" type="station" x="-71.12135231494904" y="42.32464510949409" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="High St at Cypress St"/>
+    </poi>
+    <poi id="M32066" type="station" x="-71.14797130814623" y="42.39790817368333" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Discovery Park - 30 Acorn Park Drive"/>
+    </poi>
+    <poi id="B32027" type="station" x="-71.091859698" y="42.316851139" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="NCAAA - Walnut Ave at Crawford St"/>
+    </poi>
+    <poi id="M32056" type="station" x="-71.12260755160605" y="42.39120971915856" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mass Ave at Hadley/Walden"/>
+    </poi>
+    <poi id="B32023" type="station" x="-71.09126061201096" y="42.32143814183195" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="MLK Blvd at Washington St"/>
+    </poi>
+    <poi id="M32057" type="station" x="-71.13775670528412" y="42.38536765218425" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Vassal Lane at Tobin/VLUS"/>
+    </poi>
+    <poi id="S32054" type="station" x="-71.094428" y="42.377309" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Union Square Station"/>
+    </poi>
+    <poi id="B32006" type="station" x="-71.10061883926392" y="42.34011512249236" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Colleges of the Fenway - Fenway at Avenue Louis Pasteur"/>
+    </poi>
+    <poi id="M32035" type="station" x="-71.07654601335526" y="42.366446738529454" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Rogers St &amp; Land Blvd"/>
+    </poi>
+    <poi id="M32076" type="station" x="-71.1084133386612" y="42.35766247889882" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Old Morse Park at Putnam Ave"/>
+    </poi>
+    <poi id="A32000" type="station" x="-71.04457139968872" y="42.3533905070523" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Fan Pier"/>
+    </poi>
+    <poi id="D32024" type="station" x="-71.069804668" y="42.356063724" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Beacon St at Charles St"/>
+    </poi>
+    <poi id="D32000" type="station" x="-71.06528744101524" y="42.36125721646537" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cambridge St at Joy St"/>
+    </poi>
+    <poi id="R32001" type="station" x="-70.99804848432541" y="42.40833705812975" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Sumner St at Shirley Ave"/>
+    </poi>
+    <poi id="B32064" type="station" x="-71.08767616843123" y="42.33420351352245" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Flat 9 at Whittier"/>
+    </poi>
+    <poi id="M32043" type="station" x="-71.13320231437683" y="42.37478628706384" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mt Auburn"/>
+    </poi>
+    <poi id="D32060" type="station" x="-71.073014379" y="42.380101562" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hood Park"/>
+    </poi>
+    <poi id="F32006" type="station" x="-71.09651505947113" y="42.40721644126376" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hormel Stadium"/>
+    </poi>
+    <poi id="S32041" type="station" x="-71.090098" y="42.380078" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Union Square East"/>
+    </poi>
+    <poi id="E32012" type="station" x="-71.101889014" y="42.324273348" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Martha Eliot Health Center"/>
+    </poi>
+    <poi id="E32010" type="station" x="-71.114249" y="42.300923" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Forest Hills"/>
+    </poi>
+    <poi id="D32023" type="station" x="-71.048422098" y="42.378324389" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Spaulding Rehabilitation Hospital - Charlestown Navy Yard"/>
+    </poi>
+    <poi id="A32003" type="station" x="-71.10813117" y="42.350385308" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="B.U. Central - 725 Comm. Ave."/>
+    </poi>
+    <poi id="C32020" type="station" x="-71.028664" y="42.344827" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="ID Building East"/>
+    </poi>
+    <poi id="A32031" type="station" x="-71.039431" y="42.369536" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="East Boston Neighborhood Health Center - 20 Maverick Square"/>
+    </poi>
+    <poi id="A32042" type="station" x="-71.05656400803126" y="42.35294569782581" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Surface Rd at Summer St"/>
+    </poi>
+    <poi id="B32058" type="station" x="-71.1001680795016" y="42.34734473177431" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lansdowne T Stop"/>
+    </poi>
+    <poi id="A32026" type="station" x="-71.053181" y="42.354659" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Purchase St at Pearl St"/>
+    </poi>
+    <poi id="V32005" type="station" x="-71.0724475979805" y="42.39329263225162" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Encore"/>
+    </poi>
+    <poi id="D32020" type="station" x="-71.064608" y="42.375603" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Main St at Austin St"/>
+    </poi>
+    <poi id="C32016" type="station" x="-71.046282291" y="42.335995555" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="W Broadway at Dorchester St"/>
+    </poi>
+    <poi id="D32037" type="station" x="-71.060796738" y="42.380536199" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Medford St at Charlestown BCYF"/>
+    </poi>
+    <poi id="T32004" type="station" x="-70.89570075273514" y="42.51803519796769" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mayor Salvo Path at Mill St"/>
+    </poi>
+    <poi id="C32091" type="station" x="-71.03987016504107" y="42.341780891371904" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="645 Summer St"/>
+    </poi>
+    <poi id="H32002" type="station" x="-71.033252597" y="42.393358469" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bellingham Square"/>
+    </poi>
+    <poi id="C32086" type="station" x="-71.15728851416861" y="42.28277901074054" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Centre St at Parkway YMCA"/>
+    </poi>
+    <poi id="C32000" type="station" x="-71.069616" y="42.345392" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Tremont St at E Berkeley St"/>
+    </poi>
+    <poi id="B32060" type="station" x="-71.103915" y="42.349609" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="700 Commonwealth Ave."/>
+    </poi>
+    <poi id="S32040" type="station" x="-71.105587" y="42.392525" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Community Path at Lowell St"/>
+    </poi>
+    <poi id="M32006" type="station" x="-71.093198" y="42.3581" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="MIT at Mass Ave / Amherst St"/>
+    </poi>
+    <poi id="M32025" type="station" x="-71.130263925" y="42.397780776" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Linear Park - Mass. Ave. at Cameron Ave. "/>
+    </poi>
+    <poi id="M32041" type="station" x="-71.101332664" y="42.359547138" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="MIT Pacific St at Purrington St"/>
+    </poi>
+    <poi id="M32080" type="station" x="-71.091853619" y="42.362891316" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Main Street/Albany Street/Technology Square"/>
+    </poi>
+    <poi id="A32053" type="station" x="-71.05934903025626" y="42.36473898691789" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Valenti Way at Haverhill St"/>
+    </poi>
+    <poi id="B32033" type="station" x="-71.0988699646623" y="42.336585554561154" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Huntington Ave at Mass Art"/>
+    </poi>
+    <poi id="D32061" type="station" x="-71.08255058528357" y="42.33759485033856" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lenox St at Kendall St"/>
+    </poi>
+    <poi id="D32059" type="station" x="-71.08038157224655" y="42.33584612997077" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Shawmut Ave at Lenox St"/>
+    </poi>
+    <poi id="K32009" type="station" x="-71.1253622174263" y="42.32784317478686" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cypress St at Clark Playground"/>
+    </poi>
+    <poi id="W32001" type="station" x="-71.15683130688922" y="42.37207611472287" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Coolidge Sq."/>
+    </poi>
+    <poi id="A32001" type="station" x="-71.137313" y="42.353334" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Union Square - Brighton Ave at Cambridge St"/>
+    </poi>
+    <poi id="B32003" type="station" x="-71.102918744" y="42.337408781" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="HMS/HSPH - Avenue Louis Pasteur at Longwood Ave"/>
+    </poi>
+    <poi id="M32070" type="station" x="-71.086574197" y="42.360563874" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="MIT Carleton St at Amherst St"/>
+    </poi>
+    <poi id="M32081" type="station" x="-71.08634233665725" y="42.373079797934935" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Gore Street at Lambert Street"/>
+    </poi>
+    <poi id="C32099" type="station" x="-71.09171926975249" y="42.29704126420948" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Circuit Drive at American Legion Hwy"/>
+    </poi>
+    <poi id="C32077" type="station" x="-71.07648162175792" y="42.34474224772802" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Columbus Ave at W. Canton St"/>
+    </poi>
+    <poi id="B32015" type="station" x="-71.10235286881107" y="42.34369055719748" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Landmark Center - Brookline Ave at Park Dr"/>
+    </poi>
+    <poi id="K32004" type="station" x="-71.128314614" y="42.346611261" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="JFK Crossing at Harvard St. / Thorndike St."/>
+    </poi>
+    <poi id="M32036" type="station" x="-71.129042" y="42.392766" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Rindge Avenue - O'Neill Library"/>
+    </poi>
+    <poi id="K32012" type="station" x="-71.12070563810447" y="42.34012242696642" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Marion St at Harvard St"/>
+    </poi>
+    <poi id="C32056" type="station" x="-71.08169049924982" y="42.338431795290944" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Tremont St at Northampton St"/>
+    </poi>
+    <poi id="M32045" type="station" x="-71.07116281986237" y="42.36769018024484" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Museum of Science"/>
+    </poi>
+    <poi id="D32001" type="station" x="-71.14673539996147" y="42.35732921867706" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="New Balance - 20 Guest St"/>
+    </poi>
+    <poi id="S32047" type="station" x="-71.08071684837341" y="42.39301840035393" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Foley St at Grand Union Blvd"/>
+    </poi>
+    <poi id="A32011" type="station" x="-71.12459778785706" y="42.36371276003581" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Innovation Lab - 125 Western Ave at Batten Way"/>
+    </poi>
+    <poi id="D32022" type="station" x="-71.06446668505669" y="42.36590788445084" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="West End Park"/>
+    </poi>
+    <poi id="C32111" type="station" x="-71.078209519" y="42.303316832" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Four Corners/Geneva T Stop"/>
+    </poi>
+    <poi id="M32052" type="station" x="-71.09759867191315" y="42.37119727759414" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cambridge Dept. of Public Works -147 Hampshire St."/>
+    </poi>
+    <poi id="A32010" type="station" x="-71.055547" y="42.352175" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="South Station - 700 Atlantic Ave"/>
+    </poi>
+    <poi id="M32022" type="station" x="-71.1138716340065" y="42.357218503176526" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lower Cambridgeport at Magazine St / Riverside Rd"/>
+    </poi>
+    <poi id="W32006" type="station" x="-71.17569386959076" y="42.36466403441681" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="160 Arsenal St"/>
+    </poi>
+    <poi id="M32074" type="station" x="-71.1538877" y="42.390719" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Concord Ave at Spinelli Place"/>
+    </poi>
+    <poi id="C32066" type="station" x="-71.062739015" y="42.291710973" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Dorchester Ave at King St"/>
+    </poi>
+    <poi id="D32052" type="station" x="-71.11570891001975" y="42.3060456272408" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Jamaica St at South St"/>
+    </poi>
+    <poi id="V32012" type="station" x="-71.05281829839441" y="42.41532709603205" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hale Park"/>
+    </poi>
+    <poi id="C32050" type="station" x="-71.09325" y="42.2773889" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mattapan Library"/>
+    </poi>
+    <poi id="A32039" type="station" x="-71.01063068965232" y="42.385223935870535" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bennington St at Constitution Beach"/>
+    </poi>
+    <poi id="D32021" type="station" x="-71.060292" y="42.371848" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Warren St at Chelsea St"/>
+    </poi>
+    <poi id="M32078" type="station" x="-71.0885418" y="42.3664204" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Galileo Galilei Way at Fulkerson St/Binney St"/>
+    </poi>
+    <poi id="C32092" type="station" x="-71.090986" y="42.286012" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Blue Hill Ave at Havelock St"/>
+    </poi>
+    <poi id="M32040" type="station" x="-71.10006093978882" y="42.36264779118595" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="University Park"/>
+    </poi>
+    <poi id="D32045" type="station" x="-71.07782810926437" y="42.35096144421219" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Dartmouth St at Newbury St"/>
+    </poi>
+    <poi id="B32032" type="station" x="-71.05979576244862" y="42.3598253979878" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Government Center - Cambridge St at Court St"/>
+    </poi>
+    <poi id="C32014" type="station" x="-71.03662622" y="42.312250733" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="University of Massachusetts Boston - Campus Center"/>
+    </poi>
+    <poi id="M32044" type="station" x="-71.13426981498378" y="42.381650612901176" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Huron Ave At Vassal Lane"/>
+    </poi>
+    <poi id="C32110" type="station" x="-71.077948213" y="42.292129517" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Talbot Ave T Station"/>
+    </poi>
+    <poi id="C32013" type="station" x="-71.05105865" y="42.320224881" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="JFK/UMass T Stop"/>
+    </poi>
+    <poi id="V32015" type="station" x="-71.042953014" y="42.408153892" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Gramsdorf Playground"/>
+    </poi>
+    <poi id="E32013" type="station" x="-71.122509" y="42.2568376" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hyde Park Library"/>
+    </poi>
+    <poi id="C32001" type="station" x="-71.095171" y="42.331184" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Roxbury Crossing T Stop - Columbus Ave at Tremont St"/>
+    </poi>
+    <poi id="M32013" type="station" x="-71.111075" y="42.373379" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cambridge Main Library at Broadway / Trowbridge St"/>
+    </poi>
+    <poi id="M32089" type="station" x="-71.111732721" y="42.363541961" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Moore Youth Center"/>
+    </poi>
+    <poi id="A32041" type="station" x="-71.03918548682486" y="42.37544912547037" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Central Square East Boston"/>
+    </poi>
+    <poi id="A32028" type="station" x="-71.01619094610214" y="42.383532520117896" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bennington St at Byron St"/>
+    </poi>
+    <poi id="K32011" type="station" x="-71.134139419" y="42.339897275" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington Sq"/>
+    </poi>
+    <poi id="C32093" type="station" x="-71.06975" y="42.339194" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harrison Ave at E. Dedham St"/>
+    </poi>
+    <poi id="E32006" type="station" x="-71.10014140605927" y="42.32293117195949" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Jackson Square T Stop"/>
+    </poi>
+    <poi id="A32004" type="station" x="-71.1069839" y="42.338466287" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Longwood Ave at Binney St"/>
+    </poi>
+    <poi id="S32014" type="station" x="-71.078425884" y="42.386045456" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broadway St at Mt Pleasant St"/>
+    </poi>
+    <poi id="C32024" type="station" x="-71.052608" y="42.344137" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="State Street at Channel Center"/>
+    </poi>
+    <poi id="C32044" type="station" x="-71.09372552493369" y="42.27462067181224" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Blue Hill Ave at Almont St"/>
+    </poi>
+    <poi id="V32006" type="station" x="-71.04479655659816" y="42.41427294293992" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Glendale Square (Ferry St at Broadway)"/>
+    </poi>
+    <poi id="M32060" type="station" x="-71.15412890911102" y="42.380788172914286" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="700 Huron Ave"/>
+    </poi>
+    <poi id="C32104" type="station" x="-71.12444" y="42.2556" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cleary Sq"/>
+    </poi>
+    <poi id="M32012" type="station" x="-71.105495" y="42.366426" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Central Sq Post Office / Cambridge City Hall at Mass Ave / Pleasant St"/>
+    </poi>
+    <poi id="W32004" type="station" x="-71.15764854490408" y="42.36277388549605" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Arsenal Yards"/>
+    </poi>
+    <poi id="D32036" type="station" x="-71.070612192" y="42.380784273" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Main St at Baldwin St"/>
+    </poi>
+    <poi id="T32005" type="station" x="-70.896029115" y="42.523252368" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Salem MBTA - Washington at Federal St"/>
+    </poi>
+    <poi id="B32017" type="station" x="-71.08386572459494" y="42.329842993518085" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Dudley Square - Bolling Building"/>
+    </poi>
+    <poi id="V32007" type="station" x="-71.05842225271772" y="42.412504507772105" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Swan St. Park"/>
+    </poi>
+    <poi id="E32005" type="station" x="-71.107341" y="42.310579" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Green Street T Stop - Green St at Amory St"/>
+    </poi>
+    <poi id="E32009" type="station" x="-71.065650463" y="42.292848587" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Shawmut T Stop"/>
+    </poi>
+    <poi id="A32033" type="station" x="-71.044201" y="42.370744" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="The Eddy - New St at Sumner St"/>
+    </poi>
+    <poi id="H32004" type="station" x="-71.030856" y="42.394531" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broadway at Gerrish Ave"/>
+    </poi>
+    <poi id="C23109" type="station" x="-71.060221" y="42.279608" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cedar Grove T Stop"/>
+    </poi>
+    <poi id="C32045" type="station" x="-71.093641" y="42.267902" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mattapan T Stop"/>
+    </poi>
+    <poi id="T32015" type="station" x="-70.90614259243011" y="42.52989964975891" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="North St at Liberty Hill Ave"/>
+    </poi>
+    <poi id="M32007" type="station" x="-71.094445" y="42.372969" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cambridge St - at Columbia St / Webster Ave"/>
+    </poi>
+    <poi id="S32001" type="station" x="-71.09812" y="42.386844" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Somerville City Hall"/>
+    </poi>
+    <poi id="N32009" type="station" x="-71.167089" y="42.339879" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boston College T"/>
+    </poi>
+    <poi id="A32030" type="station" x="-71.039972544" y="42.368873239" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Maverick Square - Lewis Mall"/>
+    </poi>
+    <poi id="A32019" type="station" x="-71.128495336" y="42.364511967" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="175 N Harvard St"/>
+    </poi>
+    <poi id="D32008" type="station" x="-71.050699" y="42.357143" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Rowes Wharf at Atlantic Ave"/>
+    </poi>
+    <poi id="B32062" type="station" x="-71.090511" y="42.339202" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Forsyth St at Huntington Ave"/>
+    </poi>
+    <poi id="B32014" type="station" x="-71.042630315" y="42.34884572" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Seaport Hotel - Congress St at Seaport Ln"/>
+    </poi>
+    <poi id="Z32997" type="station" x="-71.09261138044758" y="42.3384884941905" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Parker St at Huntington Ave"/>
+    </poi>
+    <poi id="D32028" type="station" x="-71.15027189254761" y="42.34894857235593" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Brighton Center - Washington St at Cambridge St"/>
+    </poi>
+    <poi id="S32035" type="station" x="-71.108848333" y="42.380514264" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="191 Beacon St"/>
+    </poi>
+    <poi id="B32031" type="station" x="-71.06512248516083" y="42.30785224238503" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bowdoin St at Quincy St"/>
+    </poi>
+    <poi id="D32009" type="station" x="-71.05691123" y="42.360752463" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Congress St at Boston City Hall"/>
+    </poi>
+    <poi id="S32009" type="station" x="-71.123090148" y="42.404384851" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Packard Ave at Powderhouse Blvd"/>
+    </poi>
+    <poi id="F32001" type="station" x="-71.110444" y="42.411709" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Main St at Brooks Park"/>
+    </poi>
+    <poi id="M32039" type="station" x="-71.11901879310608" y="42.38674802045056" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lesley University"/>
+    </poi>
+    <poi id="C32041" type="station" x="-71.060595512" y="42.299561858" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Fields Corner T Stop"/>
+    </poi>
+    <poi id="D32057" type="station" x="-71.05524927377701" y="42.3607028354884" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Clinton St at North St"/>
+    </poi>
+    <poi id="B32007" type="station" x="-71.04436084628105" y="42.35148193460858" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Seaport Square - Seaport Blvd at Northern Ave"/>
+    </poi>
+    <poi id="D32053" type="station" x="-71.07514854529654" y="42.38445225635844" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Sullivan Square"/>
+    </poi>
+    <poi id="C32034" type="station" x="-71.04569256305693" y="42.351586001198456" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Watermark Seaport - Boston Wharf Rd at Seaport Blvd"/>
+    </poi>
+    <poi id="D32048" type="station" x="-71.06559185315746" y="42.34854543411198" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Shawmut Ave at Oak St W"/>
+    </poi>
+    <poi id="M32033" type="station" x="-71.139459" y="42.396105" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Alewife Station at Russell Field"/>
+    </poi>
+    <poi id="T32003" type="station" x="-70.88952362537384" y="42.51836788262243" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Shetland Park - Congress at Peabody St"/>
+    </poi>
+    <poi id="A32050" type="station" x="-71.028760076" y="42.364151001" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Porzio Park"/>
+    </poi>
+    <poi id="M32072" type="station" x="-71.08974037706501" y="42.363003781560096" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Galileo Galilei Way at Main Street"/>
+    </poi>
+    <poi id="C32079" type="station" x="-71.117037058" y="42.278826594" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="American Legion Hwy at Cummins Hwy"/>
+    </poi>
+    <poi id="C32047" type="station" x="-71.127820969" y="42.287068725" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Roslindale Village - South St"/>
+    </poi>
+    <poi id="B32026" type="station" x="-71.081198" y="42.332817" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Melnea Cass Blvd"/>
+    </poi>
+    <poi id="V32001" type="station" x="-71.068233" y="42.411432" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="7 Acre Park"/>
+    </poi>
+    <poi id="G32001" type="station" x="-71.073179" y="42.426541" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Malden Center T Station"/>
+    </poi>
+    <poi id="H32005" type="station" x="-71.039938331" y="42.396448016" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Chelsea Station"/>
+    </poi>
+    <poi id="D32032" type="station" x="-71.10057592391968" y="42.34949599514002" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Silber Way"/>
+    </poi>
+    <poi id="D32005" type="station" x="-71.07739206866427" y="42.34992828230057" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Copley Square - Dartmouth St at Boylston St"/>
+    </poi>
+    <poi id="M32019" type="station" x="-71.07679277658461" y="42.367074071490926" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="CambridgeSide Galleria - CambridgeSide PL at Land Blvd"/>
+    </poi>
+    <poi id="M32064" type="station" x="-71.0801375997653" y="42.36550728505653" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="75 Binney St"/>
+    </poi>
+    <poi id="M32073" type="station" x="-71.10998779535294" y="42.36895180540729" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="955 Mass Ave"/>
+    </poi>
+    <poi id="C32025" type="station" x="-71.063187" y="42.345901" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Ink Block - Harrison Ave at Herald St"/>
+    </poi>
+    <poi id="S32045" type="station" x="-71.107376933" y="42.38331008" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Conway Park @ Bleachery Ct (Temp Winter Station)"/>
+    </poi>
+    <poi id="S32008" type="station" x="-71.116772" y="42.400877" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Powder House Circle - Nathan Tufts Park"/>
+    </poi>
+    <poi id="M32020" type="station" x="-71.119888425" y="42.378433943" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard Law School at Mass Ave / Jarvis St"/>
+    </poi>
+    <poi id="M32016" type="station" x="-71.12188071012497" y="42.3722168027866" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard Kennedy School at Bennett St / Eliot St"/>
+    </poi>
+    <poi id="E32004" type="station" x="-71.098634" y="42.315692" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Egleston Square - Atherton St at Washington St"/>
+    </poi>
+    <poi id="C32090" type="station" x="-71.04536797860419" y="42.31886468217537" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Geiger Gibson Community Health Center"/>
+    </poi>
+    <poi id="C32036" type="station" x="-71.048097014" y="42.353123426" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Seaport Blvd at Sleeper St"/>
+    </poi>
+    <poi id="M32058" type="station" x="-71.143986464" y="42.393540263" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="84 Cambridgepark Dr"/>
+    </poi>
+    <poi id="A32012" type="station" x="-71.123691559" y="42.352228999" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Packard's Corner - Commonwealth Ave at Brighton Ave"/>
+    </poi>
+    <poi id="M32047" type="station" x="-71.10393404960632" y="42.35775309465199" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Sidney Research Campus/Erie Street at Waverly"/>
+    </poi>
+    <poi id="C32038" type="station" x="-71.071806" y="42.290333" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Talbot Ave"/>
+    </poi>
+    <poi id="M32050" type="station" x="-71.11305356025696" y="42.37250864997261" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Verizon Innovation Hub 10 Ware Street"/>
+    </poi>
+    <poi id="D32041" type="station" x="-71.104374" y="42.316966" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Stony Brook T Stop"/>
+    </poi>
+    <poi id="A32013" type="station" x="-71.052215457" y="42.358167768" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Surface Rd at India St"/>
+    </poi>
+    <poi id="C32008" type="station" x="-71.082254887" y="42.348793507" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boylston St at Fairfield St"/>
+    </poi>
+    <poi id="M32021" type="station" x="-71.114025" y="42.376369" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harvard University Gund Hall at Quincy St / Kirkland St"/>
+    </poi>
+    <poi id="D32013" type="station" x="-71.07329249382019" y="42.3511419825475" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boylston St at Berkeley St"/>
+    </poi>
+    <poi id="C32009" type="station" x="-71.05737626552582" y="42.34404051001636" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Dorchester Ave at Gillette Park"/>
+    </poi>
+    <poi id="F32003" type="station" x="-71.106082797" y="42.401744008" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Tufts Sq - Main St at Medford St"/>
+    </poi>
+    <poi id="E32015" type="station" x="-71.128513" y="42.357651" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lincoln St at Empire St"/>
+    </poi>
+    <poi id="S32048" type="station" x="-71.09601" y="42.3864" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Somerville High School &amp; Central Library"/>
+    </poi>
+    <poi id="B32005" type="station" x="-71.08582377433777" y="42.3436658245146" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Christian Science Plaza - Massachusetts Ave at Westland Ave"/>
+    </poi>
+    <poi id="S32016" type="station" x="-71.098515391" y="42.395156503" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broadway at Central St"/>
+    </poi>
+    <poi id="A32023" type="station" x="-71.06905996799469" y="42.37408991426522" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bunker Hill Community College"/>
+    </poi>
+    <poi id="A32049" type="station" x="-71.035635948" y="42.370709062" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Gove St at Orleans St"/>
+    </poi>
+    <poi id="B32037" type="station" x="-71.09728209692548" y="42.34924376955301" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Deerfield St at Commonwealth Ave"/>
+    </poi>
+    <poi id="B32035" type="station" x="-71.15061519672052" y="42.335543083570826" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cleveland Circle"/>
+    </poi>
+    <poi id="E32014" type="station" x="-71.1145523" y="42.2645666" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Ross Playground"/>
+    </poi>
+    <poi id="F32007" type="station" x="-71.133483" y="42.420647" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="West Medford Square (Bower St at Harvard Ave)"/>
+    </poi>
+    <poi id="K32007" type="station" x="-71.10728681087494" y="42.346197076555455" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="St Mary's"/>
+    </poi>
+    <poi id="B32010" type="station" x="-71.097009" y="42.348706" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Kenmore Square"/>
+    </poi>
+    <poi id="H32001" type="station" x="-71.030709722545" y="42.398135645582464" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cary Square"/>
+    </poi>
+    <poi id="B32021" type="station" x="-71.09627097845076" y="42.33758601097239" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Wentworth Institute of Technology - Huntington Ave at Vancouver St"/>
+    </poi>
+    <poi id="S32049" type="station" x="-71.10606908798218" y="42.38322726839113" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="515 Somerville Ave (Temp. Winter Location)"/>
+    </poi>
+    <poi id="D32046" type="station" x="-71.079210997" y="42.349771023" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boylston St at Exeter St"/>
+    </poi>
+    <poi id="C32053" type="station" x="-71.05803430091328" y="42.343048583900966" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broadway T Stop"/>
+    </poi>
+    <poi id="A32045" type="station" x="-71.141740918" y="42.35656631" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boston Landing"/>
+    </poi>
+    <poi id="C32087" type="station" x="-71.16341467955863" y="42.277484442008216" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Spring St at Powell St"/>
+    </poi>
+    <poi id="F32004" type="station" x="-71.08152866385353" y="42.41081837243052" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harris Park"/>
+    </poi>
+    <poi id="C32007" type="station" x="-71.08065776545118" y="42.34652003998412" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Prudential Center - 101 Huntington Ave"/>
+    </poi>
+    <poi id="D32002" type="station" x="-71.068820119" y="42.341507435" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Waltham St"/>
+    </poi>
+    <poi id="C32004" type="station" x="-71.0816197" y="42.340835" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Massachusetts Ave at Columbus Ave"/>
+    </poi>
+    <poi id="M32077" type="station" x="-71.076198" y="42.371141" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cambridge Crossing at North First Street"/>
+    </poi>
+    <poi id="D32043" type="station" x="-71.0621" y="42.349426" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Harrison Ave at Bennet St"/>
+    </poi>
+    <poi id="C32052" type="station" x="-71.050745606" y="42.330172181" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Columbia Rd at Tierney Community Center"/>
+    </poi>
+    <poi id="T32016" type="station" x="-70.889711" y="42.528101" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bridge Street Neck"/>
+    </poi>
+    <poi id="T32008" type="station" x="-70.8903331" y="42.5223714" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hawthorne Boulevard"/>
+    </poi>
+    <poi id="C32023" type="station" x="-71.023739" y="42.336448" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Murphy Skating Rink - 1880 Day Blvd"/>
+    </poi>
+    <poi id="H32006" type="station" x="-71.024105906" y="42.398265719" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="855 Broadway"/>
+    </poi>
+    <poi id="D32010" type="station" x="-71.056067" y="42.362811" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Cross St at Hanover St"/>
+    </poi>
+    <poi id="C32030" type="station" x="-71.085347" y="42.303469" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Franklin Park Zoo - Franklin Park Rd at Blue Hill Ave"/>
+    </poi>
+    <poi id="C32113" type="station" x="-71.06019938382815" y="42.30981924861789" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hancock St at Pleasant St"/>
+    </poi>
+    <poi id="T32018" type="station" x="-70.8913904428482" y="42.520096183311445" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Derby Street"/>
+    </poi>
+    <poi id="C32106" type="station" x="-71.11924" y="42.2681" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="555 Metropolitan Ave"/>
+    </poi>
+    <poi id="B32013" type="station" x="-71.10407917767589" y="42.33462893055976" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Brigham Circle - Francis St at Huntington Ave"/>
+    </poi>
+    <poi id="A32040" type="station" x="-71.12852452327388" y="42.36027370454934" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Honan Library"/>
+    </poi>
+    <poi id="B32056" type="station" x="-71.06166645884514" y="42.35668334969929" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Tremont St at Hamilton Pl"/>
+    </poi>
+    <poi id="M32085" type="station" x="-71.10044184048091" y="42.36356498989399" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mass Ave/Lafayette Square"/>
+    </poi>
+    <poi id="S32002" type="station" x="-71.09540475672475" y="42.37964789967527" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Union Square - Somerville"/>
+    </poi>
+    <poi id="C32112" type="station" x="-71.05889977661718" y="42.31870274532011" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Meaney Playground - Pleasant St at E Cottage St"/>
+    </poi>
+    <poi id="C32102" type="station" x="-71.09616905450821" y="42.31242399029812" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Walnut Ave at School St"/>
+    </poi>
+    <poi id="S32038" type="station" x="-71.08714388528824" y="42.38717463348314" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Edgerly Education Center"/>
+    </poi>
+    <poi id="D32033" type="station" x="-71.15174222" y="42.340284824" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Commonwealth Ave at Chiswick Rd"/>
+    </poi>
+    <poi id="R32006" type="station" x="-71.013857484" y="42.407456279" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Revere City Hall"/>
+    </poi>
+    <poi id="C32029" type="station" x="-71.0514432" y="42.3391085" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="W Broadway at D St"/>
+    </poi>
+    <poi id="C32003" type="station" x="-71.07657015323639" y="42.34807412317439" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Back Bay T Stop - Dartmouth St at Stuart St"/>
+    </poi>
+    <poi id="K32001" type="station" x="-71.123338" y="42.341598" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Coolidge Corner - Beacon St at Centre St"/>
+    </poi>
+    <poi id="S32046" type="station" x="-71.09455049" y="42.38661015" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Gilman Square T at Medford St"/>
+    </poi>
+    <poi id="K32006" type="station" x="-71.121406913" y="42.351447821" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Commonwealth Ave At Babcock St"/>
+    </poi>
+    <poi id="B32022" type="station" x="-71.08243077993393" y="42.31787329345602" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Roxbury YMCA - Warren St at MLK Blvd"/>
+    </poi>
+    <poi id="M32027" type="station" x="-71.08633603909765" y="42.36608797388682" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Binney St / Sixth St"/>
+    </poi>
+    <poi id="B32004" type="station" x="-71.05043940246105" y="42.36044135623124" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Aquarium T Stop - 200 Atlantic Ave"/>
+    </poi>
+    <poi id="B32061" type="station" x="-71.06135129928589" y="42.358477644348106" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="One Beacon St"/>
+    </poi>
+    <poi id="M32088" type="station" x="-71.143946" y="42.390821" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="55 Wheeler Street"/>
+    </poi>
+    <poi id="M32079" type="station" x="-71.12761001482795" y="42.38736953747185" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Raymond Park at Walden St"/>
+    </poi>
+    <poi id="M32084" type="station" x="-71.144219" y="42.395222" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="87-101 Cambridgepark Drive"/>
+    </poi>
+    <poi id="E32003" type="station" x="-71.10984160567114" y="42.32176525723952" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hyde Square - Barbara St at Centre St"/>
+    </poi>
+    <poi id="D32040" type="station" x="-71.107669" y="42.306539" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Williams St at Washington St"/>
+    </poi>
+    <poi id="K32008" type="station" x="-71.1268836054569" y="42.331370168043215" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Tappan St at Brookline Hills MBTA"/>
+    </poi>
+    <poi id="S32022" type="station" x="-71.11133694648743" y="42.39407223665884" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Community Path at Cedar Street"/>
+    </poi>
+    <poi id="G32003" type="station" x="-71.06393694877625" y="42.426537658440544" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Malden High School"/>
+    </poi>
+    <poi id="T32010" type="station" x="-70.88693" y="42.506395" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Forest River Park"/>
+    </poi>
+    <poi id="S32051" type="station" x="-71.089455" y="42.390509" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Foss Park 2 (temp for winter)"/>
+    </poi>
+    <poi id="C32006" type="station" x="-71.07404083013535" y="42.338514601786" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Rutland St"/>
+    </poi>
+    <poi id="S32043" type="station" x="-71.087216377" y="42.380986571" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St @ New Washington St (Temp Winter Station)"/>
+    </poi>
+    <poi id="M32054" type="station" x="-71.14871613699506" y="42.37500235137831" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="699 Mt Auburn St"/>
+    </poi>
+    <poi id="W32007" type="station" x="-71.156255007" y="42.367677808" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Nichols Ave. at Watertown Greenway"/>
+    </poi>
+    <poi id="D32018" type="station" x="-71.0453599691391" y="42.347763454147454" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boston Convention and Exhibition Center - Summer St at West Side Dr"/>
+    </poi>
+    <poi id="S32007" type="station" x="-71.11111521723615" y="42.39936816059618" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Ball Sq"/>
+    </poi>
+    <poi id="C32022" type="station" x="-71.066498" y="42.326599" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Newmarket Square T Stop - Massachusetts Ave at Newmarket Square"/>
+    </poi>
+    <poi id="E32007" type="station" x="-71.11089169979095" y="42.32760387040573" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="S Huntington Ave at Heath St"/>
+    </poi>
+    <poi id="C32061" type="station" x="-71.0689445958451" y="42.33664795427071" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Albany St at E. Brookline St"/>
+    </poi>
+    <poi id="B32036" type="station" x="-71.10436213" y="42.333941102" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="One Brigham Circle"/>
+    </poi>
+    <poi id="D32039" type="station" x="-71.05481199938367" y="42.374124549426526" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Charlestown Navy Yard"/>
+    </poi>
+    <poi id="M32071" type="station" x="-71.08551858007559" y="42.36085937353302" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="MIT Hayward St at Amherst St"/>
+    </poi>
+    <poi id="S32052" type="station" x="-71.09983" y="42.383709" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Summer St at Quincy St"/>
+    </poi>
+    <poi id="M32082" type="station" x="-71.08287078916874" y="42.36304549626695" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broad Canal Way at Third Street"/>
+    </poi>
+    <poi id="M32046" type="station" x="-71.142689347" y="42.395736694" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Alewife MBTA at Steel Place"/>
+    </poi>
+    <poi id="ZZ32996" type="station" x="-71.126081" y="42.417591" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Auburn St. at Mystic River"/>
+    </poi>
+    <poi id="C32059" type="station" x="-71.13672129828046" y="42.28634589486312" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Belgrade Ave at Walworth St"/>
+    </poi>
+    <poi id="V32014" type="station" x="-71.07573182424781" y="42.4023682" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Wellington MBTA"/>
+    </poi>
+    <poi id="T32013" type="station" x="-70.906271" y="42.520136" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Community Life Center"/>
+    </poi>
+    <poi id="A32057" type="station" x="-71.04030132293701" y="42.365678711213775" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lewis Mall Wharf"/>
+    </poi>
+    <poi id="T32011" type="station" x="-70.905535" y="42.516223" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Essex St at Dalton Parkway"/>
+    </poi>
+    <poi id="T32014" type="station" x="-70.910528" y="42.520897" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Goodhue St at Grove St"/>
+    </poi>
+    <poi id="C32040" type="station" x="-71.054730296" y="42.282790422" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Gallivan Blvd at Adams St"/>
+    </poi>
+    <poi id="C32108" type="station" x="-71.054273725" y="42.303717375" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Beach St at Freeport St"/>
+    </poi>
+    <poi id="C32062" type="station" x="-71.0641389" y="42.2856944" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Ashmont T Stop"/>
+    </poi>
+    <poi id="E32017" type="station" x="-71.062882" y="42.272548" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Butler T Stop"/>
+    </poi>
+    <poi id="C32094" type="station" x="-71.095002532" y="42.289008737" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="2 Hummingbird Lane at Olmsted Green"/>
+    </poi>
+    <poi id="M32090" type="station" x="-71.076638" y="42.370982" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="O'Brien Highway at First Street"/>
+    </poi>
+    <poi id="S32039" type="station" x="-71.11694140364307" y="42.38952436305763" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Elm St at White St"/>
+    </poi>
+    <poi id="D32058" type="station" x="-71.1296752" y="42.3528376" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Brighton Ave at Linden St"/>
+    </poi>
+    <poi id="S32003" type="station" x="-71.10707223415375" y="42.37875351212593" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Beacon St at Washington / Kirkland"/>
+    </poi>
+    <poi id="E32008" type="station" x="-71.1142981" y="42.3121203" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Centre St at Seaverns Ave"/>
+    </poi>
+    <poi id="S32037" type="station" x="-71.110773444" y="42.388269782" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Craigie St at Summer St"/>
+    </poi>
+    <poi id="D32012" type="station" x="-71.055095077" y="42.35627234" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Post Office Square"/>
+    </poi>
+    <poi id="C32067" type="station" x="-71.067052" y="42.342958" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Peters Park"/>
+    </poi>
+    <poi id="C32078" type="station" x="-71.117736660035" y="42.29118034790426" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Northbourne Rd at Hyde Park Ave"/>
+    </poi>
+    <poi id="D32047" type="station" x="-71.0756166279316" y="42.35159662465317" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Clarendon St at Newbury St"/>
+    </poi>
+    <poi id="S32021" type="station" x="-71.083750248" y="42.381724715" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Myrtle St"/>
+    </poi>
+    <poi id="C32012" type="station" x="-71.05699850837482" y="42.33073332585453" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Andrew T Stop - Dorchester Ave at Dexter St"/>
+    </poi>
+    <poi id="N32001" type="station" x="-71.199374199" y="42.353928089" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Crafts St"/>
+    </poi>
+    <poi id="N32012" type="station" x="-71.20668411254883" y="42.330062324403" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Beacon at Walnut"/>
+    </poi>
+    <poi id="N32008" type="station" x="-71.192889094" y="42.330561161" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Langley Lot"/>
+    </poi>
+    <poi id="N32014" type="station" x="-71.20764970779419" y="42.351458116963016" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Walnut St"/>
+    </poi>
+    <poi id="C32101" type="station" x="-71.119812727" y="42.272672772" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="American Legion Hwy at Hyde Park Ave"/>
+    </poi>
+    <poi id="C32065" type="station" x="-71.057309151" y="42.29167819" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Adams St at Lonsdale St"/>
+    </poi>
+    <poi id="D32004" type="station" x="-71.0582291708306" y="42.35533501941256" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Arch St at Franklin St"/>
+    </poi>
+    <poi id="B32016" type="station" x="-71.0898108780384" y="42.35082680669095" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Beacon St at Massachusetts Ave"/>
+    </poi>
+    <poi id="N32006" type="station" x="-71.21382214128971" y="42.354104081396585" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Watertown St at Albemarle Rd"/>
+    </poi>
+    <poi id="C32002" type="station" x="-71.07306711393903" y="42.33639915372498" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boston Medical Center - E Concord St at Harrison Ave"/>
+    </poi>
+    <poi id="N32002" type="station" x="-71.20146199598821" y="42.36068455768156" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Nonantum Library"/>
+    </poi>
+    <poi id="C32049" type="station" x="-71.07942931372236" y="42.286212948246096" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Thetford Ave at Norfolk St"/>
+    </poi>
+    <poi id="C32096" type="station" x="-71.1365658044815" y="42.29376656473529" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Knoll St at Centre St"/>
+    </poi>
+    <poi id="M32091" type="station" x="-71.08903" y="42.36722" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="325 Binney St."/>
+    </poi>
+    <poi id="A32047" type="station" x="-71.055111647" y="42.358352065" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broad St at Central St"/>
+    </poi>
+    <poi id="C32080" type="station" x="-71.11874517062459" y="42.28484472443536" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mt. Hope St at Hyde Park Ave"/>
+    </poi>
+    <poi id="C32081" type="station" x="-71.134223938" y="42.280740976" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Denton Terr"/>
+    </poi>
+    <poi id="C32083" type="station" x="-71.06955613950048" y="42.27719469639791" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Walsh Playground"/>
+    </poi>
+    <poi id="C32095" type="station" x="-71.14636927843094" y="42.28611420958351" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bellevue T Stop"/>
+    </poi>
+    <poi id="C32084" type="station" x="-71.07147924620222" y="42.281986277339136" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Fuller St"/>
+    </poi>
+    <poi id="N32013" type="station" x="-71.207728744" y="42.336219072" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Newton Library"/>
+    </poi>
+    <poi id="B32012" type="station" x="-71.090179" y="42.341814" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Northeastern University - North Parking Lot"/>
+    </poi>
+    <poi id="S32010" type="station" x="-71.132290602" y="42.406266689" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Clarendon Hill at Broadway"/>
+    </poi>
+    <poi id="N32015" type="station" x="-71.2477594614029" y="42.34805541493346" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Auburndale"/>
+    </poi>
+    <poi id="N32003" type="station" x="-71.1860453666327" y="42.35711920909866" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Bacon St at Washington St"/>
+    </poi>
+    <poi id="N32005" type="station" x="-71.2262749671936" y="42.34960049864208" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="West Newton"/>
+    </poi>
+    <poi id="N32010" type="station" x="-71.2063729763031" y="42.322065656952944" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Newton Highlands T"/>
+    </poi>
+    <poi id="N32011" type="station" x="-71.20236039161682" y="42.365148708129546" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="California at Chapel"/>
+    </poi>
+    <poi id="N32018" type="station" x="-71.193889141" y="42.336034417" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Centre St at Commonwealth Ave"/>
+    </poi>
+    <poi id="N32000" type="station" x="-71.186359048" y="42.35579896" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Centre St at Washington St"/>
+    </poi>
+    <poi id="C32031" type="station" x="-71.056679606" y="42.31772244" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Ryan Playground - Dorchester Ave at Harbor View St"/>
+    </poi>
+    <poi id="C32018" type="station" x="-71.061964393" y="42.320555687" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="E Cottage St at Columbia Rd"/>
+    </poi>
+    <poi id="B32025" type="station" x="-71.069729447" y="42.318803549" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Uphams Corner T Stop - Magnolia St at Dudley St"/>
+    </poi>
+    <poi id="A32037" type="station" x="-71.14127840855872" y="42.34286835071959" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Egremont Rd"/>
+    </poi>
+    <poi id="D32026" type="station" x="-71.056812525" y="42.377029538" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hayes Square - Vine St at Moulton St"/>
+    </poi>
+    <poi id="T32002" type="station" x="-70.87021440267563" y="42.53466911383265" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Salem Willows Park"/>
+    </poi>
+    <poi id="C32042" type="station" x="-71.073489666" y="42.299111247" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Bowdoin St"/>
+    </poi>
+    <poi id="C32088" type="station" x="-71.073291898" y="42.270892382" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Central Ave at River St"/>
+    </poi>
+    <poi id="C32010" type="station" x="-71.049848199" y="42.35119164" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Congress St at Sleeper St"/>
+    </poi>
+    <poi id="L32004" type="station" x="-71.14009319811885" y="42.40994213011757" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Broadway at Grafton St"/>
+    </poi>
+    <poi id="T32001" type="station" x="-70.8806911110878" y="42.52189284110247" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Salem Ferry Landing"/>
+    </poi>
+    <poi id="BCBS01" type="station" x="-70.90555783370291" y="42.16722555541654" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="BCBS Hingham"/>
+    </poi>
+    <poi id="V32009" type="station" x="-71.044231534" y="42.420330524" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Pope John High School"/>
+    </poi>
+    <poi id="C23045" type="station" x="-71.085972905" y="42.2806077" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Morton St T"/>
+    </poi>
+    <poi id="A32029" type="station" x="-71.03528559207916" y="42.36501119822304" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Piers Park"/>
+    </poi>
+    <poi id="B32000" type="station" x="-71.085835457" y="42.348728776" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Newbury St at Hereford St"/>
+    </poi>
+    <poi id="A32043" type="station" x="-71.143847823" y="42.36180985" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Western Ave at Richardson St"/>
+    </poi>
+    <poi id="A32048" type="station" x="-71.03907315999093" y="42.38066930871317" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Marion St at White St"/>
+    </poi>
+    <poi id="C32019" type="station" x="-71.065349102" y="42.317250609" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Uphams Corner"/>
+    </poi>
+    <poi id="A32054" type="station" x="-71.0151367" y="42.38518146513944" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Addison St at Saratoga St"/>
+    </poi>
+    <poi id="B32030" type="station" x="-71.083235" y="42.324081" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Walnut Ave at Warren St"/>
+    </poi>
+    <poi id="D32050" type="station" x="-71.069687963" y="42.364253044" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Blossom St at Charles St"/>
+    </poi>
+    <poi id="C32039" type="station" x="-71.078335047" y="42.294436216" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Park St at Norwell St"/>
+    </poi>
+    <poi id="H32007" type="station" x="-71.0195408" y="42.4021215" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value=" Broadway and Cabot"/>
+    </poi>
+    <poi id="X32999" type="station" x="-71.075978" y="42.387151" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="18 Dorrance Warehouse"/>
+    </poi>
+    <poi id="B32057" type="station" x="-71.077993989" y="42.317902088" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Blue Hill Ave at Southwood St"/>
+    </poi>
+    <poi id="M32092" type="station" x="-71.073526" y="42.369931" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Elevate at One Leighton"/>
+    </poi>
+    <poi id="F32009" type="station" x="-71.098973" y="42.424981" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hickey Park"/>
+    </poi>
+    <poi id="D32055" type="station" x="-71.07744187116623" y="42.35019319808638" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Boylston St at Dartmouth St"/>
+    </poi>
+    <poi id="W32009" type="station" x="-71.164206147" y="42.363469839" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Arsenal on the Charles"/>
+    </poi>
+    <poi id="C32068" type="station" x="-71.075526" y="42.330982" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Melnea Cass Blvd at Hampden St"/>
+    </poi>
+    <poi id="A32046" type="station" x="-71.059683204" y="42.364306927" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Canal St. at Causeway St."/>
+    </poi>
+    <poi id="S32055" type="station" x="-71.080351" y="42.391658" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Grand Union Blvd at Revolution Dr"/>
+    </poi>
+    <poi id="B32038" type="station" x="-71.153257" y="42.343706" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Chestnut Hill Ave at Ledgemere Rd"/>
+    </poi>
+    <poi id="L32003" type="station" x="-71.14382132425817" y="42.40726052447951" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mass Ave at Grafton St"/>
+    </poi>
+    <poi id="A32055" type="station" x="-71.03131771093103" y="42.375353774222354" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Airport T Stop - Bremen St at Brooks St"/>
+    </poi>
+    <poi id="F32011" type="station" x="-71.094755" y="42.434365" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Carr Park"/>
+    </poi>
+    <poi id="M32093" type="station" x="-71.150761" y="42.392568" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="101 Smith Place"/>
+    </poi>
+    <poi id="C32109" type="station" x="-71.127436" y="42.300806" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Centre St. at Allandale St."/>
+    </poi>
+    <poi id="C32100" type="station" x="-71.12163126468657" y="42.26286746177123" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Hyde Park Ave at Arlington St"/>
+    </poi>
+    <poi id="M32094" type="station" x="-71.079999" y="42.369061" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="40 Thorndike St"/>
+    </poi>
+    <poi id="F32013" type="station" x="-71.110386" y="42.425178" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Governors Ave at Lawrence Rd"/>
+    </poi>
+    <poi id="A32034" type="station" x="-71.03024303913116" y="42.38240377674137" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Glendon St at Condor St"/>
+    </poi>
+    <poi id="c32014" type="station" x="-71.0542411" y="42.3324824" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Damrell St at Old Colony Ave"/>
+    </poi>
+    <poi id="C32026" type="station" x="-71.0291997" y="42.3461009" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Au Bon Pain Way at Fid Kennedy Ave"/>
+    </poi>
+    <poi id="F32012" type="station" x="-71.12636" y="42.428086" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Steve Miller Dr at Winthrop St (Medford High)"/>
+    </poi>
+    <poi id="V32017" type="station" x="-71.063278" y="42.403444" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Northern Strand - West St &amp; Wellington Ave"/>
+    </poi>
+    <poi id="W32010" type="station" x="-71.19127" y="42.36289" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Watertown St at 5th Ave"/>
+    </poi>
+    <poi id="D32030" type="station" x="-71.06097685" y="42.35496799" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Washington St at Temple Pl"/>
+    </poi>
+    <poi id="R32008" type="station" x="-70.989972" y="42.402889" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Eliot Circle Revere Beach"/>
+    </poi>
+    <poi id="H320010" type="station" x="-71.030828" y="42.394541" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="615 Broadway"/>
+    </poi>
+    <poi id="R32009" type="station" x="-70.989609" y="42.414019" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Revere Beach - Markey Footbridge"/>
+    </poi>
+    <poi id="A32059" type="station" x="-71.05622222" y="42.35352778" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="High St at Federal St"/>
+    </poi>
+    <poi id="F32014" type="station" x="-71.117556" y="42.421361" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Winthrop Circle"/>
+    </poi>
+    <poi id="C32069" type="station" x="-71.054530621" y="42.33245182" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Damrell St at Old Colony"/>
+    </poi>
+    <poi id="L32007" type="station" x="-71.152377" y="42.414705" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Swan Place at Minuteman Bikeway"/>
+    </poi>
+    <poi id="C32114" type="station" x="-71.047186" y="42.295305" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="780 Morrissey Blvd"/>
+    </poi>
+    <poi id="A32061" type="station" x="-71.056887746" y="42.368201375" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Commercial St at Charter St"/>
+    </poi>
+    <poi id="A32024" type="station" x="-71.063681126" y="42.36361742" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Staniford St at Merrimac St"/>
+    </poi>
+    <poi id="C32054" type="station" x="-71.06613934" y="42.346595883" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Shawmut Ave at Herald St"/>
+    </poi>
+    <poi id="L32010" type="station" x="-71.14813429053619" y="42.41649057463282" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Medford St at Warren St"/>
+    </poi>
+    <poi id="L32008" type="station" x="-71.14690375265656" y="42.4041703390082" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lake St. at Minuteman Bikeway"/>
+    </poi>
+    <poi id="L32009" type="station" x="-71.15753579744356" y="42.4186027386165" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Mill St. at Minuteman Bikeway"/>
+    </poi>
+    <poi id="D32062" type="station" x="-71.06830556" y="42.35066667" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Stuart St at Church St"/>
+    </poi>
+    <poi id="A32062" type="station" x="-71.134765387" y="42.363180876" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Western Ave at Everett St"/>
+    </poi>
+    <poi id="B32065" type="station" x="-71.088012" y="42.34752" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Massachusetts Ave at Boylston St."/>
+    </poi>
+    <poi id="S32056" type="station" x="-71.10740912" y="42.383309126" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Craigie &amp; Summer at Conway Park (Temp. Winter Location)"/>
+    </poi>
+    <poi id="M32095" type="station" x="-71.076079" y="42.36984" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Lechmere Canal Park"/>
+    </poi>
+    <poi id="D32025" type="station" x="-71.06669444" y="42.35077778" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Charles St S at Stuart"/>
+    </poi>
+    <poi id="W32011" type="station" x="-71.151786" y="42.363675" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="99 Coolidge Ave"/>
+    </poi>
+    <poi id="S32057" type="station" x="-71.08643078" y="42.37959118" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Innerbelt at East Somerville Station"/>
+    </poi>
+    <poi id="C23015" type="station" x="-71.046085" y="42.279774" color="1,0,0" layer="100">
+        <param key="demand" value="35.2"/>
+        <param key="name" value="Pope John Paul II Park - Neponset Trail at Hallet St"/>
+    </poi>
+</additional>

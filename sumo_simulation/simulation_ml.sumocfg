@@ -1,0 +1,25 @@
+<configuration>
+    <input>
+        <net-file value="boston.net.xml"/>
+        <route-files value="trips.rou.xml"/>
+        <additional-files value="stations_ml.add.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <end value="3600"/>
+    </time>
+    <processing>
+        <ignore-route-errors value="true"/>
+    </processing>
+    <routing>
+        <junction-taz value="true"/>
+    </routing>
+    <report>
+        <no-step-log value="true"/>
+        <no-warnings value="false"/>
+        <error-log value="simulation_ml.errors.log"/>
+    </report>
+    <gui_only>
+        <gui-settings-file value="gui-settings.xml"/>
+    </gui_only>
+</configuration>
